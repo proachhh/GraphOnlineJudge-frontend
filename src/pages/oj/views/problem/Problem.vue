@@ -297,39 +297,68 @@
     <div v-if="resultVisible" class="result-overlay" @click.self="resultVisible = false">
       <div class="result-modal">
         <div class="result-close" @click="resultVisible = false">
-          <Icon type="ios-close" size="28" />
+          <Icon type="ios-close" size="24" />
         </div>
-        <div class="result-header" :class="resultHeaderClass">
-          <span class="result-icon">{{ resultIcon }}</span>
-          <span class="result-text">{{ resultTitle }}</span>
-        </div>
-        <div class="result-info">
-          <div class="result-info-item">
-            <span class="label">{{$t('m.Time')}}</span>
-            <span class="value">{{ submissionDetail.statistic_info.time_cost || 0 }}ms</span>
-          </div>
-          <div class="result-info-item">
-            <span class="label">{{$t('m.Memory')}}</span>
-            <span class="value">{{ ((submissionDetail.statistic_info.memory_cost || 0) / 1024 / 1024).toFixed(2) }}MB</span>
-          </div>
-          <div class="result-info-item" v-if="submissionDetail.statistic_info.score !== undefined">
-            <span class="label">{{$t('m.Score')}}</span>
-            <span class="value">{{ submissionDetail.statistic_info.score }}</span>
-          </div>
-        </div>
-        <div v-if="compileError" class="compile-error">
+
+        <table class="result-meta-table">
+          <tr><td class="meta-label">{{$t('m.Problem')}}</td><td class="meta-value">{{ problem._id }} {{ problem.title }}</td></tr>
+          <tr><td class="meta-label">{{$t('m.Submit_Time')}}</td><td class="meta-value">{{ submissionDetail.create_time | localtime }}</td></tr>
+          <tr><td class="meta-label">{{$t('m.Language')}}</td><td class="meta-value">{{ submissionDetail.language }}</td></tr>
+          <tr><td class="meta-label">{{$t('m.Memory')}}</td><td class="meta-value">{{ (submissionDetail.statistic_info.memory_cost || 0) / 1024 }} / {{ problem.memory_limit * 1024 }} KB</td></tr>
+          <tr><td class="meta-label">{{$t('m.Time')}}</td><td class="meta-value">{{ submissionDetail.statistic_info.time_cost || 0 }} / {{ problem.time_limit }} ms</td></tr>
+          <tr><td class="meta-label">{{$t('m.Status')}}</td><td class="meta-value result-status" :class="resultHeaderClass">{{ resultTitle }}</td></tr>
+          <tr v-if="submissionDetail.statistic_info.score !== undefined"><td class="meta-label">{{$t('m.Score')}}</td><td class="meta-value">{{ submissionDetail.statistic_info.score }} / {{ problem.total_score }}</td></tr>
+        </table>
+
+        <div v-if="compileError" class="compile-error-section">
+          <h4>{{$t('m.Compile_Error')}}</h4>
           <pre>{{ submissionDetail.statistic_info.err_info }}</pre>
         </div>
-        <div v-else class="testcases-grid">
-          <div
-            v-for="tc in testCases"
-            :key="tc.test_case"
-            class="testcase-item"
-            :class="tcStatusClass(tc.result)"
-          >
-            <span class="tc-index">{{ tc.test_case }}</span>
-            <span class="tc-status">{{ tcStatusText(tc.result) }}</span>
-            <span class="tc-time">{{ tc.cpu_time }}ms</span>
+
+        <div v-else class="testcases-table-wrap">
+          <h4 class="testcases-title">{{$t('m.Test_Case_Details')}}</h4>
+          <table class="testcases-table">
+            <thead>
+              <tr>
+                <th>{{$t('m.Test_Case')}}</th>
+                <th>{{$t('m.Memory')}}(KB)</th>
+                <th>{{$t('m.Time')}}(ms)</th>
+                <th>{{$t('m.Result')}}</th>
+                <th v-if="isOIProblem">{{$t('m.Score')}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="tc in testCases" :key="tc.test_case" :class="tcStatusClass(tc.result)">
+                <td>{{ tc.test_case }}</td>
+                <td>{{ tc.memory }}</td>
+                <td>{{ tc.cpu_time }}</td>
+                <td>{{ tcStatusText(tc.result) }}</td>
+                <td v-if="isOIProblem">{{ tc.score || 0 }} / {{ getTestCaseScore(tc.test_case) }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div v-if="failedDetails.length" class="failed-details-section">
+            <h4 class="failed-details-title">{{$t('m.Failed_Test_Cases')}}</h4>
+            <div v-for="fd in failedDetails" :key="fd.test_case" class="failed-case">
+              <p class="failed-case-header">
+                <span class="tc-badge tc-badge-fail">{{$t('m.Test_Case')}} {{ fd.test_case }}</span>
+              </p>
+              <div class="failed-io">
+                <div class="failed-io-block">
+                  <span class="io-label">{{$t('m.Self_Test_Input')}}</span>
+                  <pre>{{ fd.input }}</pre>
+                </div>
+                <div class="failed-io-block">
+                  <span class="io-label">{{$t('m.Expected_Output')}}</span>
+                  <pre>{{ fd.expected }}</pre>
+                </div>
+                <div class="failed-io-block">
+                  <span class="io-label">{{$t('m.Your_Output')}}</span>
+                  <pre>{{ fd.your_output }}</pre>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -744,7 +773,23 @@
       },
       tcStatusText (result) {
         if (result === 0) return this.$t('m.Accepted')
-        return this.$t('m.Wrong_Answer')
+        if (result === -1) return this.$t('m.Wrong_Answer')
+        if (result === 1) return this.$t('m.CPU_Time_Limit_Exceeded')
+        if (result === 2) return this.$t('m.Real_Time_Limit_Exceeded')
+        if (result === 3) return this.$t('m.Memory_Limit_Exceeded')
+        if (result === 4) return this.$t('m.Runtime_Error')
+        if (result === 8) return this.$t('m.Partially_Accepted')
+        return 'Error'
+      },
+      getTestCaseScore (testCaseIndex) {
+        if (this.problem.test_case_score && this.problem.test_case_score.length) {
+          const item = this.problem.test_case_score.find(
+            s => String(s.input_name) === String(testCaseIndex) + '.in' ||
+                 String(s.output_name) === String(testCaseIndex) + '.out'
+          )
+          if (item && item.score) return item.score
+        }
+        return 0
       }
     },
     computed: {
@@ -776,15 +821,7 @@
         if (this.layoutMode !== 'horizontal') return {}
         return { width: this.leftWidth + '%', flexShrink: '0' }
       },
-      resultIcon () {
-        const r = this.submissionDetail.result
-        if (r === 0) return '✅'
-        if (r === -2) return '❌'
-        if (r === -1 || r === 1 || r === 2 || r === 3 || r === 4) return '❌'
-        if (r === 8) return '⚠️'
-        return '❌'
-      },
-      resultTitle () {
+      resultHeaderClass () {
         const r = this.submissionDetail.result
         const map = {
           '-2': this.$t('m.Compile_Error'),
@@ -805,6 +842,21 @@
         if (r === 8) return 'result-pa'
         return 'result-fail'
       },
+      resultTitle () {
+        const r = this.submissionDetail.result
+        const map = {
+          '-2': this.$t('m.Compile_Error'),
+          '-1': this.$t('m.Wrong_Answer'),
+          '0': this.$t('m.Accepted'),
+          '1': this.$t('m.CPU_Time_Limit_Exceeded'),
+          '2': this.$t('m.Real_Time_Limit_Exceeded'),
+          '3': this.$t('m.Memory_Limit_Exceeded'),
+          '4': this.$t('m.Runtime_Error'),
+          '5': this.$t('m.System_Error'),
+          '8': this.$t('m.Partially_Accepted')
+        }
+        return map[r] || this.$t('m.Unknown')
+      },
       compileError () {
         return this.submissionDetail.result === -2
       },
@@ -812,6 +864,12 @@
         const info = this.submissionDetail.info
         if (info && info.data) return info.data
         return []
+      },
+      failedDetails () {
+        return this.submissionDetail.failed_testcase_details || []
+      },
+      isOIProblem () {
+        return this.problem.rule_type === 'OI'
       }
     },
     beforeRouteLeave (to, from, next) {
@@ -1677,8 +1735,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.45);
     z-index: 2000;
     display: flex;
     align-items: center;
@@ -1686,144 +1743,170 @@
   }
 
   .result-modal {
-    background: #1a1a2e;
-    border-radius: 16px;
-    width: 560px;
+    background: #fff;
+    border-radius: 8px;
+    width: 640px;
     max-width: 90vw;
-    max-height: 80vh;
+    max-height: 85vh;
     overflow-y: auto;
-    padding: 32px;
+    padding: 28px 32px;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
   }
 
   .result-close {
     position: absolute;
-    top: 12px;
-    right: 16px;
-    color: #94a3b8;
+    top: 10px;
+    right: 14px;
+    color: #999;
     cursor: pointer;
     transition: color 0.2s;
-
-    &:hover {
-      color: #fff;
-    }
+    &:hover { color: #333; }
   }
 
-  .result-header {
-    text-align: center;
-    padding: 20px 0 16px;
-    font-size: 1.3rem;
-    font-weight: 600;
-
-    .result-icon {
-      font-size: 2rem;
-      display: block;
-      margin-bottom: 8px;
-    }
-  }
-
-  .result-ac {
-    color: #4ade80;
-  }
-
-  .result-pa {
-    color: #fbbf24;
-  }
-
-  .result-fail {
-    color: #f87171;
-  }
-
-  .result-info {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
+  .result-meta-table {
+    width: 100%;
+    border-collapse: collapse;
     margin-bottom: 20px;
 
-    .result-info-item {
-      text-align: center;
+    td {
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+    }
 
-      .label {
-        display: block;
-        font-size: 0.75rem;
-        color: #94a3b8;
-        margin-bottom: 4px;
-      }
+    .meta-label {
+      color: #999;
+      width: 90px;
+      vertical-align: top;
+    }
 
-      .value {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #e2e8f0;
-      }
+    .meta-value {
+      color: #333;
     }
   }
 
-  .compile-error {
+  .result-status {
+    font-weight: 600;
+    &.result-ac { color: #52c41a; }
+    &.result-pa { color: #faad14; }
+    &.result-fail { color: #ff4d4f; }
+  }
+
+  .compile-error-section {
+    h4 { font-size: 14px; color: #ff4d4f; margin: 0 0 10px; }
     pre {
-      background: #0f172a;
-      color: #f87171;
-      padding: 16px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      max-height: 300px;
+      background: #fff2f0;
+      border: 1px solid #ffccc7;
+      color: #333;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      max-height: 260px;
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-all;
     }
   }
 
-  .testcases-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 8px;
-  }
-
-  .testcase-item {
-    background: #162032;
-    border: 2px solid #334155;
-    border-radius: 8px;
-    padding: 10px 8px;
-    text-align: center;
-    transition: all 0.2s;
-
-    .tc-index {
-      display: block;
-      font-size: 0.85rem;
+  .testcases-table-wrap {
+    .testcases-title {
+      font-size: 14px;
       font-weight: 600;
-      color: #e2e8f0;
-      margin-bottom: 4px;
-    }
-
-    .tc-status {
-      display: block;
-      font-size: 0.7rem;
-      margin-bottom: 2px;
-    }
-
-    .tc-time {
-      display: block;
-      font-size: 0.7rem;
-      color: #94a3b8;
-    }
-
-    &.tc-ac {
-      border-color: #22c55e;
-      background: #0a2e1a;
-
-      .tc-status {
-        color: #4ade80;
-      }
-    }
-
-    &.tc-fail {
-      border-color: #ef4444;
-      background: #2e0f0f;
-
-      .tc-status {
-        color: #f87171;
-      }
+      color: #333;
+      margin: 0 0 10px;
     }
   }
+
+  .testcases-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    th {
+      background: #fafafa;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 500;
+      color: #666;
+      border: 1px solid #f0f0f0;
+    }
+
+    td {
+      padding: 7px 10px;
+      border: 1px solid #f0f0f0;
+      color: #333;
+    }
+
+    tr.tc-ac td {
+      color: #52c41a;
+    }
+
+    tr.tc-fail td {
+       color: #ff4d4f;
+     }
+   }
+
+   .failed-details-section {
+     margin-top: 20px;
+
+     .failed-details-title {
+       font-size: 14px;
+       font-weight: 600;
+       color: #ff4d4f;
+       margin: 0 0 12px;
+     }
+   }
+
+   .failed-case {
+     margin-bottom: 16px;
+
+     .failed-case-header {
+       margin: 0 0 8px;
+     }
+
+     .tc-badge-fail {
+       display: inline-block;
+       background: #fff2f0;
+       border: 1px solid #ffccc7;
+       color: #ff4d4f;
+       padding: 2px 10px;
+       border-radius: 4px;
+       font-size: 12px;
+       font-weight: 500;
+     }
+   }
+
+   .failed-io {
+     display: grid;
+     grid-template-columns: 1fr 1fr 1fr;
+     gap: 10px;
+
+     .failed-io-block {
+       min-width: 0;
+
+       .io-label {
+         display: block;
+         font-size: 11px;
+         color: #999;
+         margin-bottom: 4px;
+       }
+
+       pre {
+         margin: 0;
+         background: #fafafa;
+         border: 1px solid #e8e8e8;
+         border-radius: 4px;
+         padding: 8px;
+         font-size: 11px;
+         line-height: 1.5;
+         max-height: 140px;
+         overflow: auto;
+         white-space: pre-wrap;
+         word-break: break-all;
+         color: #333;
+       }
+     }
+   }
 </style>
 
