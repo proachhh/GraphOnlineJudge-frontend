@@ -204,6 +204,11 @@ export default {
       data
     })
   },
+  selfTest (data) {
+    return ajax('self_test', 'post', {
+      data
+    })
+  },
   getSubmissionList (offset, limit, params) {
     params.limit = limit
     params.offset = offset

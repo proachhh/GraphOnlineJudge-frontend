@@ -482,6 +482,13 @@ export const m = {
   You_have_submitted_a_solution: '你已经提交了解答',
   Contest_has_ended: '比赛已结束',
   You_have_submission_in_this_problem_sure_to_cover_it: '你已经提交了解答，确定要覆盖吗？',
+  Self_Test: '自测',
+   Self_Test_Placeholder: '输入测试数据...',
+   Self_Test_Run: '运行测试',
+   Self_Test_Result: '测试结果',
+   Self_Test_Input: '输入',
+   Self_Test_Output: '输出',
+   Self_Test_Output_Hint: '点击「运行测试」查看输出',
   // About.vue
   Compiler: '编译器',
   Result_Explanation: '结果解释',

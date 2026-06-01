@@ -20,9 +20,10 @@
       <transition name="fadeInUp" mode="out-in">
         <router-view></router-view>
       </transition>
-      <div class="footer">
-        Build Version: {{ version }}
-      </div>
+    </div>
+    <div class="footer">
+      <div v-html="websiteFooter"></div>
+      <span>Build Version: {{ version }}</span>
     </div>
 
     <el-dialog :title="$t('m.Latex_Editor')" :visible.sync="katexVisible">
@@ -44,8 +45,14 @@
     data () {
       return {
         version: process.env.VERSION,
+        websiteFooter: '',
         katexVisible: false
       }
+    },
+    mounted () {
+      api.getWebsiteConfig().then(res => {
+        this.websiteFooter = res.data.data.website_footer || ''
+      }).catch(() => {})
     },
     components: {
       SideMenu,
@@ -190,10 +197,30 @@
   }
 
   .footer {
-    margin: 15px;
+    margin-top: 40px;
+    padding: 20px 30px 18px;
+    background: #f5f7fa;
+    border-top: 1px solid #e2e8f0;
     text-align: center;
-    font-size: small;
-    color: #64748b;
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.8;
+
+    a {
+      color: #64748b;
+      text-decoration: none;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #1e3a8a;
+      }
+    }
+
+    span {
+      display: block;
+      margin-top: 6px;
+      color: #94a3b8;
+    }
   }
 
   @keyframes fadeInUp {

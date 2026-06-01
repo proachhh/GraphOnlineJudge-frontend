@@ -1,5 +1,31 @@
 <template>
-  <div class="flex-container" :class="{ 'full-width-layout': layoutMode === 'horizontal' }">
+  <div class="problem-page-root">
+    <div v-if="contestID" class="contest-problem-sidebar" :class="{ 'full-width-mode': layoutMode === 'horizontal' }">
+    <div class="sidebar-header">
+      <Icon type="ios-photos" size="16" />
+      <span>题目列表</span>
+      <span class="sidebar-count">{{ contestProblems.length }}</span>
+    </div>
+    <div class="sidebar-list">
+      <div
+        v-for="p in contestProblems"
+        :key="p._id"
+        class="sidebar-item"
+        :class="{ active: p._id === problemID }"
+        @click="switchContestProblem(p)"
+      >
+        <span class="sidebar-pid">{{ p._id }}</span>
+        <span class="sidebar-ptitle">{{ p.title }}</span>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <router-link :to="{ name: 'contest-problem-list', params: { contestID: contestID } }">
+        <Icon type="ios-arrow-back" />
+        <span>返回题目列表</span>
+      </router-link>
+    </div>
+  </div>
+  <div class="flex-container" :class="{ 'full-width-layout': layoutMode === 'horizontal', 'contest-mode': contestID }">
     <div id="problem-main">
       <!-- 布局切换 -->
       <div class="layout-toggle-row">
@@ -14,11 +40,11 @@
       </div>
 
       <!-- 题目描述 + 代码编辑器容器 -->
-      <div class="problem-layout-wrapper" :class="layoutMode">
-        <div class="layout-left" :style="layoutLeftStyle">
+      <div class="problem-layout-wrapper" :class="layoutMode" ref="layoutWrapper">
+        <div class="layout-left" :style="layoutLeftStyle" ref="layoutLeft">
           <Panel :padding="40" shadow>
             <div slot="title" class="problem-title-header">
-              <span class="problem-title-id">{{problem._id}}</span>
+              <span class="problem-title-id">#{{problem._id}}.</span>
               <span class="problem-title-text">{{problem.title}}</span>
             </div>
             <div id="problem-content" class="markdown-body" v-katex>
@@ -83,8 +109,8 @@
         <div v-if="layoutMode === 'horizontal'" class="resize-handle" @mousedown="startResize"></div>
         <div v-show="isResizing" class="resize-overlay" @mouseup="stopResize" @mousemove="handleResize"></div>
 
-        <div class="layout-right" :style="layoutRightStyle">
-          <!-- 智能解题提示 -->
+        <div class="layout-right" :style="layoutRightStyle" ref="layoutRight">
+
           <AICard
             title="智能解题提示"
             icon="ios-bulb"
@@ -94,55 +120,84 @@
             :fetchFn="fetchHint"
           />
 
-          <Card :padding="20" id="submit-code" dis-hover>
-        <CodeMirror :value.sync="code"
+          <Card :padding="20" id="submit-code" dis-hover ref="submitCodeCard">
+        <CodeMirror ref="codeMirror" :value.sync="code"
                     :languages="problem.languages"
                     :language="language"
                     :theme="theme"
                     @resetCode="onResetToTemplate"
                     @changeTheme="onChangeTheme"
                     @changeLang="onChangeLang"></CodeMirror>
-        <Row type="flex" justify="space-between">
-          <Col :span="10">
-            <div class="status" v-if="statusVisible">
-              <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
-                <span>{{$t('m.Status')}}</span>
-                <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
-                  {{$t('m.' + submissionStatus.text.replace(/ /g, "_"))}}
-                </Tag>
-              </template>
-              <template v-else-if="this.contestID && !OIContestRealTimePermission">
-                <Alert type="success" show-icon>{{$t('m.Submitted_successfully')}}</Alert>
-              </template>
-            </div>
-            <div v-else-if="problem.my_status === 0">
-              <Alert type="success" show-icon>{{$t('m.You_have_solved_the_problem')}}</Alert>
-            </div>
-            <div v-else-if="this.contestID && !OIContestRealTimePermission && submissionExists">
-              <Alert type="success" show-icon>{{$t('m.You_have_submitted_a_solution')}}</Alert>
-            </div>
-            <div v-if="contestEnded">
-              <Alert type="warning" show-icon>{{$t('m.Contest_has_ended')}}</Alert>
-            </div>
-          </Col>
 
-          <Col :span="12">
-            <template v-if="captchaRequired">
-              <div class="captcha-container">
-                <Tooltip v-if="captchaRequired" content="Click to refresh" placement="top">
-                  <img :src="captchaSrc" @click="getCaptchaSrc"/>
-                </Tooltip>
-                <Input v-model="captchaCode" class="captcha-code"/>
-              </div>
-            </template>
-            <Button type="warning" icon="edit" :loading="submitting" @click="submitCode"
-                    :disabled="problemSubmitDisabled || submitted"
-                    class="fl-right">
+        <div class="self-test-section">
+          <p class="self-test-label">{{$t('m.Self_Test')}}</p>
+          <div class="self-test-row">
+            <div class="self-test-left">
+              <p class="self-test-col-title">{{$t('m.Self_Test_Input')}}</p>
+              <textarea v-model="selfTestInput" rows="5"
+                        :placeholder="$t('m.Self_Test_Placeholder')"
+                        class="self-test-textarea"></textarea>
+            </div>
+            <div class="self-test-right">
+              <p class="self-test-col-title">
+                {{$t('m.Self_Test_Output')}}
+                <span v-if="selfTestResult" class="self-test-meta" :class="{ success: selfTestResult.success }">
+                  <span v-if="selfTestResult.success" class="self-test-tag self-test-tag-success">{{$t('m.Self_Test_Run')}} {{$t('m.Success')}}</span>
+                  <span v-else class="self-test-tag self-test-tag-error">{{$t('m.Error')}}</span>
+                  <span v-if="selfTestResult.success" class="meta-text">{{$t('m.Time')}}: {{ selfTestResult.time_cost }}ms</span>
+                  <span v-if="selfTestResult.success" class="meta-text">{{$t('m.Memory')}}: {{ (selfTestResult.memory_cost / 1024 / 1024).toFixed(2) }}MB</span>
+                </span>
+              </p>
+              <pre v-if="selfTestResult" class="self-test-pre">{{ selfTestResult.output || selfTestResult.error }}</pre>
+              <pre v-else class="self-test-pre self-test-pre-empty">{{ $t('m.Self_Test_Output_Hint') }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-row">
+          <div class="submit-row-left">
+            <Button type="primary" icon="edit" :loading="submitting" @click="submitCode"
+                    :disabled="problemSubmitDisabled || submitted">
               <span v-if="submitting">{{$t('m.Submitting')}}</span>
               <span v-else>{{$t('m.Submit')}}</span>
             </Button>
-          </Col>
-        </Row>
+            <Button type="primary" :loading="selfTesting" @click="runSelfTest">
+              {{$t('m.Self_Test')}}
+            </Button>
+
+            <template v-if="captchaRequired">
+              <Tooltip content="Click to refresh" placement="top">
+                <img :src="captchaSrc" @click="getCaptchaSrc" class="captcha-img"/>
+              </Tooltip>
+              <Input v-model="captchaCode" class="captcha-code-inline"/>
+            </template>
+          </div>
+        </div>
+
+        <div class="status" v-if="statusVisible">
+          <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
+            <span>{{$t('m.Status')}}</span>
+            <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
+              {{$t('m.' + submissionStatus.text.replace(/ /g, "_"))}}
+            </Tag>
+          </template>
+          <template v-else-if="this.contestID && !OIContestRealTimePermission">
+            <span class="status-text">{{$t('m.Submitted_successfully')}}</span>
+          </template>
+        </div>
+
+        <div class="alert-row">
+          <Alert v-if="problem.my_status === 0 && !statusVisible" type="success" show-icon>
+            {{$t('m.You_have_solved_the_problem')}}
+          </Alert>
+          <Alert v-if="contestID && !OIContestRealTimePermission && submissionExists && !statusVisible"
+                 type="success" show-icon>
+            {{$t('m.You_have_submitted_a_solution')}}
+          </Alert>
+          <Alert v-if="contestEnded" type="warning" show-icon>
+            {{$t('m.Contest_has_ended')}}
+          </Alert>
+        </div>
       </Card>
         </div>
       </div>
@@ -238,6 +293,48 @@
         <Button type="ghost" @click="graphVisible=false">{{$t('m.Close')}}</Button>
       </div>
     </Modal>
+
+    <div v-if="resultVisible" class="result-overlay" @click.self="resultVisible = false">
+      <div class="result-modal">
+        <div class="result-close" @click="resultVisible = false">
+          <Icon type="ios-close" size="28" />
+        </div>
+        <div class="result-header" :class="resultHeaderClass">
+          <span class="result-icon">{{ resultIcon }}</span>
+          <span class="result-text">{{ resultTitle }}</span>
+        </div>
+        <div class="result-info">
+          <div class="result-info-item">
+            <span class="label">{{$t('m.Time')}}</span>
+            <span class="value">{{ submissionDetail.statistic_info.time_cost || 0 }}ms</span>
+          </div>
+          <div class="result-info-item">
+            <span class="label">{{$t('m.Memory')}}</span>
+            <span class="value">{{ ((submissionDetail.statistic_info.memory_cost || 0) / 1024 / 1024).toFixed(2) }}MB</span>
+          </div>
+          <div class="result-info-item" v-if="submissionDetail.statistic_info.score !== undefined">
+            <span class="label">{{$t('m.Score')}}</span>
+            <span class="value">{{ submissionDetail.statistic_info.score }}</span>
+          </div>
+        </div>
+        <div v-if="compileError" class="compile-error">
+          <pre>{{ submissionDetail.statistic_info.err_info }}</pre>
+        </div>
+        <div v-else class="testcases-grid">
+          <div
+            v-for="tc in testCases"
+            :key="tc.test_case"
+            class="testcase-item"
+            :class="tcStatusClass(tc.result)"
+          >
+            <span class="tc-index">{{ tc.test_case }}</span>
+            <span class="tc-status">{{ tcStatusText(tc.result) }}</span>
+            <span class="tc-time">{{ tc.cpu_time }}ms</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   </div>
 </template>
 
@@ -277,6 +374,11 @@
         contestID: '',
         problemID: '',
         submitting: false,
+        selfTesting: false,
+        selfTestInput: '',
+        selfTestResult: null,
+        resultVisible: false,
+        submissionDetail: { statistic_info: {}, info: {} },
         code: '',
         language: 'C++',
         theme: 'solarized',
@@ -302,6 +404,7 @@
         largePie: largePie,
         pieChart: null,
         largePieChart: null,
+        contestProblems: []
       }
     },
     beforeRouteEnter (to, from, next) {
@@ -319,6 +422,8 @@
     mounted () {
       this.$store.commit(types.CHANGE_CONTEST_ITEM_VISIBLE, {menu: false})
       this.init()
+      this._resizeHandler = () => { this.fixLayoutHeights() }
+      window.addEventListener('resize', this._resizeHandler)
     },
     methods: {
       ...mapActions(['changeDomTitle']),
@@ -332,6 +437,9 @@
         this.$Loading.start()
         this.contestID = this.$route.params.contestID
         this.problemID = this.$route.params.problemID
+        if (this.contestID) {
+          this.loadContestProblems()
+        }
         let func = this.$route.name === 'problem-details' ? 'getProblem' : 'getContestProblem'
         api[func](this.problemID, this.contestID).then(res => {
           this.$Loading.finish()
@@ -343,6 +451,10 @@
           problem.languages = problem.languages.sort()
           this.problem = problem
           this.changePie(problem)
+
+          if (problem.samples && problem.samples.length > 0) {
+            this.selfTestInput = problem.samples[0].input
+          }
 
           // 在beforeRouteEnter中修改了, 说明本地有code，无需加载template
           if (this.code !== '') {
@@ -356,6 +468,20 @@
           }
         }, () => {
           this.$Loading.error()
+        })
+      },
+      loadContestProblems () {
+        api.getContestProblemList(this.contestID).then(res => {
+          this.contestProblems = res.data.data || []
+        }).catch(() => {})
+      },
+      switchContestProblem (problem) {
+        this.$router.push({
+          name: 'contest-problem-details',
+          params: {
+            contestID: this.contestID,
+            problemID: problem._id
+          }
         })
       },
       changePie (problemData) {
@@ -464,9 +590,11 @@
           let id = this.submissionId
           api.getSubmission(id).then(res => {
             this.result = res.data.data
+            this.submissionDetail = res.data.data
             if (Object.keys(res.data.data.statistic_info).length !== 0) {
               this.submitting = false
               this.submitted = false
+              this.resultVisible = true
               clearTimeout(this.refreshStatus)
               this.init()
             } else {
@@ -550,6 +678,38 @@
       onCopyError (e) {
         this.$error('Failed to copy code')
       },
+      runSelfTest () {
+        if (this.code.trim() === '') {
+          this.$error(this.$i18n.t('m.Code_can_not_be_empty'))
+          return
+        }
+        this.selfTestResult = null
+        this.selfTesting = true
+        api.selfTest({
+          code: this.code,
+          language: this.language,
+          input: this.selfTestInput
+        }).then(res => {
+          let result = res.data.data
+          if (res.data.error === null) {
+            this.selfTestResult = {
+              success: true,
+              output: result.output || '',
+              time_cost: result.time_cost || 0,
+              memory_cost: result.memory_cost || 0
+            }
+          } else {
+            this.selfTestResult = {
+              success: false,
+              error: res.data.data || res.data.error || 'Unknown error'
+            }
+          }
+          this.selfTesting = false
+        }).catch(() => {
+          this.selfTesting = false
+          this.$error('Self test failed')
+        })
+      },
       startResize (e) {
         this.isResizing = true
         window.addEventListener('mousemove', this.handleResize)
@@ -572,6 +732,19 @@
         window.removeEventListener('mouseup', this.stopResize)
         document.body.style.cursor = ''
         document.body.style.userSelect = ''
+      },
+      fixLayoutHeights () {
+        if (this.$refs.codeMirror && this.$refs.codeMirror.editor) {
+          this.$refs.codeMirror.editor.refresh()
+        }
+      },
+      tcStatusClass (result) {
+        if (result === 0) return 'tc-ac'
+        return 'tc-fail'
+      },
+      tcStatusText (result) {
+        if (result === 0) return this.$t('m.Accepted')
+        return this.$t('m.Wrong_Answer')
       }
     },
     computed: {
@@ -597,11 +770,48 @@
       },
       layoutRightStyle () {
         if (this.layoutMode !== 'horizontal') return {}
-        return { width: (100 - this.leftWidth) + '%' }
+        return { flex: '1', minWidth: '0' }
       },
       layoutLeftStyle () {
         if (this.layoutMode !== 'horizontal') return {}
-        return { width: this.leftWidth + '%' }
+        return { width: this.leftWidth + '%', flexShrink: '0' }
+      },
+      resultIcon () {
+        const r = this.submissionDetail.result
+        if (r === 0) return '✅'
+        if (r === -2) return '❌'
+        if (r === -1 || r === 1 || r === 2 || r === 3 || r === 4) return '❌'
+        if (r === 8) return '⚠️'
+        return '❌'
+      },
+      resultTitle () {
+        const r = this.submissionDetail.result
+        const map = {
+          '-2': this.$t('m.Compile_Error'),
+          '-1': this.$t('m.Wrong_Answer'),
+          '0': this.$t('m.Accepted'),
+          '1': this.$t('m.CPU_Time_Limit_Exceeded'),
+          '2': this.$t('m.Real_Time_Limit_Exceeded'),
+          '3': this.$t('m.Memory_Limit_Exceeded'),
+          '4': this.$t('m.Runtime_Error'),
+          '5': this.$t('m.System_Error'),
+          '8': this.$t('m.Partially_Accepted')
+        }
+        return map[r] || this.$t('m.Unknown')
+      },
+      resultHeaderClass () {
+        const r = this.submissionDetail.result
+        if (r === 0) return 'result-ac'
+        if (r === 8) return 'result-pa'
+        return 'result-fail'
+      },
+      compileError () {
+        return this.submissionDetail.result === -2
+      },
+      testCases () {
+        const info = this.submissionDetail.info
+        if (info && info.data) return info.data
+        return []
       }
     },
     beforeRouteLeave (to, from, next) {
@@ -619,6 +829,7 @@
     beforeDestroy () {
       window.removeEventListener('mousemove', this.handleResize)
       window.removeEventListener('mouseup', this.stopResize)
+      window.removeEventListener('resize', this._resizeHandler)
       this.disposeCharts()
     },
     watch: {
@@ -631,6 +842,16 @@
             this.initLargePieChart()
           })
         }
+      },
+      layoutMode () {
+        if (this.layoutMode === 'horizontal') {
+          this.$nextTick(() => { this.fixLayoutHeights() })
+        }
+      }
+    },
+    updated () {
+      if (this.layoutMode === 'horizontal') {
+        this.fixLayoutHeights()
       }
     }
   }
@@ -643,26 +864,42 @@
 
   .flex-container {
     display: flex;
+    width: 100%;
     max-width: 1400px;
     margin: 0 auto;
     padding: 40px 20px;
     background: linear-gradient(180deg, #f0f4f8 0%, #f8fafc 100%);
     min-height: calc(100vh - 60px);
 
+    &.contest-mode:not(.full-width-layout) {
+      max-width: 100%;
+      padding: 24px 20px;
+    }
+
     &.full-width-layout {
       max-width: none;
-      padding: 16px 16px 0 16px;
+      width: 100%;
+      padding: 0;
       background: #f5f7fa;
-      min-height: calc(100vh - 80px);
-      height: calc(100vh - 80px);
+      margin: 0;
+      position: fixed;
+      top: 80px;
+      left: 0;
+      right: 0;
+      bottom: 0;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
 
       #problem-main {
-        margin-right: 0;
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        min-width: 0;
+          margin-right: 0;
+          flex: 1;
+          min-width: 0;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          padding: 0 0 0 8px;
 
         .layout-toggle-row {
           flex-shrink: 0;
@@ -675,14 +912,35 @@
 
         .problem-layout-wrapper.horizontal {
           display: flex;
-          gap: 0;
-          align-items: stretch;
+          width: 100%;
+
+          .layout-left {
+            min-width: 0;
+          }
+
+          .layout-right {
+            min-width: 0;
+          }
         }
       }
     }
 
+    &.contest-mode {
+      #problem-main {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+
+    &.full-width-layout.contest-mode {
+      #problem-main {
+        padding-left: 200px;
+      }
+    }
+
     #problem-main {
-      flex: auto;
+      flex: 1;
+      min-width: 0;
       margin-right: 24px;
 
       .layout-toggle-row {
@@ -871,14 +1129,14 @@
     gap: 10px;
 
     .problem-title-id {
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: 700;
       font-family: inherit;
       color: #1e3a8a;
     }
 
     .problem-title-text {
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: 700;
       font-family: inherit;
       color: #111827;
@@ -887,9 +1145,27 @@
 
   #problem-content {
     padding: 24px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
+
+    /deep/ pre {
+      overflow-x: auto;
+    }
+
+    /deep/ img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /deep/ table {
+      display: block;
+      overflow-x: auto;
+      max-width: 100%;
+    }
 
     .title {
-      font-size: 1.25rem;
+      font-size: 1.4rem;
       font-weight: 600;
       margin: 40px 0 16px 0;
       color: #1e3a8a;
@@ -931,7 +1207,10 @@
       margin-top: 20px;
       margin-bottom: 28px;
       width: 100%;
-      max-width: 800px;
+
+      @media (max-width: 640px) {
+        grid-template-columns: 1fr;
+      }
 
       &-input, &-output {
         display: flex;
@@ -961,7 +1240,8 @@
         line-height: 1.6;
         max-height: 180px;
         overflow: auto;
-        white-space: pre;
+        white-space: pre-wrap;
+        word-break: break-word;
         color: #334155;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         
@@ -1020,18 +1300,128 @@
 </style>
 
 <style lang="less">
+  .contest-problem-sidebar {
+    position: fixed;
+    left: 0;
+    top: 80px;
+    bottom: 0;
+    width: 200px;
+    z-index: 99;
+    background: #fff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    &.full-width-mode {
+      width: 200px;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e3a8a;
+      flex-shrink: 0;
+      background: #fff;
+
+      .sidebar-count {
+        margin-left: auto;
+        font-size: 12px;
+        color: #94a3b8;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 10px;
+      }
+    }
+
+    .sidebar-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 0;
+
+      .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-size: 13px;
+        border-left: 3px solid transparent;
+
+        &:hover {
+          background: #f0f9ff;
+        }
+
+        &.active {
+          background: #e8f0fe;
+          border-left-color: #1e3a8a;
+          font-weight: 600;
+        }
+
+        .sidebar-pid {
+          color: #94a3b8;
+          font-size: 12px;
+          font-weight: 600;
+          min-width: 26px;
+          flex-shrink: 0;
+        }
+
+        &.active .sidebar-pid {
+          color: #1e3a8a;
+        }
+
+        .sidebar-ptitle {
+          color: #334155;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        &.active .sidebar-ptitle {
+          color: #1e3a8a;
+        }
+      }
+    }
+
+    .sidebar-footer {
+      padding: 10px 14px;
+      border-top: 1px solid #f1f5f9;
+      flex-shrink: 0;
+      font-size: 13px;
+      background: #fff;
+
+      a {
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.2s;
+
+        &:hover {
+          color: #1e3a8a;
+        }
+      }
+    }
+  }
+
   .full-width-layout {
     #problem-main {
       .problem-layout-wrapper.horizontal {
         .layout-left {
           min-width: 0;
-          overflow-y: auto !important;
+          overflow-y: auto;
           overflow-x: hidden;
         }
 
         .layout-left > .ivu-card {
-          height: auto !important;
-          min-height: 100% !important;
+          min-height: 100%;
+          min-width: 0;
           margin-bottom: 0;
           border-radius: 16px;
           overflow: hidden !important;
@@ -1039,25 +1429,35 @@
 
         .layout-right {
           min-width: 0;
-          overflow: hidden;
+          overflow-y: auto;
           display: flex;
           flex-direction: column;
+          width: 100%;
+        }
+
+        .layout-right > .ivu-card {
+          width: 100%;
         }
 
         .layout-right .ai-response-card {
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
           flex-shrink: 0;
         }
 
         .layout-right #submit-code {
           flex: 1;
           min-height: 0;
+          min-width: 0;
           display: flex;
           flex-direction: column;
         }
 
         .layout-right #submit-code > .ivu-card-body {
           flex: 1;
+          min-width: 0;
           min-height: 0;
+          width: 100%;
           display: flex;
           flex-direction: column;
           overflow: hidden;
@@ -1065,25 +1465,187 @@
 
         .layout-right #submit-code > .ivu-card-body > div:first-child {
           flex: 1;
+          min-width: 0;
           min-height: 0;
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          margin-bottom: 0 !important;
+          margin: 0 !important;
+          width: 100%;
+        }
+
+        .layout-right #submit-code > .ivu-card-body > div:first-child .vue-codemirror-wrap {
+          flex: 1;
+          min-width: 0;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          width: 100%;
         }
 
         .layout-right #submit-code > .ivu-card-body > div:first-child .CodeMirror {
           flex: 1;
-          min-height: 300px;
-          height: auto !important;
+          min-width: 0;
+          min-height: 0;
+          width: 100%;
         }
 
         .layout-right #submit-code > .ivu-card-body > div:first-child .CodeMirror-scroll {
-          min-height: 300px !important;
           max-height: none !important;
+          max-width: none !important;
         }
       }
     }
+  }
+
+  .self-test-section {
+    margin-top: 20px;
+    margin-bottom: 12px;
+
+    .self-test-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-bottom: 10px;
+      margin-top: 0;
+    }
+
+    .self-test-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .self-test-left,
+    .self-test-right {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .self-test-col-title {
+       font-size: 0.9rem;
+       font-weight: 600;
+       color: #475569;
+       margin-bottom: 8px;
+       margin-top: 0;
+       display: flex;
+       align-items: center;
+       gap: 8px;
+       flex-wrap: wrap;
+     }
+
+     .self-test-meta {
+       display: inline-flex;
+       align-items: center;
+       gap: 8px;
+       flex-wrap: wrap;
+       font-weight: 400;
+
+       .meta-text {
+         font-size: 11px;
+         color: #64748b;
+       }
+     }
+
+    .self-test-textarea,
+    .self-test-pre {
+      width: 100%;
+      margin: 0;
+      padding: 8px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #334155;
+      outline: none;
+      resize: vertical;
+      min-height: 119px;
+      max-height: 200px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      box-sizing: border-box;
+
+      &::placeholder {
+        color: #94a3b8;
+      }
+    }
+
+    .self-test-pre-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+    }
+
+    .self-test-output-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .self-test-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .self-test-tag-success {
+      background: #19be6b;
+      color: #fff;
+    }
+
+    .self-test-tag-error {
+      background: #ed4014;
+      color: #fff;
+    }
+  }
+
+  .submit-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+
+    .submit-row-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .submit-row-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .captcha-img {
+      height: 32px;
+      cursor: pointer;
+    }
+
+    .captcha-code-inline {
+      width: 100px;
+    }
+
+    .status-text {
+      font-size: 13px;
+      color: #19be6b;
+    }
+  }
+
+  .alert-row {
+    margin-top: 8px;
+  }
+
+  .status {
+    margin-top: 8px;
   }
 
   #submit-code .ivu-card,
@@ -1107,6 +1669,161 @@
 
   .fl-right {
     float: right;
+  }
+
+  .result-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .result-modal {
+    background: #1a1a2e;
+    border-radius: 16px;
+    width: 560px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 32px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .result-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  .result-header {
+    text-align: center;
+    padding: 20px 0 16px;
+    font-size: 1.3rem;
+    font-weight: 600;
+
+    .result-icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+  }
+
+  .result-ac {
+    color: #4ade80;
+  }
+
+  .result-pa {
+    color: #fbbf24;
+  }
+
+  .result-fail {
+    color: #f87171;
+  }
+
+  .result-info {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 20px;
+
+    .result-info-item {
+      text-align: center;
+
+      .label {
+        display: block;
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-bottom: 4px;
+      }
+
+      .value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #e2e8f0;
+      }
+    }
+  }
+
+  .compile-error {
+    pre {
+      background: #0f172a;
+      color: #f87171;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      max-height: 300px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  }
+
+  .testcases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+
+  .testcase-item {
+    background: #162032;
+    border: 2px solid #334155;
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    transition: all 0.2s;
+
+    .tc-index {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+    }
+
+    .tc-status {
+      display: block;
+      font-size: 0.7rem;
+      margin-bottom: 2px;
+    }
+
+    .tc-time {
+      display: block;
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+
+    &.tc-ac {
+      border-color: #22c55e;
+      background: #0a2e1a;
+
+      .tc-status {
+        color: #4ade80;
+      }
+    }
+
+    &.tc-fail {
+      border-color: #ef4444;
+      background: #2e0f0f;
+
+      .tc-status {
+        color: #f87171;
+      }
+    }
   }
 </style>
 

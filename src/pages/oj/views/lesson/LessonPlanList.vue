@@ -68,7 +68,7 @@
 
           <div v-else class="table-wrap">
             <Table :data="lessonPlans" :columns="listColumns" class="lesson-table" disabled-hover
-              @on-row-click="(row) => goToLessonPlan(row.id)" size="small">
+              @on-row-click="(row) => goToLessonPlan(row.id)">
             </Table>
           </div>
 
@@ -116,15 +116,31 @@ export default {
   computed: {
     listColumns () {
       return [
-        { title: '#', key: '_index', width: 80, align: 'center', className: 'col-index',
-          render: (h, p) => h('span', { style: { color: '#94a3b8', whiteSpace: 'nowrap' } }, (this.offset - 1) * this.limit + p.index + 1) },
-        { title: '标题', key: 'title', width: 200, ellipsis: true,
-          render: (h, p) => h('span', { style: { fontWeight: '600', color: '#1e3a8a', cursor: 'pointer' } }, p.row.title) },
-        { title: '简介', key: 'description', minWidth: 240, ellipsis: true, tooltip: true },
-        { title: '题目数', key: 'problems_count', width: 80, align: 'center' },
-        { title: '作者', key: 'created_by_username', width: 110, align: 'center' },
-        { title: '时间', key: 'create_time', width: 120, align: 'center',
-          render: (h, p) => h('span', {}, p.row.create_time ? new Date(p.row.create_time).toLocaleDateString('zh-CN') : '-') }
+        {
+          title: '#',
+          key: '_index',
+          width: 90,
+          align: 'center',
+          className: 'col-index',
+          render: (h, p) => h('span', { style: { color: '#94a3b8' } }, (this.offset - 1) * this.limit + p.index + 1)
+        },
+        {
+          title: '标题',
+          key: 'title',
+          width: 220,
+          ellipsis: true,
+          render: (h, p) => h('span', { style: { fontWeight: '600', color: '#1e3a8a', cursor: 'pointer', fontSize: '15px' } }, p.row.title)
+        },
+        { title: '简介', key: 'description', minWidth: 260, ellipsis: true, tooltip: true },
+        { title: '题目数', key: 'problems_count', width: 90, align: 'center' },
+        { title: '作者', key: 'created_by_username', width: 120, align: 'center' },
+        {
+          title: '时间',
+          key: 'create_time',
+          width: 130,
+          align: 'center',
+          render: (h, p) => h('span', {}, p.row.create_time ? new Date(p.row.create_time).toLocaleDateString('zh-CN') : '-')
+        }
       ]
     }
   },
@@ -209,9 +225,9 @@ export default {
 
 <style lang="less" scoped>
 .lesson-plan-list-page {
-  max-width: 1300px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 24px 20px;
+  padding: 32px 24px;
   min-height: calc(100vh - 60px);
 }
 
@@ -222,30 +238,30 @@ export default {
 }
 
 .alpha-sidebar {
-  width: 36px;
+  width: 42px;
   flex-shrink: 0;
   background: #fff;
-  border-radius: 8px 0 0 8px;
+  border-radius: 10px 0 0 10px;
   border: 1px solid #e2e8f0;
   border-right: none;
-  padding: 6px 0;
+  padding: 8px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   position: relative;
   z-index: 2;
 
   .alpha-letter {
     display: inline-block;
-    width: 28px;
-    height: 18px;
-    line-height: 18px;
+    width: 32px;
+    height: 22px;
+    line-height: 22px;
     text-align: center;
-    font-size: 11px;
+    font-size: 13px;
     color: #64748b;
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: 4px;
     transition: all 0.15s;
     user-select: none;
 
@@ -270,12 +286,13 @@ export default {
 .search-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 20px;
 
   .search-input {
     flex: 1;
-    max-width: 480px;
+    max-width: 520px;
+    font-size: 15px;
   }
 
   .view-toggle {
@@ -288,31 +305,28 @@ export default {
   background: #fff;
   border-radius: 0 10px 10px 10px;
   border: 1px solid #e2e8f0;
-  padding: 20px;
-  min-height: 400px;
+  padding: 24px;
+  min-height: 440px;
 
   .status-box {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 400px;
-    font-size: 15px;
+    min-height: 440px;
+    font-size: 16px;
     color: #94a3b8;
   }
 }
 
 .lesson-plan-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 
   @media (max-width: 1400px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  @media (max-width: 1100px) {
     grid-template-columns: repeat(3, 1fr);
   }
-  @media (max-width: 768px) {
+  @media (max-width: 1100px) {
     grid-template-columns: repeat(2, 1fr);
   }
   @media (max-width: 500px) {
@@ -322,7 +336,7 @@ export default {
 
 .lesson-plan-card {
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
   border: 1px solid #e2e8f0;
   cursor: pointer;
@@ -337,7 +351,7 @@ export default {
   }
 
   .card-cover {
-    height: 100px;
+    height: 120px;
     overflow: hidden;
     background: linear-gradient(135deg, #1e3a8a, #3b82f6);
 
@@ -353,22 +367,26 @@ export default {
       align-items: center;
       justify-content: center;
       color: rgba(255,255,255,0.6);
+
+      .ivu-icon {
+        font-size: 48px;
+      }
     }
   }
 
   .card-body {
     display: flex;
-    gap: 8px;
-    padding: 10px 10px 0;
+    gap: 10px;
+    padding: 14px 14px 0;
     flex: 1;
 
     .card-num {
       color: #c0c8d8;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
       flex-shrink: 0;
-      padding-top: 1px;
-      min-width: 18px;
+      padding-top: 2px;
+      min-width: 22px;
       text-align: right;
     }
 
@@ -377,25 +395,25 @@ export default {
       min-width: 0;
 
       .card-title {
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 600;
         color: #1e3a8a;
-        margin: 0 0 4px;
+        margin: 0 0 6px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
 
       .card-desc {
-        font-size: 12px;
-        color: #94a3b8;
+        font-size: 13px;
+        color: #64748b;
         margin: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
-        line-height: 1.4;
+        line-height: 1.5;
       }
     }
   }
@@ -403,39 +421,38 @@ export default {
   .card-footer {
     display: flex;
     justify-content: space-between;
-    padding: 8px 10px;
+    padding: 10px 14px;
     border-top: 1px solid #e8ecf1;
-    font-size: 11px;
-    color: #94a3b8;
+    font-size: 13px;
+    color: #64748b;
     margin-top: auto;
 
     span {
       display: flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
     }
   }
 }
 
 .table-wrap {
   .lesson-table {
-    font-size: 14px;
     /deep/ .ivu-table-row { cursor: pointer; }
-    /deep/ td { padding: 10px 8px; font-size: 14px; }
+    /deep/ td { padding: 12px 10px; font-size: 15px; }
     /deep/ th {
       background: #f8fafc;
       font-weight: 600;
       color: #475569;
       border-bottom: 1px solid #e2e8f0;
-      padding: 10px 8px;
-      font-size: 14px;
+      padding: 12px 10px;
+      font-size: 15px;
     }
     /deep/ .ivu-table-row:hover td {
       background: #f0f9ff;
     }
     /deep/ .col-index {
-      padding-left: 4px;
-      padding-right: 4px;
+      padding-left: 6px;
+      padding-right: 6px;
     }
     /deep/ .col-index .ivu-table-cell {
       padding-left: 0;
@@ -449,8 +466,8 @@ export default {
   z-index: 2;
   display: flex;
   justify-content: center;
-  padding: 18px 0 0;
-  margin-top: 16px;
+  padding: 22px 0 0;
+  margin-top: 20px;
   border-top: 1px solid #f1f5f9;
 
   /deep/ .ivu-page-item,
@@ -458,10 +475,23 @@ export default {
   /deep/ .ivu-page-next {
     cursor: pointer;
     pointer-events: auto;
+    min-width: 36px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 15px;
   }
 
   /deep/ .ivu-page {
     text-align: center;
+  }
+
+  /deep/ .ivu-select-selection {
+    height: 36px;
+    line-height: 34px;
+  }
+
+  /deep/ .ivu-page-options-elevator input {
+    height: 36px;
   }
 }
 </style>

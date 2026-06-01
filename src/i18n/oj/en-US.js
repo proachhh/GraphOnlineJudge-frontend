@@ -492,6 +492,13 @@ export const m = {
   You_have_submitted_a_solution: 'You have submitted a solution.',
   Contest_has_ended: 'Contest has ended',
   You_have_submission_in_this_problem_sure_to_cover_it: 'You have submission in this problem, sure to cover it?',
+  Self_Test: 'Self Test',
+   Self_Test_Placeholder: 'Enter test input...',
+   Self_Test_Run: 'Run Test',
+   Self_Test_Result: 'Test Result',
+   Self_Test_Input: 'Input',
+   Self_Test_Output: 'Output',
+   Self_Test_Output_Hint: 'Click "Run Test" to see output',
   // About.vue
   Compiler: 'Compiler',
   Result_Explanation: 'Result Explanation',

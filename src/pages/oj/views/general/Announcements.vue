@@ -59,7 +59,7 @@
               <div class="item-content">
                 <div class="item-header">
                   <span class="item-number">{{ String(index + 1).padStart(2, '0') }}</span>
-                  <h4 class="item-title">{{ item.title }}</h4>
+                  <h4 class="item-title" :title="item.title">{{ item.title }}</h4>
                 </div>
                 <p class="item-meta">
                   <span class="time">{{ item.create_time | localtime }}</span>
@@ -245,7 +245,7 @@ export default {
 
 <style scoped lang="less">
 .announcements-elegant {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 40px;
 }
@@ -440,8 +440,8 @@ export default {
 
 /* 公告列表区域 */
 .list-section {
-  flex: 1;
-  min-width: 0;
+  flex: 1.5;
+  min-width: 300px;
   background: white;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
