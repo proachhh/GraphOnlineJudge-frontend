@@ -21,13 +21,13 @@
         </div>
         <div class="menu-item" @click.stop="openCodeEditor">
           <div class="menu-icon" style="background: linear-gradient(135deg, #1e40af, #6366f1);">
-            <Icon type="ios-code" size="18" color="#fff" />
+            <Icon type="ios-paper" size="18" color="#fff" />
           </div>
           <span class="menu-text">{{ $t('m.Code_Editor') }}</span>
         </div>
         <div class="menu-item" @click.stop="openFeedback">
           <div class="menu-icon" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
-            <Icon type="ios-help-circle" size="18" color="#fff" />
+            <Icon type="ios-flag" size="18" color="#fff" />
           </div>
           <span class="menu-text">{{ $t('m.Feedback') }}</span>
         </div>
@@ -129,7 +129,7 @@
       `"
     >
       <div class="panel-header" @mousedown="startDrag($event, 'editor')">
-        <Icon type="ios-code" size="18" color="#3b82f6" style="margin-right: 6px;" />
+        <Icon type="ios-paper" size="18" color="#3b82f6" style="margin-right: 6px;" />
         <h3>{{ $t('m.Code_Editor') }}</h3>
         <div class="panel-actions">
           <Button type="text" size="small" @click="openFullscreen('editor')" :title="$t('m.Fullscreen')">
@@ -189,7 +189,7 @@
       `"
     >
       <div class="panel-header" @mousedown="startDrag($event, 'feedback')">
-        <Icon type="ios-help-circle" size="18" color="#3b82f6" style="margin-right: 6px;" />
+        <Icon type="ios-flag" size="18" color="#3b82f6" style="margin-right: 6px;" />
         <h3>{{ $t('m.Feedback') }}</h3>
         <div class="panel-actions">
           <Button type="text" size="small" @click="closeFeedback">
@@ -450,11 +450,13 @@ export default {
         y: Math.max(0, this.sidebarPos.y)
       }
       this.aiPanelSize = { w: 380, h: 520 }
-      this.showAIChat = !this.showAIChat
       if (this.showAIChat) {
-        this.showCodeEditor = false
-        this.showFeedback = false
+        this.showAIChat = false
+        return
       }
+      this.closeCodeEditor()
+      this.closeFeedback()
+      this.showAIChat = true
     },
 
     openCodeEditor() {
@@ -468,11 +470,13 @@ export default {
         y: Math.max(0, this.sidebarPos.y)
       }
       this.editorPanelSize = { w: 380, h: 520 }
-      this.showCodeEditor = !this.showCodeEditor
       if (this.showCodeEditor) {
-        this.showAIChat = false
-        this.showFeedback = false
+        this.showCodeEditor = false
+        return
       }
+      this.closeAIChat()
+      this.closeFeedback()
+      this.showCodeEditor = true
     },
 
     closeAIChat () {
@@ -495,14 +499,16 @@ export default {
         y: Math.max(0, this.sidebarPos.y)
       }
       this.feedbackPanelSize = { w: 420, h: 480 }
-      this.showFeedback = !this.showFeedback
       if (this.showFeedback) {
-        this.showAIChat = false
-        this.showCodeEditor = false
-        this.$nextTick(() => {
-          this.initFeedbackEditor()
-        })
+        this.showFeedback = false
+        return
       }
+      this.closeAIChat()
+      this.closeCodeEditor()
+      this.showFeedback = true
+      this.$nextTick(() => {
+        this.initFeedbackEditor()
+      })
     },
 
     closeFeedback () {
@@ -537,27 +543,27 @@ export default {
     _bindFeedbackImageResize () {
       const editor = this.feedbackEditor
       if (!editor) return
-      const body = editor.body
-      if (!body) return
+      const bodyEl = editor.body ? editor.body[0] : null
+      if (!bodyEl) return
       this._feedbackImgObserver = new MutationObserver((mutations) => {
         mutations.forEach((m) => {
           m.addedNodes.forEach((node) => {
             if (node.tagName === 'IMG') {
-              this._handleNewImage(node, body)
+              this._handleNewImage(node, bodyEl)
             } else if (node.querySelectorAll) {
               node.querySelectorAll('img').forEach((img) => {
-                this._handleNewImage(img, body)
+                this._handleNewImage(img, bodyEl)
               })
             }
           })
         })
       })
-      body.addEventListener('load', (e) => {
+      bodyEl.addEventListener('load', (e) => {
         if (e.target && e.target.tagName === 'IMG' && e.target.isConnected) {
-          this._handleNewImage(e.target, body)
+          this._handleNewImage(e.target, bodyEl)
         }
       }, true)
-      this._feedbackImgObserver.observe(body, { childList: true, subtree: true })
+      this._feedbackImgObserver.observe(bodyEl, { childList: true, subtree: true })
     },
 
     _handleNewImage (img, container) {

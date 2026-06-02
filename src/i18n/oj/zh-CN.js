@@ -793,7 +793,7 @@ export const m = {
   Lesson_Plan_Management: '教案管理',
   // GlobalSidebar.vue & AIChatFullscreen.vue
   Code_Editor: '代码编辑器',
-  Feedback: '反馈',
+  Feedback: 'BUG反馈',
   Feedback_Title: '反馈标题',
   Hello_I_Am_DeepSeek: '你好！我是 DeepSeek V4 PRO',
   DeepSeek_Description: '我可以帮你解答编程问题、算法思路、代码调试等各种技术问题',

@@ -783,7 +783,7 @@ export const m = {
   Lesson_Plan_Management: '教案管理',
   // GlobalSidebar.vue
   Code_Editor: '代碼編輯器',
-  Feedback: '回饋',
+  Feedback: 'BUG回饋',
   Feedback_Title: '回饋標題',
   Spark_AI_Assistant: '星火 AI 助手',
   Spark_AI: '星火',

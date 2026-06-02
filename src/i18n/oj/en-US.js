@@ -801,7 +801,7 @@ export const m = {
   Lesson_Plan_Management: 'Lesson Plan Management',
   // GlobalSidebar.vue
   Code_Editor: 'Code Editor',
-  Feedback: 'Feedback',
+  Feedback: 'Bug Report',
   Feedback_Title: 'Feedback Title',
   Spark_AI_Assistant: 'Spark AI Assistant',
   Spark_AI: 'Spark',

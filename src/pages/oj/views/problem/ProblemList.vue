@@ -337,9 +337,14 @@ export default {
     },
     getProblemList () {
       this.loadings.table = true
-      api.getProblemList(0, 10000, this.query).then(res => {
+      const filterParams = {
+        keyword: this.query.keyword,
+        difficulty: this.query.difficulty,
+        tag: this.query.tag
+      }
+      api.getProblemList(0, 250, filterParams).then(res => {
         this.loadings.table = false
-        this.total = res.data.data.total
+        this.total = Math.min(res.data.data.total, 250)
         const sorted = (res.data.data.results || []).slice().sort((a, b) => {
           const na = parseInt(a._id), nb = parseInt(b._id)
           if (!isNaN(na) && !isNaN(nb)) return na - nb
