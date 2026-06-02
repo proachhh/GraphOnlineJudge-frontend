@@ -1,7 +1,7 @@
 export const m = {
   // SideMenu.vue
   Dashboard: 'Dashboard',
-  General: 'General',
+  General: 'Admin Settings',
   User: 'User',
   Announcement: 'Announcement',
   System_Config: 'System Config',

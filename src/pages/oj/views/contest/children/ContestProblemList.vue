@@ -1,14 +1,5 @@
 <template>
   <div class="contest-problem-list-elegant">
-    <!-- 页面标题区 -->
-    <div class="page-header">
-      <h1 class="page-title">
-        <span class="title-line"></span>
-        {{ $t('m.Problems_List') }}
-        <span class="title-line"></span>
-      </h1>
-      <p class="page-subtitle">Contest Problems</p>
-    </div>
 
     <!-- 问题列表面板 -->
     <div class="problem-panel">

@@ -80,10 +80,11 @@
           </Button>
         </template>
         <template v-else>
-          <Dropdown class="drop-menu" @on-click="handleRoute" placement="bottom" trigger="click">
+          <Dropdown class="drop-menu" @on-click="handleRoute" placement="bottom" trigger="hover">
             <div class="user-info">
               <img :src="profile.avatar" class="user-avatar" />
               <span class="user-name">{{ user.username }}</span>
+              <Icon type="ios-arrow-down" class="user-arrow" />
             </div>
             <Dropdown-menu slot="list">
               <Dropdown-item name="/user-home">{{$t('m.MyHome')}}</Dropdown-item>
@@ -97,7 +98,7 @@
       </div>
     </div>
     
-    <Modal v-model="modalVisible" :width="400">
+    <Modal v-model="modalVisible" :width="420" class="auth-modal">
       <div slot="header" class="modal-title">{{$t('m.Welcome_to')}} {{website.website_name_shortcut}}</div>
       <component :is="modalStatus.mode" v-if="modalVisible"></component>
       <div slot="footer" style="display: none"></div>
@@ -239,16 +240,28 @@
         
         .auth-menu {
           .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            
             &:hover {
-              background: rgba(255, 255, 255, 0.15);
+              background: rgba(255, 255, 255, 0.2);
+              box-shadow: 0 2px 12px rgba(255, 255, 255, 0.2);
             }
             
             .user-avatar {
               border-color: rgba(255, 255, 255, 0.9);
             }
+
+            &:hover .user-avatar {
+              border-color: #fff;
+              box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+            }
             
             .user-name {
               color: rgba(255, 255, 255, 0.9);
+            }
+
+            .user-arrow {
+              color: rgba(255, 255, 255, 0.7);
             }
           }
           
@@ -360,28 +373,47 @@
       .user-info {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         cursor: pointer;
-        padding: 4px 12px;
+        padding: 6px 14px;
         border-radius: 24px;
         transition: all 0.3s ease;
+        background: rgba(30, 58, 138, 0.06);
         
         &:hover {
-          background: rgba(30, 58, 138, 0.1);
+          background: rgba(30, 58, 138, 0.12);
+          box-shadow: 0 2px 12px rgba(30, 58, 138, 0.15);
+          transform: translateY(-1px);
         }
         
         .user-avatar {
-          width: 36px;
-          height: 36px;
+          width: 32px;
+          height: 32px;
           border-radius: 50%;
           object-fit: cover;
           border: 2px solid #1e3a8a;
+          transition: all 0.3s ease;
         }
-        
+
+        &:hover .user-avatar {
+          border-color: #3b82f6;
+          box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+        }
+
         .user-name {
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 600;
           color: #1e3a8a;
+        }
+
+        .user-arrow {
+          font-size: 12px;
+          color: #1e3a8a;
+          transition: transform 0.3s ease;
+        }
+
+        &:hover .user-arrow {
+          transform: rotate(180deg);
         }
       }
       
@@ -401,10 +433,66 @@
     }
   }
 
-  .modal {
-    &-title {
-      font-size: 18px;
+  .drop-menu {
+    /deep/ .ivu-select-dropdown {
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(30, 58, 138, 0.12);
+      border: 1px solid #e2e8f0;
+      padding: 6px;
+      min-width: 180px;
+    }
+
+    /deep/ .ivu-dropdown-menu {
+      border-radius: 12px;
+    }
+
+    /deep/ .ivu-dropdown-item {
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin: 2px 0;
+      font-size: 14px;
+      color: #475569;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.06), rgba(59, 130, 246, 0.06));
+        color: #1e3a8a;
+      }
+    }
+
+    /deep/ .ivu-dropdown-item-divided {
+      margin-top: 6px;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+    }
+  }
+
+  .auth-modal {
+    /deep/ .ivu-modal {
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(30, 58, 138, 0.12);
+    }
+
+    /deep/ .ivu-modal-header {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 20px 28px 16px;
+      background: linear-gradient(135deg, #f8fafc, #fff);
+    }
+
+    /deep/ .ivu-modal-body {
+      padding: 28px 28px 24px;
+    }
+
+    /deep/ .ivu-modal-close .ivu-icon-ios-close {
+      color: #94a3b8;
+      &:hover { color: #475569; }
+    }
+
+    /deep/ .modal-title {
+      font-size: 20px;
       font-weight: 600;
+      color: #1e3a8a;
     }
   }
   

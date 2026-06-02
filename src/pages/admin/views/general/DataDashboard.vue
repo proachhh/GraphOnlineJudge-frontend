@@ -14,8 +14,8 @@
 
     <div class="overview-cards">
       <div class="card overview-card">
-        <div class="card-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-          <span style="font-size:36px">👥</span>
+        <div class="card-icon" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
+          <i class="el-icon-fa-users"></i>
         </div>
         <div class="card-content">
           <div class="card-value">{{ overview.total_users || 0 }}</div>
@@ -23,8 +23,8 @@
         </div>
       </div>
       <div class="card overview-card">
-        <div class="card-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-          <span style="font-size:36px">📄</span>
+        <div class="card-icon" style="background: linear-gradient(135deg, #1e40af, #6366f1);">
+          <i class="el-icon-fa-file-text"></i>
         </div>
         <div class="card-content">
           <div class="card-value">{{ overview.total_problems || 0 }}</div>
@@ -32,8 +32,8 @@
         </div>
       </div>
       <div class="card overview-card">
-        <div class="card-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-          <span style="font-size:36px">🚀</span>
+        <div class="card-icon" style="background: linear-gradient(135deg, #1e3a8a, #2563eb);">
+          <i class="el-icon-fa-paper-plane"></i>
         </div>
         <div class="card-content">
           <div class="card-value">{{ overview.total_submissions || 0 }}</div>
@@ -41,8 +41,8 @@
         </div>
       </div>
       <div class="card overview-card">
-        <div class="card-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
-          <span style="font-size:36px">🏆</span>
+        <div class="card-icon" style="background: linear-gradient(135deg, #1e40af, #3b82f6);">
+          <i class="el-icon-fa-trophy"></i>
         </div>
         <div class="card-content">
           <div class="card-value">{{ overview.total_contests || 0 }}</div>
@@ -474,7 +474,7 @@ export default {
 
   .header-actions {
     .immersion-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
       border: none;
       border-radius: 12px;
       padding: 12px 28px;

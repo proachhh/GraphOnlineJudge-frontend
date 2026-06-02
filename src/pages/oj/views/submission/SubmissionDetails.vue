@@ -34,8 +34,14 @@
         <div class="section-header">
           <Icon type="ios-code" />
           <span>{{ $t('m.Your_Code') }}</span>
+          <Button type="text" size="small" icon="ios-copy-outline" class="copy-code-btn" @click="copyCode" :title="$t('m.Copy')"></Button>
         </div>
         <Highlight :code="submission.code" :language="submission.language" :border-color="status.color"></Highlight>
+      </div>
+
+      <div class="code-copy-bar">
+        <Button type="primary" icon="ios-copy-outline" size="large" @click="copyCode" :loading="false">{{ $t('m.Copy') + ' ' + $t('m.Code') }}</Button>
+        <Button type="success" icon="ios-send" size="large" @click="copyToProblem" class="copy-to-problem-btn">{{ $t('m.Copy_To_Problem') }}</Button>
       </div>
 
       <!-- 分享按钮 -->
@@ -54,7 +60,7 @@
       <AICard
         v-if="isFailed"
         title="智能错误分析"
-        icon="ios-bug"
+        icon="ios-help-circle"
         iconColor="#ed4014"
         btnText="智能分析错误"
         btnType="error"
@@ -65,7 +71,7 @@
       <AICard
         v-if="isAccepted"
         title="智能代码审查"
-        icon="ios-code-working"
+        icon="ios-code"
         iconColor="#19be6b"
         btnText="智能审查代码"
         btnType="success"
@@ -77,8 +83,9 @@
 
 <script>
   import api from '@oj/api'
-  import {JUDGE_STATUS} from '@/utils/constants'
+  import {JUDGE_STATUS, buildProblemCodeKey} from '@/utils/constants'
   import utils from '@/utils/utils'
+  import storage from '@/utils/storage'
   import Highlight from '@/pages/oj/components/Highlight'
   import AICard from '@/pages/oj/components/AICard'
 
@@ -141,6 +148,52 @@
       this.getSubmission()
     },
     methods: {
+      onCopy () {
+        this.$success(this.$i18n.t('m.Code_Copied'))
+      },
+      copyCode () {
+        const code = this.submission.code || ''
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(code).then(() => {
+            this.$success(this.$i18n.t('m.Code_Copied'))
+          }).catch(() => {
+            this.fallbackCopy(code)
+          })
+        } else {
+          this.fallbackCopy(code)
+        }
+      },
+      fallbackCopy (text) {
+        const ta = document.createElement('textarea')
+        ta.value = text
+        ta.style.position = 'fixed'
+        ta.style.left = '-9999px'
+        ta.style.top = '-9999px'
+        document.body.appendChild(ta)
+        ta.focus()
+        ta.select()
+        try {
+          document.execCommand('copy')
+          this.$success(this.$i18n.t('m.Code_Copied'))
+        } catch (e) {
+          this.$error(this.$i18n.t('m.Copy_Failed'))
+        }
+        document.body.removeChild(ta)
+      },
+      copyToProblem () {
+        const problemId = this.submission.problem
+        if (!problemId) {
+          this.$error(this.$i18n.t('m.Copy_Failed'))
+          return
+        }
+        storage.set(buildProblemCodeKey(problemId), {
+          code: this.submission.code || '',
+          language: this.submission.language || 'C++',
+          theme: 'solarized'
+        })
+        this.$success(this.$i18n.t('m.Copied_To_Problem'))
+        this.$router.push({ name: 'problem-details', params: { problemID: problemId } })
+      },
       fetchErrorAnalysis () {
         return api.analyzeError({ message: `我的提交(ID: ${this.submission.id})为什么错了？请帮我分析错误原因。` })
       },
@@ -357,6 +410,24 @@
     .ivu-icon {
       font-size: 20px;
     }
+
+    .copy-code-btn {
+      margin-left: auto;
+      font-size: 16px;
+      color: #64748b;
+      &:hover { color: #1e3a8a; }
+    }
+  }
+}
+
+.code-copy-bar {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+
+  .copy-to-problem-btn {
+    margin-left: 0;
   }
 }
 

@@ -308,8 +308,10 @@ export default {
                 steps.push(data.text)
                 this.$set(chatState.messages[loadingIdx], 'thinkingSteps', steps)
                 this.$set(chatState.messages[loadingIdx], 'currentStepIndex', steps.length)
+                await this.$nextTick()
               } else if (data.event === 'done') {
                 chatState.messages[loadingIdx].allStepsDone = true
+                await this.$nextTick()
               } else if (data.event === 'result') {
                 const agentData = data.data || data
                 const formatted = formatAgentResponse(agentData)
@@ -325,6 +327,7 @@ export default {
                   displayData: display.displayData,
                   time: this.getCurrentTime()
                 })
+                await this.$nextTick()
               } else if (data.event === 'chunk') {
                 if (chatState.messages[loadingIdx].role === 'loading') {
                   const steps = chatState.messages[loadingIdx].thinkingSteps || []
@@ -341,6 +344,7 @@ export default {
                 } else {
                   chatState.messages[loadingIdx].content += data.text
                 }
+                await this.$nextTick()
               }
               this.scrollToBottom()
             }
@@ -355,23 +359,69 @@ export default {
       }
     },
     async _sendLLMMessage (text, loadingIdx) {
-      const apiUrl = '/api/spark/chat/'
+      const apiUrl = '/api/spark/chat/stream/'
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, model: chatState.aiModel }),
         signal: this.abortController ? this.abortController.signal : undefined
       })
-      chatState.messages.splice(loadingIdx, 1)
-      if (response.ok) {
-        const data = await response.json()
-        chatState.messages.push({
-          role: 'assistant',
-          content: data.answer || data.reply || data.message || this.$t('m.No_Reply'),
-          time: this.getCurrentTime()
-        })
-      } else {
+      if (!response.ok) {
+        chatState.messages.splice(loadingIdx, 1)
         chatState.messages.push({ role: 'assistant', content: this.$t('m.Request_Failed'), time: this.getCurrentTime() })
+        return
+      }
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let fullContent = ''
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.slice(6))
+              if (data.event === 'chunk') {
+                fullContent += data.text
+                if (chatState.messages[loadingIdx] && chatState.messages[loadingIdx].role === 'loading') {
+                  const steps = chatState.messages[loadingIdx].thinkingSteps || []
+                  chatState.messages[loadingIdx] = {
+                    role: 'assistant',
+                    content: fullContent,
+                    time: this.getCurrentTime(),
+                    streaming: true,
+                    streamDone: false,
+                    thinkingSteps: steps
+                  }
+                } else if (chatState.messages[loadingIdx]) {
+                  chatState.messages[loadingIdx].content = fullContent
+                }
+                await this.$nextTick()
+                this.scrollToBottom()
+              } else if (data.event === 'done') {
+                if (chatState.messages[loadingIdx]) {
+                  chatState.messages[loadingIdx].streaming = false
+                  chatState.messages[loadingIdx].streamDone = true
+                }
+                await this.$nextTick()
+              }
+            }
+          }
+        }
+      } finally {
+        if (chatState.messages[loadingIdx]) {
+          chatState.messages[loadingIdx].streamDone = true
+          chatState.messages[loadingIdx].streaming = false
+        }
+        reader.releaseLock()
       }
     },
     scrollToBottom () {

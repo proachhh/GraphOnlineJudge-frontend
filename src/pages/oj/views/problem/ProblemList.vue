@@ -219,17 +219,23 @@ export default {
         },
         {
           title: this.$i18n.t('m.Title'),
-          minWidth: 260,
+          width: 280,
           render: (h, params) => {
-            return h('div', {
+            const titleEl = h('div', {
               class: 'problem-title',
-              style: { 'white-space': 'normal', 'word-break': 'break-word' },
               on: {
                 click: () => {
                   this.$router.push({ name: 'problem-details', params: { problemID: params.row._id } })
                 }
               }
             }, params.row.title)
+            return h('Poptip', {
+              props: {
+                trigger: 'hover',
+                placement: 'top',
+                transfer: true
+              }
+            }, [titleEl, h('div', { slot: 'content' }, params.row.title)])
           }
         },
         {
@@ -330,19 +336,25 @@ export default {
       })
     },
     getProblemList () {
-      let offset = (this.query.page - 1) * this.query.limit
       this.loadings.table = true
-      api.getProblemList(offset, this.limit, this.query).then(res => {
+      api.getProblemList(0, 10000, this.query).then(res => {
         this.loadings.table = false
         this.total = res.data.data.total
-        this.problemList = (res.data.data.results || []).slice().sort((a, b) => {
+        const sorted = (res.data.data.results || []).slice().sort((a, b) => {
           const na = parseInt(a._id), nb = parseInt(b._id)
           if (!isNaN(na) && !isNaN(nb)) return na - nb
           const sa = String(a._id || ''), sb = String(b._id || '')
+          const ma = sa.match(/\d+/), mb = sb.match(/\d+/)
+          if (ma && mb) {
+            const diff = Number(ma[0]) - Number(mb[0])
+            if (diff !== 0) return diff
+          }
           return sa.localeCompare(sb)
         })
+        const start = (this.query.page - 1) * this.query.limit
+        this.problemList = sorted.slice(start, start + this.query.limit)
         if (this.isAuthenticated) {
-          this.addStatusColumn(this.problemTableColumns, res.data.data.results)
+          this.addStatusColumn(this.problemTableColumns, sorted)
         }
       }, res => {
         this.loadings.table = false
@@ -518,10 +530,10 @@ export default {
 
 <style scoped lang="less">
 .problem-list-elegant {
-  max-width: 1400px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 20px;
-  font-size: 15px;
+  padding: 24px 24px 40px;
+  font-size: 16px;
 
   // 左侧面板卡片样式（白色背景、圆角、阴影）
   .problem-panel {
@@ -554,11 +566,11 @@ export default {
       gap: 16px;
 
       .filter-btn {
-        font-size: 14px;
+        font-size: 15px;
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 16px;
+        padding: 10px 18px;
         background: white;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
@@ -575,7 +587,7 @@ export default {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 14px;
+        font-size: 15px;
         cursor: pointer;
       }
     }
@@ -603,14 +615,14 @@ export default {
     }
   }
 
-  // 表格样式（字体增大，行高增加，无省略）
+  // 表格样式
   .problem-table {
     /deep/ .ivu-table {
-      font-size: 15px;
+      font-size: 16px;
 
       th {
-        font-size: 14px;
-        padding: 12px 8px;
+        font-size: 15px;
+        padding: 14px 12px;
         background: #f8fafc;
         color: #475569;
         font-weight: 600;
@@ -619,10 +631,10 @@ export default {
       }
 
       td {
-        padding: 10px 8px;
+        padding: 14px 12px;
         border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
-        line-height: 1.5;
+        line-height: 1.6;
       }
 
       tr:hover td {
@@ -632,25 +644,27 @@ export default {
   }
 
   .problem-title {
+    font-size: 16px;
     color: #334155;
     cursor: pointer;
     font-weight: 500;
-    word-break: break-word;
-    white-space: normal;
-    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.5;
     &:hover {
       color: #1e3a8a;
     }
   }
 
   .level-tag {
-    font-size: 13px;
-    padding: 4px 12px;
+    font-size: 14px;
+    padding: 5px 14px;
     border-radius: 14px;
   }
 
   .stat-number {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
   }
 

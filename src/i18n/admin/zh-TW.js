@@ -1,7 +1,7 @@
 export const m = {
   // SideMenu.vue
   Dashboard: '儀表板',
-  General: '基本設定',
+  General: '管理員設定',
   User: '使用者管理',
   Announcement: '公告管理',
   System_Config: '系統設定',

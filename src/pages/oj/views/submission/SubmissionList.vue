@@ -49,7 +49,8 @@
                :data="submissions"
                :loading="loadingTable"
                class="submission-table"
-               disabled-hover></Table>
+               disabled-hover
+               @on-row-click="handleRowClick"></Table>
       </div>
 
       <!-- 分页 -->
@@ -108,16 +109,10 @@ export default {
               style: {
                 'font-family': 'monospace',
                 'font-size': '11px',
-                'color': params.row.show_link ? '#1e3a8a' : '#64748b',
-                'cursor': params.row.show_link ? 'pointer' : 'default',
+                'color': '#1e3a8a',
                 'font-weight': '500',
                 'white-space': 'nowrap'
-              },
-              on: params.row.show_link ? {
-                click: () => {
-                  this.$router.push('/status/' + params.row.id)
-                }
-              } : {}
+              }
             }, params.row.id.slice(0, 8))
           }
         },
@@ -151,7 +146,8 @@ export default {
                 'font-size': '13px'
               },
               on: {
-                click: () => {
+                click: (e) => {
+                  e.stopPropagation()
                   if (this.contestID) {
                     this.$router.push({
                       name: 'contest-problem-details',
@@ -231,7 +227,8 @@ export default {
                 'display': 'inline-block'
               },
               on: {
-                click: () => {
+                click: (e) => {
+                  e.stopPropagation()
                   this.$router.push({
                     name: 'user-home',
                     query: { username: params.row.username }
@@ -294,6 +291,7 @@ export default {
         let data = res.data.data
         for (let v of data.results) {
           v.loading = false
+          v.show_link = true
         }
         this.adjustRejudgeColumn()
         this.loadingTable = false
@@ -302,6 +300,9 @@ export default {
       }).catch(() => {
         this.loadingTable = false
       })
+    },
+    handleRowClick (row) {
+      this.$router.push('/status/' + row.id)
     },
     changeRoute () {
       let query = utils.filterEmptyValue(this.buildQuery())
@@ -584,6 +585,10 @@ export default {
       border-bottom: 1px solid #f1f5f9;
       height: 48px;
       vertical-align: middle;
+    }
+
+    tr {
+      cursor: pointer;
     }
 
     tr:hover td {

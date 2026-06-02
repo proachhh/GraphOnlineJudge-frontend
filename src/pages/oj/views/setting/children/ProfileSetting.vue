@@ -9,7 +9,7 @@
               :before-upload="handleSelectFile">
         <div style="padding: 30px 0">
           <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
-          <p>Drop here, or click to select manually</p>
+          <p>{{$t('m.Drop_Or_Click')}}</p>
         </div>
       </Upload>
     </template>
@@ -52,13 +52,13 @@
       </div>
     </template>
     <Modal v-model="uploadModalVisible"
-           title="Upload the avatar">
+           :title="$t('m.Upload_Avatar')">
       <div class="upload-modal">
-        <p class="notice">Your avatar will be set to:</p>
+        <p class="notice">{{$t('m.Avatar_Will_Be')}}</p>
         <img :src="uploadImgSrc"/>
       </div>
       <div slot="footer">
-        <Button @click="uploadAvatar" :loading="loadingUploadBtn">upload</Button>
+        <Button @click="uploadAvatar" :loading="loadingUploadBtn">{{$t('m.Upload')}}</Button>
       </div>
     </Modal>
 
@@ -66,33 +66,33 @@
     <Form ref="formProfile" :model="formProfile">
       <Row type="flex" :gutter="30" justify="space-around">
         <Col :span="11">
-          <FormItem label="Real Name">
+          <FormItem :label="$t('m.Real_Name')">
             <Input v-model="formProfile.real_name"/>
           </FormItem>
-          <Form-item label="School">
+          <Form-item :label="$t('m.School')">
             <Input v-model="formProfile.school"/>
           </Form-item>
-          <Form-item label="Major">
+          <Form-item :label="$t('m.Major')">
             <Input v-model="formProfile.major"/>
           </Form-item>
-          <FormItem label="Language">
+          <FormItem :label="$t('m.Language')">
             <Select v-model="formProfile.language">
               <Option v-for="lang in languages" :key="lang.value" :value="lang.value">{{lang.label}}</Option>
             </Select>
           </FormItem>
           <Form-item>
-            <Button type="primary" @click="updateProfile" :loading="loadingSaveBtn">Save All</Button>
+            <Button type="primary" @click="updateProfile" :loading="loadingSaveBtn">{{$t('m.Save_All')}}</Button>
           </Form-item>
         </Col>
 
         <Col :span="11">
-          <Form-item label="Mood">
+          <Form-item :label="$t('m.Mood')">
             <Input v-model="formProfile.mood"/>
           </Form-item>
-          <Form-item label="Blog">
+          <Form-item :label="$t('m.Blog')">
             <Input v-model="formProfile.blog"/>
           </Form-item>
-          <Form-item label="Github">
+          <Form-item :label="$t('m.Github')">
             <Input v-model="formProfile.github"/>
           </Form-item>
         </Col>
@@ -148,7 +148,7 @@
       checkFileType (file) {
         if (!/\.(gif|jpg|jpeg|png|bmp|GIF|JPG|PNG)$/.test(file.name)) {
           this.$Notice.warning({
-            title: 'File type not support',
+            title: this.$i18n.t('m.File_Type_Not_Support'),
             desc: 'The format of ' + file.name + ' is incorrect ，please choose image only.'
           })
           return false
@@ -156,10 +156,9 @@
         return true
       },
       checkFileSize (file) {
-        // max size is 2MB
         if (file.size > 2 * 1024 * 1024) {
           this.$Notice.warning({
-            title: 'Exceed max size limit',
+            title: this.$i18n.t('m.Exceed_Max_Size'),
             desc: 'File ' + file.name + ' is too big, you can upload a image up to 2MB in size'
           })
           return false
@@ -190,7 +189,7 @@
       },
       reselect () {
         this.$Modal.confirm({
-          content: 'Are you sure to disgard the changes?',
+          content: this.$i18n.t('m.Discard_Changes'),
           onOk: () => {
             this.avatarOption.imgSrc = ''
           }
@@ -215,7 +214,7 @@
             headers: {'content-type': 'multipart/form-data'}
           }).then(res => {
             this.loadingUploadBtn = false
-            this.$success('Successfully set new avatar')
+            this.$success(this.$i18n.t('m.Set_New_Avatar_Success'))
             this.uploadModalVisible = false
             this.avatarOption.imgSrc = ''
             this.$store.dispatch('getProfile')
@@ -228,7 +227,7 @@
         this.loadingSaveBtn = true
         let updateData = utils.filterEmptyValue(Object.assign({}, this.formProfile))
         api.updateProfile(updateData).then(res => {
-          this.$success('Success')
+          this.$success(this.$i18n.t('m.Success'))
           this.$store.commit(types.CHANGE_PROFILE, {profile: res.data.data})
           this.loadingSaveBtn = false
         }, _ => {

@@ -21,7 +21,7 @@
           line: true,
           foldGutter: true,
           gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
-          autofocus: true
+          autofocus: false
         }
       }
     },

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="login-wrap">
     <Form ref="formLogin" :model="formLogin" :rules="ruleLogin">
       <FormItem prop="username">
         <Input type="text" v-model="formLogin.username" :placeholder="$t('m.LoginUsername')" size="large" @on-enter="handleLogin">
@@ -12,21 +12,23 @@
         </Input>
       </FormItem>
       <FormItem prop="tfa_code" v-if="tfaRequired">
-        <Input v-model="formLogin.tfa_code" :placeholder="$t('m.TFA_Code')">
+        <Input v-model="formLogin.tfa_code" :placeholder="$t('m.TFA_Code')" size="large">
         <Icon type="ios-lightbulb-outline" slot="prepend"></Icon>
         </Input>
       </FormItem>
     </Form>
-    <div class="footer">
+    <div class="login-footer">
       <Button
         type="primary"
         @click="handleLogin"
-        class="btn" long
+        class="login-btn" long
         :loading="btnLoginLoading">
         {{$t('m.UserLogin')}}
       </Button>
-      <a v-if="website.allow_register" @click.stop="handleBtnClick('register')">{{$t('m.No_Account')}}</a>
-      <a @click.stop="goResetPassword" style="float: right">{{$t('m.Forget_Password')}}</a>
+      <div class="link-row">
+        <a v-if="website.allow_register" @click.stop="handleBtnClick('register')">{{$t('m.No_Account')}}</a>
+        <a @click.stop="goResetPassword">{{$t('m.Forget_Password')}}</a>
+      </div>
     </div>
   </div>
 </template>
@@ -112,16 +114,80 @@
 </script>
 
 <style scoped lang="less">
-  .footer {
-    overflow: auto;
-    margin-top: 20px;
-    margin-bottom: -15px;
-    text-align: left;
-    .btn {
-      margin: 0 0 15px 0;
-      &:last-child {
-        margin: 0;
+.login-wrap {
+  padding: 4px 0 0;
+
+  /deep/ .ivu-input-large {
+    height: 44px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+
+    &:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      background: #fff;
+    }
+  }
+
+  /deep/ .ivu-input-group-prepend {
+    border-radius: 10px 0 0 10px;
+    border: 2px solid #e2e8f0;
+    border-right: none;
+    background: #f1f5f9;
+
+    .ivu-icon {
+      color: #64748b;
+    }
+  }
+
+  /deep/ .ivu-form-item {
+    margin-bottom: 18px;
+  }
+
+  /deep/ .ivu-form-item-error .ivu-input {
+    border-color: #ed4014;
+  }
+}
+
+.login-footer {
+  margin-top: 8px;
+
+  .login-btn {
+    height: 44px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    border: none;
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.3);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: linear-gradient(135deg, #1e40af, #2563eb);
+      box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+      transform: translateY(-1px);
+    }
+  }
+
+  .link-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+
+    a {
+      font-size: 13px;
+      color: #64748b;
+      cursor: pointer;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #1e3a8a;
       }
     }
   }
+}
 </style>

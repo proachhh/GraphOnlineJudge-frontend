@@ -171,6 +171,11 @@ export default {
       data
     })
   },
+  deleteContest (id, extra = {}) {
+    return ajax('admin/contest', 'delete', {
+      params: { id, ...extra }
+    })
+  },
   getContestList (offset, limit, keyword) {
     let params = {paging: true, offset, limit}
     if (keyword) {
@@ -347,6 +352,19 @@ export default {
       params: {
         user_id: userId
       }
+    })
+  },
+  getFeedbackList (params) {
+    return ajax('admin/feedback', 'get', { params })
+  },
+  updateFeedback (feedbackId, data) {
+    return ajax('admin/feedback', 'put', {
+      data: { feedback_id: feedbackId, ...data }
+    })
+  },
+  deleteFeedback (feedbackId) {
+    return ajax('admin/feedback', 'delete', {
+      params: { feedback_id: feedbackId }
     })
   },
 }

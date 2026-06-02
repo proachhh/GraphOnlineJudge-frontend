@@ -10,7 +10,7 @@
         <img src="../../../assets/logo3.png" alt="oj admin"/>
       </div>
       <el-menu-item index="/"><i class="el-icon-fa-dashboard"></i>{{$t('m.Dashboard')}}</el-menu-item>
-      <el-menu-item index="/data-dashboard" v-if="isSuperAdmin"><i class="el-icon-fa-bar-chart"></i>数据看板</el-menu-item>
+      <el-menu-item index="/data-dashboard" v-if="isAdminRole"><i class="el-icon-fa-bar-chart"></i>数据看板</el-menu-item>
       <el-submenu v-if="isSuperAdmin" index="general">
         <template slot="title"><i class="el-icon-menu"></i>{{$t('m.General')}}</template>
         <el-menu-item index="/user">{{$t('m.User')}}</el-menu-item>
@@ -18,6 +18,7 @@
         <el-menu-item index="/conf">{{$t('m.System_Config')}}</el-menu-item>
         <el-menu-item index="/judge-server">{{$t('m.Judge_Server')}}</el-menu-item>
         <el-menu-item index="/prune-test-case">{{$t('m.Prune_Test_Case')}}</el-menu-item>
+        <el-menu-item index="/feedback">{{$t('m.Feedback')}}</el-menu-item>
       </el-submenu>
       <el-submenu index="problem" v-if="hasProblemPermission">
         <template slot="title"><i class="el-icon-fa-bars"></i>{{$t('m.Problem')}}</template>
@@ -61,7 +62,7 @@
       }
     },
     computed: {
-      ...mapGetters(['user', 'isSuperAdmin', 'hasProblemPermission'])
+      ...mapGetters(['user', 'isSuperAdmin', 'isAdminRole', 'hasProblemPermission'])
     },
     watch: {
       '$route' () {

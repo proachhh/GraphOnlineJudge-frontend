@@ -14,16 +14,22 @@
       </div>
       <div class="sidebar-content">
         <div class="menu-item" @click.stop="openAIChat">
-          <div class="menu-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+          <div class="menu-icon" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
             <Icon type="chatbubble-working" size="18" color="#fff" />
           </div>
           <span class="menu-text">AI Chat</span>
         </div>
         <div class="menu-item" @click.stop="openCodeEditor">
-          <div class="menu-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+          <div class="menu-icon" style="background: linear-gradient(135deg, #1e40af, #6366f1);">
             <Icon type="ios-code" size="18" color="#fff" />
           </div>
           <span class="menu-text">{{ $t('m.Code_Editor') }}</span>
+        </div>
+        <div class="menu-item" @click.stop="openFeedback">
+          <div class="menu-icon" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
+            <Icon type="ios-help-circle" size="18" color="#fff" />
+          </div>
+          <span class="menu-text">{{ $t('m.Feedback') }}</span>
         </div>
       </div>
       </template>
@@ -41,6 +47,7 @@
       `"
     >
       <div class="panel-header" @mousedown="startDrag($event, 'ai')">
+        <Icon type="chatbubble-working" size="18" color="#3b82f6" style="margin-right: 6px;" />
         <h3>{{ aiFullName }}</h3>
         <div class="panel-actions">
           <Select v-model="chatState.aiModel" size="small" class="model-select" @on-change="onModelChange">
@@ -122,6 +129,7 @@
       `"
     >
       <div class="panel-header" @mousedown="startDrag($event, 'editor')">
+        <Icon type="ios-code" size="18" color="#3b82f6" style="margin-right: 6px;" />
         <h3>{{ $t('m.Code_Editor') }}</h3>
         <div class="panel-actions">
           <Button type="text" size="small" @click="openFullscreen('editor')" :title="$t('m.Fullscreen')">
@@ -168,6 +176,40 @@
       <div class="resize-handle resize-bottom" @mousedown="startResize($event, 'editor', 'bottom')"></div>
       <div class="resize-handle resize-corner" @mousedown="startResize($event, 'editor', 'corner')"></div>
     </div>
+
+    <!-- 反馈面板 -->
+    <div
+      v-if="showFeedback"
+      class="side-panel feedback-panel"
+      :style="`
+        left: ${feedbackPanelPos.x}px !important;
+        top: ${feedbackPanelPos.y}px !important;
+        width: ${feedbackPanelSize.w}px !important;
+        height: ${feedbackPanelSize.h}px !important;
+      `"
+    >
+      <div class="panel-header" @mousedown="startDrag($event, 'feedback')">
+        <Icon type="ios-help-circle" size="18" color="#3b82f6" style="margin-right: 6px;" />
+        <h3>{{ $t('m.Feedback') }}</h3>
+        <div class="panel-actions">
+          <Button type="text" size="small" @click="closeFeedback">
+            <Icon type="ios-close" size="16" color="#fff" />
+          </Button>
+        </div>
+      </div>
+      <div class="panel-content feedback-content">
+        <div class="feedback-form">
+          <Input v-model="feedbackTitle" :placeholder="$t('m.Feedback_Title')" class="feedback-title-input" />
+          <textarea ref="feedbackEditor" class="feedback-editor-textarea"></textarea>
+          <Button type="primary" long @click="submitFeedback" :loading="submittingFeedback" :disabled="!feedbackTitle.trim()">
+            <Icon type="ios-send" /> {{ $t('m.Submit') }}
+          </Button>
+        </div>
+      </div>
+      <div class="resize-handle resize-right" @mousedown="startResize($event, 'feedback', 'right')"></div>
+      <div class="resize-handle resize-bottom" @mousedown="startResize($event, 'feedback', 'bottom')"></div>
+      <div class="resize-handle resize-corner" @mousedown="startResize($event, 'feedback', 'corner')"></div>
+    </div>
   </div>
 </template>
 
@@ -184,6 +226,9 @@ import 'codemirror/theme/material.css'
 import 'codemirror/mode/clike/clike.js'
 import 'codemirror/mode/python/python.js'
 import 'codemirror/mode/javascript/javascript.js'
+
+import Simditor from 'tar-simditor'
+import 'tar-simditor/styles/simditor.css'
 
 export default {
   name: 'GlobalSidebar',
@@ -228,6 +273,13 @@ export default {
       pollingTimeout: null,
 
       editorInput: '',   // 新增：用户输入
+
+      showFeedback: false,
+      feedbackTitle: '',
+      feedbackEditor: null,
+      submittingFeedback: false,
+      feedbackPanelPos: { x: 180, y: 80 },
+      feedbackPanelSize: { w: 420, h: 480 },
     }
   },
   computed: {
@@ -319,6 +371,7 @@ export default {
       if (this.isCollapsed) {
         this.showAIChat = false
         this.showCodeEditor = false
+        this.showFeedback = false
       }
     },
 
@@ -400,6 +453,7 @@ export default {
       this.showAIChat = !this.showAIChat
       if (this.showAIChat) {
         this.showCodeEditor = false
+        this.showFeedback = false
       }
     },
 
@@ -407,6 +461,7 @@ export default {
       if (this.isCollapsed) {
         this.isCollapsed = false
       }
+      this.restoreEditorState()
       const sidebarRight = this.sidebarPos.x + 160 + 8
       this.editorPanelPos = {
         x: this.sidebarSnapped === 'left' ? sidebarRight : Math.max(0, this.sidebarPos.x - 396),
@@ -416,6 +471,7 @@ export default {
       this.showCodeEditor = !this.showCodeEditor
       if (this.showCodeEditor) {
         this.showAIChat = false
+        this.showFeedback = false
       }
     },
 
@@ -427,6 +483,142 @@ export default {
       this.showCodeEditor = false
       this.clearPollingTimer()
       this.runningCode = false
+    },
+
+    openFeedback () {
+      if (this.isCollapsed) {
+        this.isCollapsed = false
+      }
+      const sidebarRight = this.sidebarPos.x + 160 + 8
+      this.feedbackPanelPos = {
+        x: this.sidebarSnapped === 'left' ? sidebarRight : Math.max(0, this.sidebarPos.x - 436),
+        y: Math.max(0, this.sidebarPos.y)
+      }
+      this.feedbackPanelSize = { w: 420, h: 480 }
+      this.showFeedback = !this.showFeedback
+      if (this.showFeedback) {
+        this.showAIChat = false
+        this.showCodeEditor = false
+        this.$nextTick(() => {
+          this.initFeedbackEditor()
+        })
+      }
+    },
+
+    closeFeedback () {
+      this.showFeedback = false
+      if (this._feedbackImgObserver) {
+        this._feedbackImgObserver.disconnect()
+        this._feedbackImgObserver = null
+      }
+      if (this.feedbackEditor) {
+        this.feedbackEditor.destroy()
+        this.feedbackEditor = null
+      }
+    },
+
+    initFeedbackEditor () {
+      if (this.feedbackEditor) return
+      const textarea = this.$refs.feedbackEditor
+      if (!textarea) return
+      this.feedbackEditor = new Simditor({
+        textarea: textarea,
+        toolbar: ['title', 'bold', 'italic', 'underline', 'fontScale', 'color', 'ol', 'ul', '|', 'blockquote', 'code', 'link', 'table', 'image', 'hr', '|', 'indent', 'outdent', 'alignment'],
+        pasteImage: true,
+        upload: {
+          url: '/api/admin/upload_image/',
+          fileKey: 'image',
+          connectionCount: 3
+        }
+      })
+      this._bindFeedbackImageResize()
+    },
+
+    _bindFeedbackImageResize () {
+      const editor = this.feedbackEditor
+      if (!editor) return
+      const body = editor.body
+      if (!body) return
+      this._feedbackImgObserver = new MutationObserver((mutations) => {
+        mutations.forEach((m) => {
+          m.addedNodes.forEach((node) => {
+            if (node.tagName === 'IMG') {
+              this._handleNewImage(node, body)
+            } else if (node.querySelectorAll) {
+              node.querySelectorAll('img').forEach((img) => {
+                this._handleNewImage(img, body)
+              })
+            }
+          })
+        })
+      })
+      body.addEventListener('load', (e) => {
+        if (e.target && e.target.tagName === 'IMG' && e.target.isConnected) {
+          this._handleNewImage(e.target, body)
+        }
+      }, true)
+      this._feedbackImgObserver.observe(body, { childList: true, subtree: true })
+    },
+
+    _handleNewImage (img, container) {
+      if (img._feedbackResized) return
+      if (img.complete) {
+        this._resizeImageToFit(img, container)
+        img._feedbackResized = true
+      } else {
+        img.addEventListener('load', () => {
+          this._resizeImageToFit(img, container)
+          img._feedbackResized = true
+        }, { once: true })
+      }
+    },
+
+    _resizeImageToFit (img, container) {
+      const containerWidth = container.clientWidth - 24
+      if (img.naturalWidth > containerWidth) {
+        const canvas = document.createElement('canvas')
+        const ratio = containerWidth / img.naturalWidth
+        canvas.width = containerWidth
+        canvas.height = Math.round(img.naturalHeight * ratio)
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        img.src = canvas.toDataURL('image/png')
+      }
+    },
+
+    submitFeedback () {
+      if (!this.feedbackTitle.trim() || this.submittingFeedback) return
+      this.submittingFeedback = true
+      const content = this.feedbackEditor ? this.feedbackEditor.getValue() : ''
+      fetch('/api/feedback/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': this.getCsrfToken()
+        },
+        body: JSON.stringify({
+          title: this.feedbackTitle.trim(),
+          content: content
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error !== null) {
+          this.$Message.error(data.data || '提交失败')
+        } else {
+          this.$Message.success('反馈已提交，感谢你的反馈！')
+          this.feedbackTitle = ''
+          if (this.feedbackEditor) {
+            this.feedbackEditor.setValue('')
+          }
+          this.closeFeedback()
+        }
+        this.submittingFeedback = false
+      })
+      .catch(() => {
+        this.$Message.error('提交失败，请稍后重试')
+        this.submittingFeedback = false
+      })
     },
 
     clearCode () {
@@ -442,9 +634,32 @@ export default {
         this.closeAIChat()
         this.$router.push({ name: 'ai-chat-fullscreen' })
       } else if (type === 'editor') {
+        this.saveEditorState()
         this.closeCodeEditor()
         this.$router.push({ name: 'code-editor-fullscreen' })
       }
+    },
+
+    saveEditorState () {
+      localStorage.setItem('free-code-editor', JSON.stringify({
+        code: this.editorCode,
+        language: this.editorLanguage,
+        theme: this.editorTheme,
+        input: this.editorInput || ''
+      }))
+    },
+
+    restoreEditorState () {
+      try {
+        const raw = localStorage.getItem('free-code-editor')
+        if (raw) {
+          const state = JSON.parse(raw)
+          if (state.code) this.editorCode = state.code
+          if (state.language) this.editorLanguage = state.language === 'Python3' ? 'Python' : state.language
+          if (state.theme) this.editorTheme = state.theme
+          if (state.input !== undefined) this.editorInput = state.input
+        }
+      } catch (e) {}
     },
 
     onModelChange () {
@@ -482,37 +697,10 @@ export default {
       this.aiAbortController = new AbortController()
 
       try {
-        const apiUrl = chatState.aiModel === 'agent' ? '/api/agent/chat/' : '/api/spark/chat/'
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, model: chatState.aiModel }),
-          signal: this.aiAbortController.signal
-        })
-
-        chatState.messages.splice(loadingIdx, 1)
-
-        if (response.ok) {
-          const result = await response.json()
-          if (chatState.aiModel === 'agent') {
-            const agentData = result.data || result
-            const formatted = formatAgentResponse(agentData)
-            const display = extractAgentDisplay(agentData)
-            chatState.messages.push({
-              role: 'assistant',
-              content: formatted.content || this.$t('m.No_Reply'),
-              agentName: agentData.agent || '',
-              thinkingSteps: agentData.thinking_steps || [],
-              allStepsDone: !!(agentData.thinking_steps && agentData.thinking_steps.length),
-              displayType: display.displayType,
-              displayData: display.displayData
-            })
-          } else {
-            const data = result
-            chatState.messages.push({ role: 'assistant', content: data.answer || data.reply || data.message || this.$t('m.No_Reply') })
-          }
+        if (chatState.aiModel === 'agent') {
+          await this._sendAgentStream(text, loadingIdx)
         } else {
-          chatState.messages.push({ role: 'assistant', content: this.$t('m.Request_Failed') })
+          await this._sendLLMStream(text, loadingIdx)
         }
       } catch (e) {
         if (e && e.name !== 'AbortError') {
@@ -525,6 +713,159 @@ export default {
         this.aiSending = false
         this.aiAbortController = null
         this.scrollToBottom()
+      }
+    },
+
+    async _sendAgentStream (text, loadingIdx) {
+      const response = await fetch('/api/agent/chat/stream/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+        signal: this.aiAbortController.signal
+      })
+
+      if (!response.ok) {
+        chatState.messages.splice(loadingIdx, 1)
+        chatState.messages.push({ role: 'assistant', content: this.$t('m.Request_Failed') })
+        return
+      }
+
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('text/event-stream')) {
+        chatState.messages[loadingIdx].streaming = true
+        await this._handleAgentSSE(response, loadingIdx)
+      } else {
+        chatState.messages.splice(loadingIdx, 1)
+        const result = await response.json()
+        const agentData = result.data || result
+        const formatted = formatAgentResponse(agentData)
+        const display = extractAgentDisplay(agentData)
+        chatState.messages.push({
+          role: 'assistant',
+          content: formatted.content || this.$t('m.No_Reply'),
+          agentName: agentData.agent || '',
+          thinkingSteps: agentData.thinking_steps || [],
+          allStepsDone: true,
+          displayType: display.displayType,
+          displayData: display.displayData
+        })
+      }
+    },
+
+    async _handleAgentSSE (response, loadingIdx) {
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.slice(6))
+              if (data.event === 'step') {
+                const steps = chatState.messages[loadingIdx].thinkingSteps || []
+                steps.push(data.text)
+                this.$set(chatState.messages[loadingIdx], 'thinkingSteps', steps)
+                this.$set(chatState.messages[loadingIdx], 'currentStepIndex', steps.length)
+                await this.$nextTick()
+              } else if (data.event === 'done') {
+                chatState.messages[loadingIdx].allStepsDone = true
+                await this.$nextTick()
+              } else if (data.event === 'result') {
+                const agentData = data.data || data
+                const formatted = formatAgentResponse(agentData)
+                const display = extractAgentDisplay(agentData)
+                chatState.messages.splice(loadingIdx, 1)
+                chatState.messages.push({
+                  role: 'assistant',
+                  content: formatted.content,
+                  agentName: agentData.agent || '',
+                  thinkingSteps: agentData.thinking_steps || [],
+                  allStepsDone: true,
+                  displayType: display.displayType,
+                  displayData: display.displayData
+                })
+                await this.$nextTick()
+              }
+              this.scrollToBottom()
+            }
+          }
+        }
+      } finally {
+        if (chatState.messages[loadingIdx]) {
+          chatState.messages[loadingIdx].streamDone = true
+          chatState.messages[loadingIdx].streaming = false
+        }
+        reader.releaseLock()
+      }
+    },
+
+    async _sendLLMStream (text, loadingIdx) {
+      const response = await fetch('/api/spark/chat/stream/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, model: chatState.aiModel }),
+        signal: this.aiAbortController.signal
+      })
+
+      if (!response.ok) {
+        chatState.messages.splice(loadingIdx, 1)
+        chatState.messages.push({ role: 'assistant', content: this.$t('m.Request_Failed') })
+        return
+      }
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let fullContent = ''
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.slice(6))
+              if (data.event === 'chunk') {
+                fullContent += data.text
+                if (chatState.messages[loadingIdx].role === 'loading') {
+                  chatState.messages[loadingIdx] = {
+                    role: 'assistant',
+                    content: fullContent,
+                    streaming: true,
+                    streamDone: false
+                  }
+                } else {
+                  chatState.messages[loadingIdx].content = fullContent
+                }
+                await this.$nextTick()
+                this.scrollToBottom()
+              } else if (data.event === 'done') {
+                chatState.messages[loadingIdx].streaming = false
+                chatState.messages[loadingIdx].streamDone = true
+                await this.$nextTick()
+              }
+            }
+          }
+        }
+      } finally {
+        if (chatState.messages[loadingIdx]) {
+          chatState.messages[loadingIdx].streamDone = true
+          chatState.messages[loadingIdx].streaming = false
+        }
+        reader.releaseLock()
       }
     },
 
@@ -547,7 +888,8 @@ export default {
     startDrag (e, panel) {
       if (e.target.closest('.panel-actions')) return
       e.preventDefault()
-      const pos = panel === 'ai' ? this.aiPanelPos : this.editorPanelPos
+      const posMap = { ai: this.aiPanelPos, editor: this.editorPanelPos, feedback: this.feedbackPanelPos }
+      const pos = posMap[panel] || this.editorPanelPos
       this.panelDragPending = panel
       this.dragStart = { x: e.clientX, y: e.clientY, panelX: pos.x, panelY: pos.y }
       this.panelDragTimer = setTimeout(() => {
@@ -575,7 +917,8 @@ export default {
         this.activatePanelDrag()
       }
       if (this.dragging) {
-        const pos = this.dragging === 'ai' ? this.aiPanelPos : this.editorPanelPos
+        const posMap = { ai: this.aiPanelPos, editor: this.editorPanelPos, feedback: this.feedbackPanelPos }
+        const pos = posMap[this.dragging] || this.editorPanelPos
         pos.x = Math.max(0, this.dragStart.panelX + dx)
         pos.y = Math.max(0, this.dragStart.panelY + dy)
       }
@@ -595,8 +938,10 @@ export default {
     startResize (e, panel, direction) {
       e.preventDefault()
       e.stopPropagation()
-      const size = panel === 'ai' ? this.aiPanelSize : this.editorPanelSize
-      const pos = panel === 'ai' ? this.aiPanelPos : this.editorPanelPos
+      const sizeMap = { ai: this.aiPanelSize, editor: this.editorPanelSize, feedback: this.feedbackPanelSize }
+      const posMap = { ai: this.aiPanelPos, editor: this.editorPanelPos, feedback: this.feedbackPanelPos }
+      const size = sizeMap[panel] || this.editorPanelSize
+      const pos = posMap[panel] || this.editorPanelPos
       this.resizing = { panel, direction }
       this.resizeStart = { x: e.clientX, y: e.clientY, w: size.w, h: size.h, left: pos.x, top: pos.y }
       document.addEventListener('mousemove', this.onResize)
@@ -606,8 +951,8 @@ export default {
     onResize (e) {
       if (!this.resizing) return
       const { panel, direction } = this.resizing
-      const size = panel === 'ai' ? this.aiPanelSize : this.editorPanelSize
-      const pos = panel === 'ai' ? this.aiPanelPos : this.editorPanelPos
+      const sizeMap = { ai: this.aiPanelSize, editor: this.editorPanelSize, feedback: this.feedbackPanelSize }
+      const size = sizeMap[panel] || this.editorPanelSize
       const dx = e.clientX - this.resizeStart.x
       const dy = e.clientY - this.resizeStart.y
       const minWidth = 300
@@ -636,150 +981,58 @@ export default {
         'C++': 'C++',
         'C': 'C',
         'Java': 'Java',
-        'Python': 'Python3',   // 必须与后端 SysOptions.languages 中的名称一致
+        'Python': 'Python3',
         'JavaScript': 'JavaScript',
         'Go': 'Go'
       }
       const language = langMap[this.editorLanguage] || 'C++'
       const code = this.editorCode
-      const input = this.editorInput
+      const input = this.editorInput || ''
 
-      fetch('/api/code_run/', {
+      const self = this
+      fetch('/api/self_test/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': this.getCsrfToken()
         },
-        body: JSON.stringify({ language, code, input })  // input 字段即使后端暂不用，可保留
+        body: JSON.stringify({ language, code, input })
       })
       .then(res => {
         if (!res.ok) throw new Error(res.statusText)
         return res.json()
       })
       .then(data => {
-        if (data.error) {
-          this.runResult = { output: data.error, error: true }
-          this.runningCode = false
-          return
+        if (data.error !== null) {
+          self.runResult = { output: data.data || data.error || self.$t('m.Run_Failed'), error: true }
+        } else {
+          const result = data.data || {}
+          if (result.success === false) {
+            self.runResult = { output: result.error || self.$t('m.Run_Failed'), error: true }
+          } else {
+            self.runResult = { output: result.output || 'No output', error: false }
+          }
         }
-        const codeRunId = data.data.code_run_id
-        this.pollResult(codeRunId)
+        self.runningCode = false
       })
       .catch(err => {
-        this.runResult = {
-          output: err.message || this.$t('m.Run_Failed'),
+        self.runResult = {
+          output: err.message || self.$t('m.Run_Failed'),
           error: true
         }
-        this.runningCode = false
+        self.runningCode = false
       })
     },
 
-pollResult (codeRunId) {
-  this.clearPollingTimer()
-
-  let retryCount = 0
-  const maxRetries = 3
-
-  this.pollingTimer = setInterval(() => {
-    fetch(`/api/code_run/?id=${codeRunId}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok')
-        return res.json()
-      })
-      .then(res => {
-        retryCount = 0
-        const data = res.data
-        if (data.result === 6 || data.result === 7) {
-          return
-        }
-
-        this.clearPollingTimer()
-        this.runningCode = false
-
-        const statisticInfo = data.statistic_info || {}
-
-        if (data.result === 0) {
-          const output = statisticInfo.output || 'No output'
-          this.runResult = { output, error: false }
-        } else if (data.result === -2) {
-          const errInfo = statisticInfo.err_info || 'Compile Error'
-          this.runResult = { output: errInfo, error: true }
-        } else {
-          const errInfo = statisticInfo.err_info || ('Error code: ' + data.result)
-          this.runResult = { output: errInfo, error: true }
-        }
-      })
-      .catch(() => {
-        retryCount++
-        if (retryCount >= maxRetries) {
-          this.clearPollingTimer()
-          this.runningCode = false
-          this.runResult = { output: this.$t('m.Network_Error_Text'), error: true }
-        }
-      })
-  }, 500)
-
-  this.pollingTimeout = setTimeout(() => {
-    if (this.pollingTimer) {
-      this.clearPollingTimer()
-      this.runningCode = false
-      this.runResult = { output: this.$t('m.Timeout'), error: true }
-    }
-  }, 20000)
-},
-
-    pollResult (codeRunId) {
-      this.clearPollingTimer()
-
-      let retryCount = 0
-      const maxRetries = 3
-
-      this.pollingTimer = setInterval(() => {
-        fetch(`/api/code_run/?id=${codeRunId}`)
-          .then(res => {
-            if (!res.ok) throw new Error('Network response was not ok')
-            return res.json()
-          })
-          .then(res => {
-            retryCount = 0
-            const data = res.data
-            if (data.result === 6 || data.result === 7) {
-              return
-            }
-
-            this.clearPollingTimer()
-            this.runningCode = false
-
-            const statisticInfo = data.statistic_info || {}
-
-            if (data.result === 0) {
-              const output = statisticInfo.output || 'No output'
-              this.runResult = { output, error: false }
-            } else if (data.result === -2) {
-              const errInfo = statisticInfo.err_info || 'Compile Error'
-              this.runResult = { output: errInfo, error: true }
-            } else {
-              const errInfo = statisticInfo.err_info || ('Error code: ' + data.result)
-              this.runResult = { output: errInfo, error: true }
-            }
-          })
-          .catch(() => {
-            retryCount++
-            if (retryCount >= maxRetries) {
-              this.clearPollingTimer()
-              this.runningCode = false
-              this.runResult = { output: this.$t('m.Network_Error_Text'), error: true }
-            }
-          })
-      }, 500)
-
-      this.pollingTimeout = setTimeout(() => {
-        if (this.pollingTimer) {
-          this.clearPollingTimer()
-          this.runningCode = false
-          this.runResult = { output: this.$t('m.Timeout'), error: true }
-        }
-      }, 20000)
+    clearPollingTimer () {
+      if (this.pollingTimer) {
+        clearInterval(this.pollingTimer)
+        this.pollingTimer = null
+      }
+      if (this.pollingTimeout) {
+        clearTimeout(this.pollingTimeout)
+        this.pollingTimeout = null
+      }
     },
 
     getCsrfToken () {
@@ -1364,6 +1617,145 @@ pollResult (codeRunId) {
       color: rgba(255, 255, 255, 0.5) !important;
     }
   }
+}
+
+.feedback-content {
+  padding: 16px;
+  overflow-y: auto;
+
+  .feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .feedback-title-input {
+    /deep/ .ivu-input {
+      background: rgba(255, 255, 255, 0.15) !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+      color: rgba(255, 255, 255, 0.9) !important;
+      font-size: 14px;
+      font-weight: 600;
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+      }
+    }
+  }
+
+  .feedback-editor-textarea {
+    display: block;
+    width: 100%;
+    min-height: 180px;
+  }
+
+  /deep/ .simditor {
+     border: 1px solid rgba(255, 255, 255, 0.2) !important;
+     border-radius: 8px;
+     background: rgba(255, 255, 255, 0.1) !important;
+
+     .simditor-wrapper {
+       background: transparent !important;
+
+       .simditor-body,
+       .simditor-placeholder {
+         color: rgba(255, 255, 255, 0.9) !important;
+       }
+     }
+
+     .simditor-toolbar {
+       background: rgba(255, 255, 255, 0.08) !important;
+       border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+       border-radius: 8px 8px 0 0;
+
+       > ul > li {
+         > span.separator {
+           opacity: 0.3;
+         }
+
+         > .toolbar-item {
+           span {
+             opacity: 1 !important;
+             color: rgba(255, 255, 255, 0.85) !important;
+           }
+
+           &:hover span {
+             color: #fff !important;
+             background: rgba(255, 255, 255, 0.15);
+           }
+         }
+       }
+
+       .toolbar-menu {
+         background: #1e1e32 !important;
+         border-color: rgba(255, 255, 255, 0.15) !important;
+
+         ul > li .menu-item {
+           color: rgba(255, 255, 255, 0.85) !important;
+
+           &:hover {
+             background: rgba(255, 255, 255, 0.1) !important;
+             color: #fff !important;
+           }
+         }
+       }
+     }
+
+     .simditor-body {
+       background: rgba(255, 255, 255, 0.06) !important;
+       color: rgba(255, 255, 255, 0.9) !important;
+       min-height: 180px;
+       padding: 12px !important;
+       font-size: 13px;
+       line-height: 1.6;
+
+       * {
+         color: rgba(255, 255, 255, 0.9) !important;
+       }
+
+       &:focus {
+         outline: none !important;
+       }
+
+       a {
+         color: #3b82f6 !important;
+       }
+
+       blockquote {
+         border-left-color: rgba(255, 255, 255, 0.3) !important;
+         color: rgba(255, 255, 255, 0.7) !important;
+       }
+
+       table {
+         th, td {
+           border-color: rgba(255, 255, 255, 0.2) !important;
+           color: rgba(255, 255, 255, 0.9) !important;
+         }
+         th {
+           background: rgba(255, 255, 255, 0.1) !important;
+         }
+       }
+
+       pre, code {
+         background: rgba(0, 0, 0, 0.3) !important;
+         color: rgba(255, 255, 255, 0.9) !important;
+       }
+
+       p, div, span, h1, h2, h3, h4, h5, h6, li, td, th {
+         color: rgba(255, 255, 255, 0.9) !important;
+       }
+
+       img {
+          max-width: 100% !important;
+          height: auto !important;
+          object-fit: contain !important;
+        }
+     }
+
+     .simditor-placeholder {
+       color: rgba(255, 255, 255, 0.4) !important;
+       font-style: italic;
+     }
+   }
 }
 </style>
 

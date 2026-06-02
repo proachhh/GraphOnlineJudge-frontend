@@ -5,7 +5,7 @@
     <div class="content-app" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage }">
       <router-view></router-view>
     </div>
-    <div class="global-footer" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage }">
+    <div class="global-footer" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'problem-page': isProblemPage }">
       <p v-html="website.website_footer"></p>
       <p>Powered by <a href="https://github.com/QingdaoU/OnlineJudge">GraphOnlineJudge</a>
         <span v-if="version">&nbsp; Version: {{ version }}</span>
@@ -61,6 +61,9 @@
       },
       isChatPage () {
         return this.$route.path === '/ai-chat-fullscreen'
+      },
+      isProblemPage () {
+        return this.$route.name === 'problem-details' || this.$route.name === 'contest-problem-details'
       }
     },
     watch: {
@@ -105,8 +108,8 @@
 
 .global-footer {
   position: relative;
-  z-index: 50;
-  padding: 20px 2% 14px;
+  z-index: 1;
+  padding: 14px 2% 18px;
   text-align: center;
   font-size: 13px;
   background: #f5f7fa;
@@ -119,12 +122,24 @@
     background: rgba(0, 0, 0, 0.6);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.7);
+    z-index: 1;
 
     a { color: rgba(255, 255, 255, 0.85); }
   }
 
   &.chat-page {
     display: none;
+  }
+
+  &.problem-page {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    padding: 10px 2% 14px;
+    background: #f5f7fa;
+    border-top: 1px solid #e8eaec;
   }
 }
 

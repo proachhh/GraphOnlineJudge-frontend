@@ -266,9 +266,9 @@
           <li>
             <p>{{$t('m.Tags')}}</p>
             <p>
-              <Poptip trigger="hover" placement="left-end">
+              <Poptip trigger="hover" placement="top" transfer word-wrap width="260">
                 <a>{{$t('m.Show')}}</a>
-                <div slot="content">
+                <div slot="content" style="display: flex; flex-wrap: wrap; gap: 4px">
                   <Tag v-for="tag in problem.tags" :key="tag">{{$t('m.tag.' + tag, tag)}}</Tag>
                 </div>
               </Poptip>
@@ -294,69 +294,69 @@
       </div>
     </Modal>
 
-    <div v-if="resultVisible" class="result-overlay" @click.self="resultVisible = false">
-      <div class="result-modal">
-        <div class="result-close" @click="resultVisible = false">
-          <Icon type="ios-close" size="24" />
-        </div>
+  </div>
+  <div v-if="resultVisible" class="result-overlay" @click.self="resultVisible = false">
+    <div class="result-modal">
+      <div class="result-close" @click="resultVisible = false">
+        <Icon type="ios-close" size="24" />
+      </div>
 
-        <table class="result-meta-table">
-          <tr><td class="meta-label">{{$t('m.Problem')}}</td><td class="meta-value">{{ problem._id }} {{ problem.title }}</td></tr>
-          <tr><td class="meta-label">{{$t('m.Submit_Time')}}</td><td class="meta-value">{{ submissionDetail.create_time | localtime }}</td></tr>
-          <tr><td class="meta-label">{{$t('m.Language')}}</td><td class="meta-value">{{ submissionDetail.language }}</td></tr>
-          <tr><td class="meta-label">{{$t('m.Memory')}}</td><td class="meta-value">{{ (submissionDetail.statistic_info.memory_cost || 0) / 1024 }} / {{ problem.memory_limit * 1024 }} KB</td></tr>
-          <tr><td class="meta-label">{{$t('m.Time')}}</td><td class="meta-value">{{ submissionDetail.statistic_info.time_cost || 0 }} / {{ problem.time_limit }} ms</td></tr>
-          <tr><td class="meta-label">{{$t('m.Status')}}</td><td class="meta-value result-status" :class="resultHeaderClass">{{ resultTitle }}</td></tr>
-          <tr v-if="submissionDetail.statistic_info.score !== undefined"><td class="meta-label">{{$t('m.Score')}}</td><td class="meta-value">{{ submissionDetail.statistic_info.score }} / {{ problem.total_score }}</td></tr>
+      <table class="result-meta-table">
+        <tr><td class="meta-label">{{$t('m.Problem')}}</td><td class="meta-value">{{ problem._id }} {{ problem.title }}</td></tr>
+        <tr><td class="meta-label">{{$t('m.Submit_Time')}}</td><td class="meta-value">{{ submissionDetail.create_time | localtime }}</td></tr>
+        <tr><td class="meta-label">{{$t('m.Language')}}</td><td class="meta-value">{{ submissionDetail.language }}</td></tr>
+        <tr><td class="meta-label">{{$t('m.Memory')}}</td><td class="meta-value">{{ (submissionDetail.statistic_info.memory_cost || 0) / 1024 }} / {{ problem.memory_limit * 1024 }} KB</td></tr>
+        <tr><td class="meta-label">{{$t('m.Time')}}</td><td class="meta-value">{{ submissionDetail.statistic_info.time_cost || 0 }} / {{ problem.time_limit }} ms</td></tr>
+        <tr><td class="meta-label">{{$t('m.Status')}}</td><td class="meta-value result-status" :class="resultHeaderClass">{{ resultTitle }}</td></tr>
+        <tr v-if="submissionDetail.statistic_info.score !== undefined"><td class="meta-label">{{$t('m.Score')}}</td><td class="meta-value">{{ submissionDetail.statistic_info.score }} / {{ problem.total_score }}</td></tr>
+      </table>
+
+      <div v-if="compileError" class="compile-error-section">
+        <h4>{{$t('m.Compile_Error')}}</h4>
+        <pre>{{ submissionDetail.statistic_info.err_info }}</pre>
+      </div>
+
+      <div v-else class="testcases-table-wrap">
+        <h4 class="testcases-title">{{$t('m.Test_Case_Details')}}</h4>
+        <table class="testcases-table">
+          <thead>
+            <tr>
+              <th>{{$t('m.Test_Case')}}</th>
+              <th>{{$t('m.Memory')}}(KB)</th>
+              <th>{{$t('m.Time')}}(ms)</th>
+              <th>{{$t('m.Result')}}</th>
+              <th v-if="isOIProblem">{{$t('m.Score')}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="tc in testCases" :key="tc.test_case" :class="tcStatusClass(tc.result)">
+              <td>{{ tc.test_case }}</td>
+              <td>{{ tc.memory }}</td>
+              <td>{{ tc.cpu_time }}</td>
+              <td>{{ tcStatusText(tc.result) }}</td>
+              <td v-if="isOIProblem">{{ tc.score || 0 }} / {{ getTestCaseScore(tc.test_case) }}</td>
+            </tr>
+          </tbody>
         </table>
 
-        <div v-if="compileError" class="compile-error-section">
-          <h4>{{$t('m.Compile_Error')}}</h4>
-          <pre>{{ submissionDetail.statistic_info.err_info }}</pre>
-        </div>
-
-        <div v-else class="testcases-table-wrap">
-          <h4 class="testcases-title">{{$t('m.Test_Case_Details')}}</h4>
-          <table class="testcases-table">
-            <thead>
-              <tr>
-                <th>{{$t('m.Test_Case')}}</th>
-                <th>{{$t('m.Memory')}}(KB)</th>
-                <th>{{$t('m.Time')}}(ms)</th>
-                <th>{{$t('m.Result')}}</th>
-                <th v-if="isOIProblem">{{$t('m.Score')}}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="tc in testCases" :key="tc.test_case" :class="tcStatusClass(tc.result)">
-                <td>{{ tc.test_case }}</td>
-                <td>{{ tc.memory }}</td>
-                <td>{{ tc.cpu_time }}</td>
-                <td>{{ tcStatusText(tc.result) }}</td>
-                <td v-if="isOIProblem">{{ tc.score || 0 }} / {{ getTestCaseScore(tc.test_case) }}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div v-if="failedDetails.length" class="failed-details-section">
-            <h4 class="failed-details-title">{{$t('m.Failed_Test_Cases')}}</h4>
-            <div v-for="fd in failedDetails" :key="fd.test_case" class="failed-case">
-              <p class="failed-case-header">
-                <span class="tc-badge tc-badge-fail">{{$t('m.Test_Case')}} {{ fd.test_case }}</span>
-              </p>
-              <div class="failed-io">
-                <div class="failed-io-block">
-                  <span class="io-label">{{$t('m.Self_Test_Input')}}</span>
-                  <pre>{{ fd.input }}</pre>
-                </div>
-                <div class="failed-io-block">
-                  <span class="io-label">{{$t('m.Expected_Output')}}</span>
-                  <pre>{{ fd.expected }}</pre>
-                </div>
-                <div class="failed-io-block">
-                  <span class="io-label">{{$t('m.Your_Output')}}</span>
-                  <pre>{{ fd.your_output }}</pre>
-                </div>
+        <div v-if="failedDetails.length" class="failed-details-section">
+          <h4 class="failed-details-title">{{$t('m.Failed_Test_Cases')}}</h4>
+          <div v-for="fd in failedDetails" :key="fd.test_case" class="failed-case">
+            <p class="failed-case-header">
+              <span class="tc-badge tc-badge-fail">{{$t('m.Test_Case')}} {{ fd.test_case }}</span>
+            </p>
+            <div class="failed-io">
+              <div class="failed-io-block">
+                <span class="io-label">{{$t('m.Self_Test_Input')}}</span>
+                <pre>{{ fd.input }}</pre>
+              </div>
+              <div class="failed-io-block">
+                <span class="io-label">{{$t('m.Expected_Output')}}</span>
+                <pre>{{ fd.expected }}</pre>
+              </div>
+              <div class="failed-io-block">
+                <span class="io-label">{{$t('m.Your_Output')}}</span>
+                <pre>{{ fd.your_output }}</pre>
               </div>
             </div>
           </div>
@@ -395,7 +395,7 @@
         captchaRequired: false,
         graphVisible: false,
         submissionExists: false,
-        layoutMode: 'vertical',
+        layoutMode: 'horizontal',
         leftWidth: 50,
         isResizing: false,
         captchaCode: '',
@@ -462,6 +462,64 @@
           message: `题目《${this.problem.title || ''}》(ID: ${this.problemID}) 怎么做？请给我解题提示。`
         })
       },
+      processMathContent (text) {
+        if (!text) return text
+        const placeholders = []
+        text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, inner) => {
+          placeholders.push(inner)
+          return '@@LPH' + (placeholders.length - 1) + '@@'
+        })
+        text = text.replace(/\\\[([\s\S]*?)\\\]/g, '$$$1$$')
+        text = text.replace(/\\\(([\s\S]*?)\\\)/g, '$$1$$')
+        text = text.replace(/(^|[^$@])\$(?!\$)([^$\n]+?)\$(?!\$|$|[0-9])/g, '$1$$2$')
+
+        const tagPlaceholders = []
+        text = text.replace(/(<[^>]+>)/g, (match) => {
+          tagPlaceholders.push(match)
+          return '@@TAG' + (tagPlaceholders.length - 1) + '@@'
+        })
+
+        const knownCmds = 'times|cdot|frac|sum|int|sqrt|leq|geq|le|ge|alpha|beta|gamma|delta|pi|sigma|omega|lambda|mu|pm|to|rightarrow|Rightarrow|leftarrow|Leftarrow|leftrightarrow|Leftrightarrow|forall|exists|in|notin|subset|subseteq|supset|supseteq|cup|cap|infty|partial|nabla|approx|equiv|neq|propto|sim|dots|ldots|cdots|vdots|ddots|angle|triangle|oplus|otimes|odot|circ|text|mathbf|mathit|mathrm|dfrac|tfrac|binom|bmod|pmod|overline|underline|overrightarrow|overleftarrow|hat|tilde|bar|vec|dot|ddot|not|neg|land|lor|vdash|models|mid|parallel|perp|ast|star|diamond|bullet|div|mod|wedge|vee|bigcirc|bigtriangleup|bigtriangledown|triangleright|triangleleft|sqcap|sqcup|doublecup|doublecap|displaystyle|textstyle|lim|max|min|sup|inf|limsup|liminf|arg|deg|dim|hom|ker|Pr|det|gcd|lcm|log|ln|lg|exp|sin|cos|tan|cot|sec|csc|arcsin|arccos|arctan|sinh|cosh|tanh|coth'
+        const cmdRe = new RegExp('\\\\(' + knownCmds + ')(?![a-zA-Z])', 'g')
+        const mathChars = /^[a-zA-Z0-9_\{\}\^\\,\s\.\-\+\=\<\>\|\(\)\[\]\/\'\*]+$/
+        const ranges = []
+        let m
+        while ((m = cmdRe.exec(text)) !== null) {
+          let start = m.index
+          let end = m.index + m[0].length
+          while (start > 0 && mathChars.test(text[start - 1]) && text.substring(start - 4, start) !== '@@LP') start--
+          while (end < text.length && mathChars.test(text[end]) && text.substring(end, end + 3) !== '@@') end++
+          let merged = false
+          for (let i = ranges.length - 1; i >= 0; i--) {
+            const r = ranges[i]
+            if (start <= r.end && end >= r.start) {
+              r.start = Math.min(r.start, start)
+              r.end = Math.max(r.end, end)
+              merged = true
+              break
+            }
+          }
+          if (!merged) ranges.push({ start, end })
+        }
+
+        if (ranges.length > 0) {
+          ranges.sort((a, b) => a.start - b.start)
+          let rst = ''
+          let pos = 0
+          for (const r of ranges) {
+            if (r.start > pos) rst += text.substring(pos, r.start)
+            const fragment = text.substring(r.start, r.end).trim()
+            if (fragment) rst += '$' + fragment + '$'
+            pos = r.end
+          }
+          if (pos < text.length) rst += text.substring(pos)
+          text = rst
+        }
+
+        text = text.replace(/@@TAG(\d+)@@/g, (m, idx) => tagPlaceholders[parseInt(idx)])
+        text = text.replace(/@@LPH(\d+)@@/g, (m, idx) => '$$' + placeholders[parseInt(idx)] + '$$')
+        return text
+      },
       init () {
         this.$Loading.start()
         this.contestID = this.$route.params.contestID
@@ -473,6 +531,10 @@
         api[func](this.problemID, this.contestID).then(res => {
           this.$Loading.finish()
           let problem = res.data.data
+          problem.description = this.processMathContent(problem.description)
+          problem.input_description = this.processMathContent(problem.input_description)
+          problem.output_description = this.processMathContent(problem.output_description)
+          problem.hint = this.processMathContent(problem.hint)
           this.changeDomTitle({title: problem.title})
           api.submissionExists(problem.id).then(res => {
             this.submissionExists = res.data.data
@@ -923,9 +985,9 @@
   .flex-container {
     display: flex;
     width: 100%;
-    max-width: 1400px;
+    max-width: 1500px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 40px 24px 80px;
     background: linear-gradient(180deg, #f0f4f8 0%, #f8fafc 100%);
     min-height: calc(100vh - 60px);
 
@@ -948,13 +1010,14 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      z-index: 10;
+      z-index: 20;
 
       #problem-main {
           margin-right: 0;
-          flex: 1;
+          flex: 1 1 0%;
           min-width: 0;
           min-height: 0;
+          width: 100%;
           display: flex;
           flex-direction: column;
           padding: 0 0 0 8px;
@@ -964,8 +1027,9 @@
         }
 
         .problem-layout-wrapper {
-          flex: 1;
+          flex: 1 1 0%;
           min-height: 0;
+          width: 100%;
         }
 
         .problem-layout-wrapper.horizontal {
@@ -974,10 +1038,21 @@
 
           .layout-left {
             min-width: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+          }
+
+          .layout-left > .ivu-card {
+            width: 100%;
+            min-height: 100%;
+            min-width: 0;
+            margin-bottom: 0;
+            overflow: hidden !important;
           }
 
           .layout-right {
             min-width: 0;
+            flex: 1 1 0%;
           }
         }
       }
@@ -1475,6 +1550,7 @@
           min-width: 0;
           overflow-y: auto;
           overflow-x: hidden;
+          padding-bottom: 54px;
         }
 
         .layout-left > .ivu-card {
@@ -1488,9 +1564,8 @@
         .layout-right {
           min-width: 0;
           overflow-y: auto;
-          display: flex;
-          flex-direction: column;
           width: 100%;
+          padding-bottom: 54px;
         }
 
         .layout-right > .ivu-card {
@@ -1500,52 +1575,10 @@
         .layout-right .ai-response-card {
           margin-top: 0 !important;
           margin-bottom: 0 !important;
-          flex-shrink: 0;
-        }
-
-        .layout-right #submit-code {
-          flex: 1;
-          min-height: 0;
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .layout-right #submit-code > .ivu-card-body {
-          flex: 1;
-          min-width: 0;
-          min-height: 0;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
-
-        .layout-right #submit-code > .ivu-card-body > div:first-child {
-          flex: 1;
-          min-width: 0;
-          min-height: 0;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-          margin: 0 !important;
-          width: 100%;
-        }
-
-        .layout-right #submit-code > .ivu-card-body > div:first-child .vue-codemirror-wrap {
-          flex: 1;
-          min-width: 0;
-          min-height: 0;
-          display: flex;
-          flex-direction: column;
-          width: 100%;
         }
 
         .layout-right #submit-code > .ivu-card-body > div:first-child .CodeMirror {
-          flex: 1;
-          min-width: 0;
-          min-height: 0;
-          width: 100%;
+          height: auto !important;
         }
 
         .layout-right #submit-code > .ivu-card-body > div:first-child .CodeMirror-scroll {

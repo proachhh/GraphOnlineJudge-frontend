@@ -10,26 +10,43 @@ hljs.registerLanguage('python', python)
 
 export default {
   install (Vue, options) {
+    function setSelectable (target) {
+      function applyStyle (el) {
+        const style = el.style
+        style.userSelect = 'text'
+        style.webkitUserSelect = 'text'
+        style.mozUserSelect = 'text'
+        style.msUserSelect = 'text'
+      }
+      applyStyle(target)
+      const walker = document.createTreeWalker(target, 1, null, false)
+      let node
+      while ((node = walker.nextNode())) {
+        applyStyle(node)
+      }
+    }
     Vue.directive('highlight', {
       deep: true,
       bind: function (el, binding) {
-        // on first bind, highlight all targets
+        el.style.userSelect = 'text'
+        el.style.webkitUserSelect = 'text'
         Array.from(el.querySelectorAll('code')).forEach((target) => {
-          // if a value is directly assigned to the directive, use this
-          // instead of the element content.
           if (binding.value) {
             target.textContent = binding.value
           }
           hljs.highlightBlock(target)
+          setSelectable(target)
         })
       },
       componentUpdated: function (el, binding) {
-        // after an update, re-fill the content and then highlight
+        el.style.userSelect = 'text'
+        el.style.webkitUserSelect = 'text'
         Array.from(el.querySelectorAll('code')).forEach((target) => {
           if (binding.value) {
             target.textContent = binding.value
           }
           hljs.highlightBlock(target)
+          setSelectable(target)
         })
       }
     })

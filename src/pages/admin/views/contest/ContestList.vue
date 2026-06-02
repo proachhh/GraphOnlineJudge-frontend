@@ -79,6 +79,8 @@
                       @click.native="goContestAnnouncement(scope.row.id)"></icon-btn>
             <icon-btn icon="download" name="Download Accepted Submissions"
                       @click.native="openDownloadOptions(scope.row.id)"></icon-btn>
+            <icon-btn icon="trash" name="Delete Contest"
+                      @click.native="deleteContest(scope.row.id)"></icon-btn>
           </div>
         </el-table-column>
       </el-table>
@@ -167,6 +169,48 @@
       },
       handleVisibleSwitch (row) {
         api.editContest(row)
+      },
+      deleteContest (id) {
+        let cascade = false
+        const h = this.$createElement
+        const checkbox = h('el-checkbox', {
+          style: { marginTop: '12px', display: 'block' },
+          on: { input: (val) => { cascade = val } }
+        }, '同时删除题目集中所有题目（不可恢复）')
+        const msg = h('div', null, [
+          h('p', null, '此操作将删除该题目集，题目和提交记录将保留。'),
+          checkbox
+        ])
+        this.$msgbox({
+          title: 'Delete Contest',
+          message: msg,
+          showCancelButton: true,
+          confirmButtonText: '确认删除',
+          type: 'warning',
+          beforeClose: (action, instance, done) => {
+            if (action === 'confirm') {
+              if (cascade) {
+                done()
+                this.$confirm('确定要同时删除该题目集中所有题目吗？此操作不可撤销！', '再次确认', {
+                  type: 'error',
+                  confirmButtonText: '我确定删除',
+                  cancelButtonText: '取消'
+                }).then(() => {
+                  api.deleteContest(id, { cascade: 1 }).then(() => {
+                    this.getContestList(this.currentPage)
+                  }).catch(() => {})
+                }).catch(() => {})
+              } else {
+                api.deleteContest(id).then(() => {
+                  this.getContestList(this.currentPage)
+                }).catch(() => {})
+                done()
+              }
+            } else {
+              done()
+            }
+          }
+        })
       }
     },
     watch: {

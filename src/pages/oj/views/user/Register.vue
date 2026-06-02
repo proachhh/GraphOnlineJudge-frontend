@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="register-wrap">
     <Form ref="formRegister" :model="formRegister" :rules="ruleRegister">
       <FormItem prop="username">
         <Input type="text" v-model="formRegister.username" :placeholder="$t('m.RegisterUsername')" size="large" @on-enter="handleRegister">
@@ -36,18 +36,18 @@
         </div>
       </FormItem>
     </Form>
-    <div class="footer">
+    <div class="register-footer">
       <Button
         type="primary"
         @click="handleRegister"
-        class="btn" long
+        class="register-btn" long
         :loading="btnRegisterLoading">
         {{$t('m.UserRegister')}}
       </Button>
       <Button
-        type="ghost"
+        type="default"
         @click="switchMode('login')"
-        class="btn" long>
+        class="switch-btn" long>
         {{$t('m.Already_Registed')}}
       </Button>
     </div>
@@ -162,16 +162,107 @@
 </script>
 
 <style scoped lang="less">
-  .footer {
-    overflow: auto;
-    margin-top: 20px;
-    margin-bottom: -15px;
-    text-align: left;
-    .btn {
-      margin: 0 0 15px 0;
-      &:last-child {
-        margin: 0;
+.register-wrap {
+  padding: 4px 0 0;
+
+  /deep/ .ivu-input-large {
+    height: 44px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+
+    &:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      background: #fff;
+    }
+  }
+
+  /deep/ .ivu-input-group-prepend {
+    border-radius: 10px 0 0 10px;
+    border: 2px solid #e2e8f0;
+    border-right: none;
+    background: #f1f5f9;
+
+    .ivu-icon {
+      color: #64748b;
+    }
+  }
+
+  /deep/ .ivu-form-item {
+    margin-bottom: 18px;
+  }
+
+  /deep/ .ivu-form-item-error .ivu-input {
+    border-color: #ed4014;
+  }
+
+  .oj-captcha {
+    display: flex;
+    gap: 12px;
+    height: auto;
+    align-items: center;
+
+    .oj-captcha-code {
+      flex: 1;
+    }
+
+    .oj-captcha-img {
+      flex-shrink: 0;
+
+      img {
+        height: 44px;
+        border-radius: 10px;
+        cursor: pointer;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
       }
     }
   }
+}
+
+.register-footer {
+  margin-top: 8px;
+
+  .register-btn {
+    height: 44px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    border: none;
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.3);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: linear-gradient(135deg, #1e40af, #2563eb);
+      box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+      transform: translateY(-1px);
+    }
+  }
+
+  .switch-btn {
+    height: 42px;
+    border-radius: 10px;
+    font-size: 15px;
+    margin-top: 10px;
+    border: 2px solid #e2e8f0;
+    color: #64748b;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #3b82f6;
+      color: #1e3a8a;
+      background: rgba(30, 58, 138, 0.04);
+    }
+  }
+}
 </style>

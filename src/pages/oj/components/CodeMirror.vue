@@ -104,12 +104,15 @@
         mode: {
           'C++': 'text/x-csrc'
         },
-        themes: [
-          {label: this.$i18n.t('m.Monokai'), value: 'monokai'},
-          {label: this.$i18n.t('m.Solarized_Light'), value: 'solarized'},
-          {label: this.$i18n.t('m.Material'), value: 'material'}
-        ]
+        themes: []
       }
+    },
+    created () {
+      this.themes = [
+        {label: this.$i18n.t('m.Monokai'), value: 'monokai'},
+        {label: this.$i18n.t('m.Solarized_Light'), value: 'solarized'},
+        {label: this.$i18n.t('m.Material'), value: 'material'}
+      ]
     },
     mounted () {
       utils.getLanguages().then(languages => {
@@ -121,6 +124,13 @@
         this.editor.setOption('mode', this.mode[this.language])
       })
       this.editor.focus()
+    },
+    watch: {
+      language (newLang) {
+        if (this.mode[newLang] && this.editor) {
+          this.editor.setOption('mode', this.mode[newLang])
+        }
+      }
     },
     methods: {
       onEditorCodeChange (newCode) {

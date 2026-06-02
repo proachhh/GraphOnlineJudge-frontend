@@ -15,7 +15,7 @@
         <div class="stats-vert">
           <div class="stat-card" v-for="(card, idx) in statCards" :key="idx" :class="card.glowClass">
             <div class="stat-icon-wrap" :style="{ borderColor: card.borderColor }">
-              <span class="stat-emoji">{{ card.iconHtml }}</span>
+              <i :class="card.iconClass" :style="{ color: card.iconColor, fontSize: '22px' }"></i>
             </div>
             <div class="stat-info">
               <div class="stat-number" :style="{ color: card.textColor }">{{ animatedValues[idx] }}</div>
@@ -25,7 +25,7 @@
         </div>
         <div class="user-analytics-panel">
           <div class="ua-header">
-            <span class="stat-emoji">📊</span>
+            <i class="el-icon-fa-bar-chart" style="font-size:16px; color: #3b82f6;"></i>
             <span>用户分析 — {{ selectedUser ? selectedUserLabel : '请选择用户' }}</span>
             <el-select
               v-model="selectedUserId"
@@ -70,7 +70,7 @@
         </div>
         <div class="judge-panel">
           <div class="judge-header">
-            <span class="stat-emoji" style="font-size:14px">🖥️</span>
+            <i class="el-icon-fa-server" style="font-size:14px; color: #3b82f6;"></i>
             <span>判题服务器 {{ judgeServers.length }}</span>
           </div>
           <div class="judge-scroll-box" ref="judgeScrollBox">
@@ -210,10 +210,10 @@ export default {
     ...mapGetters(['user']),
     statCards () {
       return [
-        { iconHtml: '👥', value: this.overview.total_users || 0, label: '用户', iconColor: '#00f0ff', textColor: '#fff', borderColor: 'rgba(0,240,255,0.4)', glowClass: 'glow-cyan' },
-        { iconHtml: '📄', value: this.overview.total_problems || 0, label: '题目', iconColor: '#ff2d95', textColor: '#fff', borderColor: 'rgba(255,45,149,0.4)', glowClass: 'glow-pink' },
-        { iconHtml: '🚀', value: this.overview.total_submissions || 0, label: '提交', iconColor: '#b829f0', textColor: '#fff', borderColor: 'rgba(184,41,240,0.4)', glowClass: 'glow-purple' },
-        { iconHtml: '🏆', value: this.overview.total_contests || 0, label: '比赛', iconColor: '#00ff88', textColor: '#fff', borderColor: 'rgba(0,255,136,0.4)', glowClass: 'glow-green' }
+        { iconClass: 'el-icon-fa-users', value: this.overview.total_users || 0, label: '用户', iconColor: '#3b82f6', textColor: '#fff', borderColor: 'rgba(59,130,246,0.5)', glowClass: 'glow-blue' },
+        { iconClass: 'el-icon-fa-file-text', value: this.overview.total_problems || 0, label: '题目', iconColor: '#6366f1', textColor: '#fff', borderColor: 'rgba(99,102,241,0.5)', glowClass: 'glow-blue' },
+        { iconClass: 'el-icon-fa-paper-plane', value: this.overview.total_submissions || 0, label: '提交', iconColor: '#2563eb', textColor: '#fff', borderColor: 'rgba(37,99,235,0.5)', glowClass: 'glow-blue' },
+        { iconClass: 'el-icon-fa-trophy', value: this.overview.total_contests || 0, label: '比赛', iconColor: '#1e40af', textColor: '#fff', borderColor: 'rgba(30,64,175,0.5)', glowClass: 'glow-blue' }
       ]
     },
     activityStats () {
