@@ -39,6 +39,16 @@ router.beforeEach((to, from, next) => {
   }
 })
 
+// 移动端首页重定向到题目列表
+router.beforeEach((to, from, next) => {
+  const isMobile = window.innerWidth <= 768
+  if (isMobile && to.name === 'home') {
+    next({ name: 'problem-list' })
+  } else {
+    next()
+  }
+})
+
 router.afterEach((to, from, next) => {
   Vue.prototype.$Loading.finish()
 })

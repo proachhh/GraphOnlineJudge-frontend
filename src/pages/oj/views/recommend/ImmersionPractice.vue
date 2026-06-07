@@ -184,7 +184,7 @@
                 <Poptip trigger="hover" placement="top" transfer word-wrap width="260">
                   <a>{{ $t('m.Show') }}</a>
                   <div slot="content" style="display: flex; flex-wrap: wrap; gap: 4px">
-                    <Tag v-for="tag in currentProblem.tags" :key="tag">{{ $t('m.tag.' + tag, tag) }}</Tag>
+                    <Tag v-for="tag in currentProblem.tags" :key="tag">{{ m.tag[tag] || tag }}</Tag>
                   </div>
                 </Poptip>
               </p>
@@ -288,6 +288,7 @@ import CodeMirror from '@oj/components/CodeMirror.vue'
 import AICard from '@oj/components/AICard.vue'
 import { pie, largePie } from '../problem/chartData'
 import * as echarts from 'echarts'
+import { m } from '@/i18n/oj/zh-CN.js'
 
 const IMMERSION_PREFS_KEY = 'immersion_practice_prefs'
 
@@ -316,7 +317,8 @@ export default {
       largePie: largePie,
       pieChart: null,
       largePieChart: null,
-      _savedPrefs: { language: '', theme: 'solarized' }
+      _savedPrefs: { language: '', theme: 'solarized' },
+      m: m
     }
   },
   computed: {

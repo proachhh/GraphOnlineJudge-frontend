@@ -51,11 +51,14 @@
               <p class="title">{{$t('m.Description')}}</p>
               <p class="content" v-html=problem.description></p>
               <p class="title">{{$t('m.Input')}} <span v-if="problem.io_mode.io_mode=='File IO'">({{$t('m.FromFile')}}: {{ problem.io_mode.input }})</span></p>
-              <p class="content" v-html=problem.input_description></p>
+              <p class="content" v-if="problem.input_description" v-html=problem.input_description></p>
+              <p class="content placeholder" v-else>{{$t('m.None')}}</p>
               <p class="title">{{$t('m.Output')}} <span v-if="problem.io_mode.io_mode=='File IO'">({{$t('m.ToFile')}}: {{ problem.io_mode.output }})</span></p>
-              <p class="content" v-html=problem.output_description></p>
+              <p class="content" v-if="problem.output_description" v-html=problem.output_description></p>
+              <p class="content placeholder" v-else>{{$t('m.None')}}</p>
 
-              <div v-for="(sample, index) of problem.samples" :key="index">
+              <div v-if="problem.samples && problem.samples.length">
+                <div v-for="(sample, index) of problem.samples" :key="index">
                 <div class="sample">
                   <div class="sample-input">
                     <p class="title">{{$t('m.Sample_Input')}} {{index + 1}}
@@ -73,6 +76,7 @@
                     <pre>{{sample.output}}</pre>
                   </div>
                 </div>
+              </div>
               </div>
 
               <div v-if="problem.hint">
@@ -98,7 +102,7 @@
                   <span v-if="problem.difficulty" class="info-inline-item"><b>{{$t('m.Level')}}</b> {{$t('m.' + problem.difficulty)}}</span>
                   <span v-if="problem.total_score" class="info-inline-item"><b>{{$t('m.Score')}}</b> {{problem.total_score}}</span>
                   <span class="info-inline-item"><b>{{$t('m.Tags')}}</b>
-                    <Tag v-for="tag in problem.tags" :key="tag" size="small">{{$t('m.tag.' + tag, tag)}}</Tag>
+                    <Tag v-for="tag in problem.tags" :key="tag" size="small">{{ m.tag[tag] || tag }}</Tag>
                   </span>
                 </div>
               </div>
@@ -269,7 +273,7 @@
               <Poptip trigger="hover" placement="top" transfer word-wrap width="260">
                 <a>{{$t('m.Show')}}</a>
                 <div slot="content" style="display: flex; flex-wrap: wrap; gap: 4px">
-                  <Tag v-for="tag in problem.tags" :key="tag">{{$t('m.tag.' + tag, tag)}}</Tag>
+                  <Tag v-for="tag in problem.tags" :key="tag">{{ m.tag[tag] || tag }}</Tag>
                 </div>
               </Poptip>
             </p>
@@ -378,6 +382,7 @@
   import api from '@oj/api'
   import {pie, largePie} from './chartData'
   import * as echarts from 'echarts'
+  import { m } from '@/i18n/oj/zh-CN.js'
 
   // 只显示这些状态的图形占用
   const filtedStatus = ['-1', '-2', '0', '1', '2', '3', '4', '8']
@@ -433,7 +438,8 @@
         largePie: largePie,
         pieChart: null,
         largePieChart: null,
-        contestProblems: []
+        contestProblems: [],
+        m: m
       }
     },
     beforeRouteEnter (to, from, next) {

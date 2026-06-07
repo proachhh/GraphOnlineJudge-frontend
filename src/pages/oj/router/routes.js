@@ -224,6 +224,14 @@ export default [
     component: () => import('@oj/views/lesson/LessonPlanStudy.vue')
   },
 
+  // mobile personal hub
+  {
+    path: '/mobile/personal',
+    name: 'mobile-personal',
+    meta: {title: 'Personal Hub'},
+    component: () => import('@/pages/oj/views/general/MobilePersonal.vue')
+  },
+
   // fullscreen pages
   {
     path: '/ai-chat-fullscreen',

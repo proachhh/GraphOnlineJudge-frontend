@@ -226,13 +226,7 @@ export default {
 }
 </script>
 
-<style lang="less">
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow-x: hidden !important;
-}
-
+<style lang="less" scoped>
 .home-container {
   width: 100vw;
   min-height: 200vh;

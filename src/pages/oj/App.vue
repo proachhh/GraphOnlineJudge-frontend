@@ -2,7 +2,7 @@
   <div>
     <NavBar></NavBar>
     <GlobalSidebar></GlobalSidebar>
-    <div class="content-app" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage }">
+    <div class="content-app" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'mobile-nav': isMobile }">
       <router-view></router-view>
     </div>
     <div class="global-footer" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'problem-page': isProblemPage }">
@@ -11,6 +11,7 @@
         <span v-if="version">&nbsp; Version: {{ version }}</span>
       </p>
     </div>
+    <MobileBottomNav v-if="isMobile" />
     <BackTop></BackTop>
   </div>
 </template>
@@ -19,19 +20,23 @@
   import { mapActions, mapState } from 'vuex'
   import NavBar from '@oj/components/NavBar.vue'
   import GlobalSidebar from '@oj/components/GlobalSidebar.vue'
+  import MobileBottomNav from '@oj/components/MobileBottomNav.vue'
 
   export default {
     name: 'app',
     components: {
       NavBar,
-      GlobalSidebar
+      GlobalSidebar,
+      MobileBottomNav
     },
     data () {
       return {
-        version: process.env.VERSION
+        version: process.env.VERSION,
+        isMobile: false
       }
     },
     created () {
+      this.isMobile = window.innerWidth <= 768
       try {
         document.body.removeChild(document.getElementById('app-loader'))
       } catch (e) {
@@ -40,9 +45,17 @@
     mounted () {
       this.getWebsiteConfig()
       this.toggleHomeBackground()
+      this.checkMobile()
+      window.addEventListener('resize', this.checkMobile)
+    },
+    beforeDestroy () {
+      window.removeEventListener('resize', this.checkMobile)
     },
     methods: {
       ...mapActions(['getWebsiteConfig', 'changeDomTitle']),
+      checkMobile () {
+        this.isMobile = window.innerWidth <= 768
+      },
       toggleHomeBackground () {
         const homeBg = document.getElementById('home-bg')
         if (homeBg) {

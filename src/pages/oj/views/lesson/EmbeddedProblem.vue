@@ -52,7 +52,7 @@
             <span class="info-item"><b>{{$t('m.Memory_Limit')}}</b> {{problem.memory_limit}}MB</span>
             <span v-if="problem.difficulty" class="info-item"><b>{{$t('m.Level')}}</b> {{$t('m.' + problem.difficulty)}}</span>
             <span class="info-item"><b>{{$t('m.Tags')}}</b>
-              <Tag v-for="tag in problem.tags" :key="tag" size="small">{{$t('m.tag.' + tag, tag)}}</Tag>
+              <Tag v-for="tag in problem.tags" :key="tag" size="small">{{ m.tag[tag] || tag }}</Tag>
             </span>
           </div>
         </div>
@@ -131,6 +131,7 @@ import api from '@oj/api'
 import CodeMirror from '@oj/components/CodeMirror.vue'
 import storage from '@/utils/storage'
 import { JUDGE_STATUS, buildProblemCodeKey } from '@/utils/constants'
+import { m } from '@/i18n/oj/zh-CN.js'
 
 export default {
   name: 'EmbeddedProblem',
@@ -172,7 +173,8 @@ export default {
       result: { result: 9 },
       selfTesting: false,
       selfTestInput: '',
-      selfTestResult: null
+      selfTestResult: null,
+      m: m
     }
   },
   computed: {
