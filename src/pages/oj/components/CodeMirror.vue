@@ -59,6 +59,10 @@
   import 'codemirror/addon/fold/brace-fold.js'
   import 'codemirror/addon/fold/indent-fold.js'
 
+  // auto-complete / hint
+  import 'codemirror/addon/hint/show-hint.css'
+  var CodeMirror = require('codemirror')
+
   export default {
     name: 'CodeMirror',
     components: {
@@ -87,16 +91,13 @@
     data () {
       return {
         options: {
-          // codemirror options
           tabSize: 4,
           mode: 'text/x-csrc',
           theme: 'solarized',
           lineNumbers: true,
           line: true,
-          // 代码折叠
           foldGutter: true,
           gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
-          // 选中文本自动高亮，及高亮方式
           styleSelectedText: true,
           lineWrapping: true,
           highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: true}
@@ -115,15 +116,83 @@
       ]
     },
     mounted () {
-      utils.getLanguages().then(languages => {
-        let mode = {}
-        languages.forEach(lang => {
+      var vm = this
+
+      utils.getLanguages().then(function (languages) {
+        var mode = {}
+        languages.forEach(function (lang) {
           mode[lang.name] = lang.content_type
         })
-        this.mode = mode
-        this.editor.setOption('mode', this.mode[this.language])
+        vm.mode = mode
+        vm.editor.setOption('mode', vm.mode[vm.language])
       })
-      this.editor.focus()
+
+      vm.editor.focus()
+
+      // ---- 核心：键入后弹出补全 ----
+      var KEYWORDS = {
+        'text/x-csrc': ['auto','break','case','char','const','continue','default','do','double','else','enum','extern','float','for','goto','if','int','long','register','return','short','signed','sizeof','static','struct','switch','typedef','union','unsigned','void','volatile','while','bool','true','false','NULL','printf','scanf','malloc','free','stdin','stdout','FILE','size_t'],
+        'text/x-c++src': ['auto','break','case','char','const','continue','default','do','double','else','enum','extern','float','for','goto','if','int','long','register','return','short','signed','sizeof','static','struct','switch','typedef','union','unsigned','void','volatile','while','bool','catch','class','const_cast','delete','dynamic_cast','explicit','false','friend','inline','mutable','namespace','new','operator','private','protected','public','reinterpret_cast','static_cast','template','this','throw','true','try','typeid','typename','using','virtual','wchar_t','string','vector','map','set','queue','stack','pair','sort','lower_bound','upper_bound','swap','min','max','push_back','pop_back','begin','end','size','empty','clear','cout','cin','endl','std','make_pair','printf','scanf','malloc','free','NULL'],
+        'python': ['False','None','True','and','as','assert','break','class','continue','def','del','elif','else','except','finally','for','from','global','if','import','in','is','lambda','nonlocal','not','or','pass','raise','return','try','while','with','yield','print','input','range','len','int','float','str','list','dict','set','tuple','map','filter','zip','enumerate','sorted','reversed','open','split','join','append','pop','max','min','sum','abs','self','__init__'],
+        'text/x-java': ['abstract','assert','boolean','break','byte','case','catch','char','class','continue','default','do','double','else','enum','extends','final','finally','float','for','if','implements','import','instanceof','int','interface','long','native','new','package','private','protected','public','return','short','static','strictfp','super','switch','synchronized','this','throw','throws','transient','try','void','volatile','while','true','false','null','public','class','static','void','main','String','System','out','println','Scanner','Math','Arrays','ArrayList','HashMap','Integer','sort']
+      }
+
+      var getCompletions = function (editor) {
+        var cur = editor.getCursor()
+        var token = editor.getTokenAt(cur)
+        var word = token.string
+        if (!word || !/^[a-zA-Z_]/.test(word)) return
+        var mode = editor.getModeAt(cur)
+        var modeName = mode && mode.name ? mode.name : 'text/x-c++src'
+        var kw = KEYWORDS[modeName] || KEYWORDS['text/x-c++src']
+        var allWords = {}
+        for (var i = 0; i < kw.length; i++) { allWords[kw[i]] = true }
+        var docText = editor.getValue()
+        var re = /\b\w{2,}\b/g
+        var m
+        while ((m = re.exec(docText)) !== null) { allWords[m[0]] = true }
+        var list = []
+        var prefix = word.toLowerCase()
+        for (var w in allWords) {
+          if (w !== word && w.toLowerCase().indexOf(prefix) === 0) list.push(w)
+        }
+        list.sort()
+        return {
+          list: list.slice(0, 50),
+          from: { line: cur.line, ch: token.start },
+          to: { line: cur.line, ch: token.end }
+        }
+      }
+
+      // 自动补全触发
+      var tryAutocomplete = function (cm) {
+        if (typeof cm.showHint !== 'function') {
+          console.log('[CodeMirror] showHint not available on editor instance, trying CodeMirror global')
+          if (typeof CodeMirror.showHint === 'function') {
+            CodeMirror.showHint(cm, getCompletions, { completeSingle: false })
+          } else {
+            console.log('[CodeMirror] global CodeMirror.showHint also not available')
+          }
+          return
+        }
+        cm.showHint({ hint: getCompletions, completeSingle: false })
+      }
+
+      vm.editor.on('changes', function (cm, change) {
+        if (change.origin === '+input') {
+          tryAutocomplete(cm)
+        }
+      })
+
+      vm.editor.on('keyup', function (cm, e) {
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+          tryAutocomplete(cm)
+        }
+        if (e.ctrlKey && e.key === ' ') {
+          e.preventDefault()
+          tryAutocomplete(cm)
+        }
+      })
     },
     watch: {
       language (newLang) {
@@ -164,7 +233,6 @@
     },
     computed: {
       editor () {
-        // get current editor object
         return this.$refs.myEditor.editor
       }
     },

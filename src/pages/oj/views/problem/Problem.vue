@@ -94,11 +94,11 @@
               <div v-if="layoutMode === 'horizontal'" class="problem-info-inline">
                 <Divider />
                 <div class="info-inline-grid">
-                  <span class="info-inline-item"><b>ID</b> {{problem._id}}</span>
-                  <span class="info-inline-item"><b>{{$t('m.Time_Limit')}}</b> {{problem.time_limit}}MS</span>
-                  <span class="info-inline-item"><b>{{$t('m.Memory_Limit')}}</b> {{problem.memory_limit}}MB</span>
-                  <span class="info-inline-item"><b>{{$t('m.IOMode')}}</b> {{problem.io_mode.io_mode}}</span>
-                  <span class="info-inline-item"><b>{{$t('m.Created')}}</b> {{problem.created_by.username}}</span>
+                  <span class="info-inline-item"><b>ID</b> {{ problem._id || '—' }}</span>
+                <span class="info-inline-item"><b>{{$t('m.Time_Limit')}}</b> {{ problem.time_limit || '—' }}MS</span>
+                <span class="info-inline-item"><b>{{$t('m.Memory_Limit')}}</b> {{ problem.memory_limit || '—' }}MB</span>
+                  <span class="info-inline-item"><b>{{$t('m.IOMode')}}</b> {{ problem.io_mode && problem.io_mode.io_mode || '—' }}</span>
+                <span class="info-inline-item"><b>{{$t('m.Created')}}</b> {{ problem.created_by && problem.created_by.username || '—' }}</span>
                   <span v-if="problem.difficulty" class="info-inline-item"><b>{{$t('m.Level')}}</b> {{$t('m.' + problem.difficulty)}}</span>
                   <span v-if="problem.total_score" class="info-inline-item"><b>{{$t('m.Score')}}</b> {{problem.total_score}}</span>
                   <span class="info-inline-item"><b>{{$t('m.Tags')}}</b>
@@ -249,17 +249,17 @@
             <p>{{problem._id}}</p></li>
           <li>
             <p>{{$t('m.Time_Limit')}}</p>
-            <p>{{problem.time_limit}}MS</p></li>
+            <p>{{ problem.time_limit || '—' }}MS</p></li>
           <li>
             <p>{{$t('m.Memory_Limit')}}</p>
-            <p>{{problem.memory_limit}}MB</p></li>
+            <p>{{ problem.memory_limit || '—' }}MB</p></li>
           <li>
             <p>{{$t('m.IOMode')}}</p>
             <p>{{problem.io_mode.io_mode}}</p>
           </li>
           <li>
             <p>{{$t('m.Created')}}</p>
-            <p>{{problem.created_by.username}}</p></li>
+            <p>{{ problem.created_by && problem.created_by.username || '—' }}</p></li>
           <li v-if="problem.difficulty">
             <p>{{$t('m.Level')}}</p>
             <p>{{$t('m.' + problem.difficulty)}}</p></li>
@@ -1025,7 +1025,7 @@
       top: 80px;
       left: 0;
       right: 0;
-      bottom: 0;
+      bottom: 50px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -1056,22 +1056,31 @@
           width: 100%;
 
           .layout-left {
+            flex: 1;
             min-width: 0;
             overflow-y: auto;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
           }
 
-          .layout-left > .ivu-card {
-            width: 100%;
-            min-height: 100%;
-            min-width: 0;
-            margin-bottom: 0;
-            overflow: visible;
+          ::v-deep .layout-left > .ivu-card {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+          }
+
+          ::v-deep .layout-left .ivu-card-body {
+            flex: 1 1 0%;
+            min-height: 0;
+            overflow-y: auto;
           }
 
           .layout-right {
+            flex: 1;
             min-width: 0;
-            flex: 1 1 0%;
+            overflow-y: auto;
           }
         }
       }
@@ -1554,22 +1563,37 @@
   .full-width-layout {
     #problem-main {
       .problem-layout-wrapper.horizontal {
+        display: flex;
+        overflow: hidden;
+
         .layout-left {
+          flex: 1 1 0%;
           min-width: 0;
           overflow-y: auto;
           overflow-x: hidden;
           padding-bottom: 54px;
+          display: flex;
+          flex-direction: column;
         }
 
         .layout-left > .ivu-card {
-          min-height: 100%;
+          flex: 1 1 auto;
+          min-height: 0;
           min-width: 0;
           margin-bottom: 0;
           border-radius: 16px;
-          overflow: visible;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .layout-left .ivu-card-body {
+          flex: 1 1 0%;
+          min-height: 0;
+          overflow-y: auto;
         }
 
         .layout-right {
+          flex: 1 1 0%;
           min-width: 0;
           overflow-y: auto;
           width: 100%;
@@ -1949,5 +1973,12 @@
        }
      }
    }
+</style>
+
+<style lang="less">
+/* 强制 full-width-layout 铺满全屏 */
+.problem-page-root > .flex-container.full-width-layout {
+  z-index: 30 !important;
+}
 </style>
 

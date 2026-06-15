@@ -14,18 +14,36 @@
       <Button @click="refetch" style="margin-left: 8px">重新加载</Button>
     </div>
 
-    <div v-else class="flex-container">
+    <div v-else class="flex-container" :class="{ 'horizontal-mode': layoutMode === 'horizontal' }">
       <div id="problem-main">
-        <Panel :padding="40" shadow>
+        <!-- 布局切换 -->
+        <div class="layout-toggle-row">
+          <RadioGroup v-model="layoutMode" type="button" size="small">
+            <Radio label="horizontal">
+              <Icon type="ios-pause" :style="{ transform: 'rotate(90deg)' }" size="14" />
+              <span style="font-size: 12px; margin-left: 2px">左右</span>
+            </Radio>
+            <Radio label="vertical">
+              <Icon type="ios-pause" size="14" />
+              <span style="font-size: 12px; margin-left: 2px">上下</span>
+            </Radio>
+          </RadioGroup>
+        </div>
+
+        <!-- 推荐理由 -->
+        <div v-if="currentProblem.reason" class="reason-note-top">
+          <span class="rn-dot"></span>
+          <span>{{ currentProblem.reason }}</span>
+        </div>
+
+        <!-- 题目描述 + 代码编辑器容器 -->
+        <div class="problem-layout-wrapper" :class="layoutMode">
+          <div class="layout-left" :style="layoutLeftStyle">
+            <Panel :padding="40" shadow>
           <div slot="title" class="panel-title-row">
             <span class="problem-title-id">#{{ currentProblem._id }}.</span>
             <span class="problem-title-text">{{ currentProblem.title }}</span>
             <span class="diff-tag" :class="diffClass">{{ diffLabel }}</span>
-          </div>
-
-          <div v-if="currentProblem.reason" class="reason-note">
-            <span class="rn-dot"></span>
-            <span>{{ currentProblem.reason }}</span>
           </div>
 
           <div id="problem-content" class="markdown-body" v-katex>
@@ -69,8 +87,28 @@
               <p class="title">{{ $t('m.Source') }}</p>
               <p class="content">{{ currentProblem.source }}</p>
             </div>
+
+            <div v-if="layoutMode === 'horizontal'" class="problem-info-inline">
+              <Divider />
+              <div class="info-inline-grid">
+                <span class="info-inline-item"><b>ID</b> {{ currentProblem._id }}</span>
+                <span class="info-inline-item"><b>{{ $t('m.Time_Limit') }}</b> {{ currentProblem.time_limit || 1000 }}MS</span>
+                <span class="info-inline-item"><b>{{ $t('m.Memory_Limit') }}</b> {{ currentProblem.memory_limit || 256 }}MB</span>
+                <span class="info-inline-item"><b>{{ $t('m.IOMode') }}</b> {{ currentProblemIO }}</span>
+                <span v-if="currentProblem.difficulty" class="info-inline-item"><b>{{ $t('m.Level') }}</b> {{ difficultyText }}</span>
+                <span class="info-inline-item"><b>{{ $t('m.Tags') }}</b>
+                  <Tag v-for="tag in currentProblem.tags" :key="tag" size="small">{{ m.tag[tag] || tag }}</Tag>
+                </span>
+              </div>
+            </div>
           </div>
         </Panel>
+          </div>
+
+          <div v-if="layoutMode === 'horizontal'" class="resize-handle" @mousedown="startResize"></div>
+          <div v-show="isResizing" class="resize-overlay" @mouseup="stopResize" @mousemove="handleResize"></div>
+
+          <div class="layout-right" :style="layoutRightStyle">
 
         <AICard
           title="智能解题提示"
@@ -163,9 +201,11 @@
             下一题 <Icon type="ios-arrow-forward" />
           </Button>
         </div>
+          </div>
+        </div>
       </div>
 
-      <div id="right-column">
+      <div id="right-column" v-show="layoutMode === 'vertical'">
         <Card id="info">
           <div slot="title" class="header">
             <Icon type="information-circled"></Icon>
@@ -318,7 +358,10 @@ export default {
       pieChart: null,
       largePieChart: null,
       _savedPrefs: { language: '', theme: 'solarized' },
-      m: m
+      m: m,
+      layoutMode: 'horizontal',
+      leftWidth: 50,
+      isResizing: false
     }
   },
   computed: {
@@ -407,6 +450,14 @@ export default {
     },
     failedDetails () {
       return this.submissionDetail.failed_testcase_details || []
+    },
+    layoutRightStyle () {
+      if (this.layoutMode !== 'horizontal') return {}
+      return { flex: '1', minWidth: '0' }
+    },
+    layoutLeftStyle () {
+      if (this.layoutMode !== 'horizontal') return {}
+      return { width: this.leftWidth + '%', flexShrink: '0' }
     }
   },
   watch: {
@@ -436,6 +487,8 @@ export default {
       this.refreshTimer = null
     }
     this.disposeCharts()
+    window.removeEventListener('mousemove', this.handleResize)
+    window.removeEventListener('mouseup', this.stopResize)
   },
   methods: {
     _restorePrefs () {
@@ -479,7 +532,7 @@ export default {
       api.getProblem(problemId).then(res => {
         const problem = res.data.data
         if (problem) {
-          this.problemList[this.currentIndex] = { ...this.problemList[this.currentIndex], ...problem }
+          this.$set(this.problemList, this.currentIndex, { ...this.problemList[this.currentIndex], ...problem })
           if (problem.samples && problem.samples.length > 0) {
             this.selfTestInput = problem.samples[0].input
           }
@@ -735,6 +788,29 @@ export default {
         this.largePieChart.dispose()
         this.largePieChart = null
       }
+    },
+    startResize (e) {
+      this.isResizing = true
+      window.addEventListener('mousemove', this.handleResize)
+      window.addEventListener('mouseup', this.stopResize)
+      document.body.style.cursor = 'col-resize'
+      document.body.style.userSelect = 'none'
+      e.preventDefault()
+    },
+    handleResize (e) {
+      if (!this.isResizing) return
+      const main = this.$el.querySelector('#problem-main')
+      if (!main) return
+      const rect = main.getBoundingClientRect()
+      const w = ((e.clientX - rect.left) / rect.width) * 100
+      this.leftWidth = Math.min(Math.max(w, 30), 70)
+    },
+    stopResize () {
+      this.isResizing = false
+      window.removeEventListener('mousemove', this.handleResize)
+      window.removeEventListener('mouseup', this.stopResize)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
     }
   }
 }
@@ -822,6 +898,28 @@ export default {
       border-radius: 50%;
       background: #2d8cf0;
       margin-top: 8px;
+    }
+  }
+
+  .reason-note-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #1e3a8a;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 10px 20px;
+    margin: 8px 16px;
+    background: #e8f0fe;
+    border-radius: 8px;
+    border-left: 4px solid #1e3a8a;
+    flex-shrink: 0;
+    .rn-dot {
+      flex-shrink: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1e3a8a;
     }
   }
 
@@ -1196,6 +1294,145 @@ export default {
     }
   }
 }
+
+.flex-container {
+  &.horizontal-mode {
+    max-width: none;
+    width: 100%;
+    padding: 0;
+    background: #f5f7fa;
+    margin: 0;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+
+    #problem-main {
+      margin-right: 0;
+      flex: 1 1 0%;
+      min-width: 0;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 0 8px;
+
+      .layout-toggle-row {
+        flex-shrink: 0;
+      }
+
+      .problem-layout-wrapper {
+        flex: 1 1 0%;
+        min-height: 0;
+        width: 100%;
+      }
+
+      .problem-layout-wrapper.horizontal {
+        display: flex;
+        width: 100%;
+
+        .layout-left {
+          min-width: 0;
+          overflow-y: auto;
+          overflow-x: hidden;
+          height: 100%;
+        }
+
+        .layout-left > .ivu-card {
+          min-height: 100%;
+          min-width: 0;
+          margin-bottom: 0;
+          border-radius: 16px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .layout-left ::v-deep .ivu-card-body {
+          flex: 1 1 0%;
+          min-height: 0;
+          overflow-y: auto;
+        }
+      }
+
+      .layout-right {
+        min-width: 0;
+        overflow-y: auto;
+        width: 100%;
+        padding-bottom: 54px;
+
+        .nav-bottom { margin-bottom: 16px; }
+        > .ivu-card { width: 100%; }
+        .ai-response-card { margin-top: 0 !important; margin-bottom: 0 !important; }
+        #submit-code > .ivu-card-body > div:first-child {
+          .CodeMirror { height: auto !important; }
+          .CodeMirror-scroll { max-height: none !important; max-width: none !important; }
+        }
+      }
+    }
+
+    .layout-toggle-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+      padding: 4px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      ::v-deep .ivu-radio-group-button .ivu-radio-wrapper { padding: 2px 12px; }
+    }
+
+    .resize-handle {
+      width: 4px;
+      background: #e2e8f0;
+      cursor: col-resize;
+      flex-shrink: 0;
+      z-index: 10;
+      transition: background 0.2s;
+      &:hover { background: #1e3a8a; }
+    }
+
+    .resize-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 9999;
+      cursor: col-resize;
+    }
+  }
+
+  &:not(.horizontal-mode) {
+    padding-top: 120px;
+    padding-bottom: 80px;
+
+    .layout-toggle-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+      padding: 4px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      ::v-deep .ivu-radio-group-button .ivu-radio-wrapper { padding: 2px 12px; }
+    }
+
+    .problem-layout-wrapper {
+      &.horizontal {
+        display: flex;
+        gap: 0;
+        flex: 1 1 0%;
+        min-height: 0;
+        .layout-left { overflow-y: auto; overflow-x: hidden; }
+        .layout-right { overflow-y: auto; }
+      }
+      &.vertical {
+        .layout-left { width: 100%; }
+        .layout-right { width: 100%; }
+      }
+    }
+  }
+}
 </style>
 
 <style lang="less">
@@ -1240,6 +1477,31 @@ export default {
     width: 100% !important;
     padding: 0;
     overflow: hidden;
+  }
+}
+
+.problem-info-inline {
+  margin-top: 8px;
+
+  .info-inline-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+
+    .info-inline-item {
+      font-size: 13px;
+      color: #475569;
+      padding: 2px 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+
+      b {
+        color: #1e3a8a;
+        font-weight: 600;
+      }
+    }
   }
 }
 </style>

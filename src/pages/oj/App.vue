@@ -9,10 +9,10 @@
       <span class="mobile-page-title">{{ pageTitle }}</span>
       <div class="mobile-back-placeholder"></div>
     </div>
-    <div class="content-app" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'mobile-nav': isMobile, 'mobile-has-top-bar': isMobile && !isTabPage }">
+    <div class="content-app" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'mobile-nav': isMobile, 'mobile-has-top-bar': isMobile && !isTabPage, 'full-screen-page': isFullWidthPage }">
       <router-view></router-view>
     </div>
-    <div class="global-footer" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'problem-page': isProblemPage }">
+    <div class="global-footer" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'problem-page': isProblemPage, 'hide-footer': isFullWidthPage }">
       <p v-html="website.website_footer"></p>
       <p>Powered by <a href="https://github.com/QingdaoU/OnlineJudge">GraphOnlineJudge</a>
         <span v-if="version">&nbsp; Version: {{ version }}</span>
@@ -90,6 +90,9 @@
       },
       isProblemPage () {
         return this.$route.name === 'problem-details' || this.$route.name === 'contest-problem-details'
+      },
+      isFullWidthPage () {
+        return this.$route.name === 'immersion-practice'
       }
     },
     watch: {
@@ -130,6 +133,13 @@
 .content-app.home-page {
   margin-top: 0;
   padding: 0;
+}
+
+.content-app.full-screen-page {
+  margin-top: 0;
+  padding: 0;
+  min-height: auto;
+  overflow: hidden;
 }
 
 .mobile-top-bar {
@@ -197,6 +207,10 @@
   }
 
   &.chat-page {
+    display: none;
+  }
+
+  &.hide-footer {
     display: none;
   }
 

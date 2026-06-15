@@ -4,6 +4,10 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 Vue.use(ElementUI)
 import App from './App.vue'
+
+// 确保 CodeMirror 核心 + addons 在入口加载
+require('codemirror')
+require('codemirror/addon/hint/show-hint.js')
 import router from './router'
 import store from '@/store'
 import i18n from '@/i18n'
