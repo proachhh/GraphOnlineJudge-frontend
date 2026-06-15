@@ -195,7 +195,7 @@
         this.$router.push({ name: 'problem-details', params: { problemID: problemId } })
       },
       fetchErrorAnalysis () {
-        return api.analyzeError({ message: `我的提交(ID: ${this.submission.id})为什么错了？请帮我分析错误原因。` })
+        return api.analyzeError({ message: '帮我分析这条提交为什么出错', submission_id: this.submission.id, agent_type: 'ErrorAnalysisAgent' })
       },
       fetchCodeReview () {
         return api.codeReview({ submission_id: this.submission.id })

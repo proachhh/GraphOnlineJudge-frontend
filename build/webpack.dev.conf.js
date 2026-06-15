@@ -23,12 +23,12 @@ module.exports = merge(baseWebpackConfig, {
     },
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8001',   // 你的测试后端地址
+        target: 'http://127.0.0.1:80',   // Docker 后端暴露在 80 端口
         changeOrigin: true,
         logLevel: 'debug'                 // 可选，便于调试
       },
       '/public': {
-        target: 'http://127.0.0.1:8001',
+        target: 'http://127.0.0.1:80',
         changeOrigin: true,
         logLevel: 'debug',
         onProxyRes: function(proxyRes, req, res) {

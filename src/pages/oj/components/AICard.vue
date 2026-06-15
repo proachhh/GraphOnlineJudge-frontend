@@ -40,6 +40,8 @@
 </template>
 
 <script>
+import { renderMarkdown } from '@/utils/markdown'
+
 export default {
   name: 'AICard',
   props: {
@@ -60,37 +62,10 @@ export default {
   computed: {
     renderedContent () {
       if (!this.result) return ''
-      var content = this.result
-      var self = this
-      // 保护代码块，避免内部 \n 被转成 <br>
-      var codeBlocks = []
-      content = content.replace(/```(\w*)\n?([\s\S]*?)```/g, function (_, lang, code) {
-        var idx = codeBlocks.length
-        codeBlocks.push('<pre class="ai-code-block"><code>' + self.escapeHtml(code.trim()) + '</code></pre>')
-        return '%%CODEBLOCK_' + idx + '%%'
-      })
-      // 行内代码
-      content = content.replace(/`([^`]+)`/g, function (_, code) {
-        return '<code>' + self.escapeHtml(code) + '</code>'
-      })
-      // 粗体
-      content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      // 换行
-      content = content.replace(/\n/g, '<br>')
-      // 还原代码块
-      content = content.replace(/%%CODEBLOCK_(\d+)%%/g, function (_, idx) {
-        return codeBlocks[parseInt(idx)] || ''
-      })
-      return content
+      return renderMarkdown(this.result)
     }
   },
   methods: {
-    escapeHtml (str) {
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-    },
     async fetchAI () {
       this.loading = true
       this.isExpanded = true
@@ -202,16 +177,11 @@ export default {
       font-weight: 600;
     }
 
-    /deep/ .ai-code-block {
-      background: #1e1e2e;
-      color: #cdd6f4;
-      padding: 16px;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-family: 'Fira Code', 'Consolas', monospace;
-      font-size: 13px;
-      line-height: 1.6;
-      margin: 12px 0;
+    /deep/ pre code, /deep/ .md-code-block code {
+      background: transparent !important;
+      color: inherit !important;
+      padding: 0 !important;
+      font-size: inherit !important;
     }
 
     /deep/ code {
@@ -221,6 +191,30 @@ export default {
       font-family: 'Fira Code', 'Consolas', monospace;
       font-size: 13px;
       color: #ed4014;
+    }
+
+    /deep/ h2, /deep/ h3, /deep/ h4 {
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #17233d;
+    }
+
+    /deep/ h2 { font-size: 18px; }
+    /deep/ h3 { font-size: 16px; }
+    /deep/ h4 { font-size: 14px; }
+
+    /deep/ ul, /deep/ ol {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+
+    /deep/ blockquote {
+      border-left: 3px solid #bbbec4;
+      padding: 6px 12px;
+      margin: 8px 0;
+      color: #808695;
+      background: #fafafa;
     }
   }
 

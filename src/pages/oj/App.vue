@@ -2,7 +2,14 @@
   <div>
     <NavBar></NavBar>
     <GlobalSidebar></GlobalSidebar>
-    <div class="content-app" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'mobile-nav': isMobile }">
+    <div class="mobile-top-bar" v-if="isMobile && !isTabPage">
+      <div class="mobile-back-btn" @click="$router.back()">
+        <Icon type="ios-arrow-back" size="22" />
+      </div>
+      <span class="mobile-page-title">{{ pageTitle }}</span>
+      <div class="mobile-back-placeholder"></div>
+    </div>
+    <div class="content-app" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'mobile-nav': isMobile, 'mobile-has-top-bar': isMobile && !isTabPage }">
       <router-view></router-view>
     </div>
     <div class="global-footer" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'problem-page': isProblemPage }">
@@ -69,6 +76,12 @@
     },
     computed: {
       ...mapState(['website', 'sidebarCollapsed']),
+      isTabPage () {
+        return ['problem-list', 'contest-list', 'lesson-plan-list', 'immersion-practice', 'mobile-personal'].includes(this.$route.name)
+      },
+      pageTitle () {
+        return this.$route.meta && this.$route.meta.title ? this.$route.meta.title : ''
+      },
       isHomePage () {
         return this.$route.path === '/' || this.$route.path === '/home' || this.$route.path === '/learning-path'
       },
@@ -117,6 +130,49 @@
 .content-app.home-page {
   margin-top: 0;
   padding: 0;
+}
+
+.mobile-top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 8px;
+  background: #fff;
+  border-bottom: 1px solid #e8eaec;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+
+  .mobile-back-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e3a8a;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-page-title {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-back-placeholder {
+    width: 36px;
+    flex-shrink: 0;
+  }
 }
 
 .global-footer {

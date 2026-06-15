@@ -293,7 +293,7 @@ export default {
     return ajax('agent/chat/', 'post', { data })
   },
   getProblemHint (data) {
-    return ajax('agent/chat/', 'post', { data })
+    return ajax('agent/chat/', 'post', { data: { ...data, agent_type: 'HintAgent' } })
   },
   getLearningAdvice () {
     return ajax('spark/learning-advice/', 'get')

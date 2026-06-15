@@ -104,7 +104,7 @@ export default {
     async fetchGraphData() {
       try {
         const res = await api.getKnowledgeGraph()
-        this.graphData = res.data  // 预期格式：{ nodes: [{name: ...}], edges: [{source, target}] }
+        this.graphData = res.data 
         this.$nextTick(() => {
           this.initChart()
         })

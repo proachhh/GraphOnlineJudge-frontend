@@ -97,31 +97,102 @@ aside {
 
 blockquote {
   border-left: 3px solid #bbbec4;
-  padding-left: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  color: #7b7b7b;
+  padding: 8px 16px;
+  margin: 10px 0;
+  color: #6b6b7b;
+  background: #fafafa;
+  border-radius: 0 6px 6px 0;
+}
+
+blockquote p {
+  margin-bottom: 0;
 }
 
 hr {
-  width: 540px;
+  width: 100%;
   text-align: left;
-  margin: 0 auto 0 0;
+  margin: 16px 0;
   color: #999;
+  border: none;
+  border-top: 1px solid #e9eaec;
 }
 
 table {
   border-collapse: collapse;
-  margin: 1em 1em;
-  border: 1px solid #ccc;
+  margin: 12px 0;
+  width: 100%;
+  border: 1px solid #e9eaec;
+  border-radius: 6px;
+  overflow: hidden;
   thead {
-    background-color: #eee;
-    td {
-      color: #666;
+    background-color: #f0f2f5;
+    th {
+      color: #333;
+      font-weight: 600;
+      padding: 8px 12px;
+      border: 1px solid #e9eaec;
+      text-align: left;
     }
   }
   td {
-    padding: 0.5em 1em;
-    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border: 1px solid #e9eaec;
   }
+  tbody tr:nth-child(even) {
+    background: #fafafa;
+  }
+}
+
+.md-table, table {
+  border-collapse: collapse;
+  margin: 12px 0;
+  width: 100%;
+  border: 1px solid #e9eaec;
+  border-radius: 6px;
+  overflow: hidden;
+  thead, th {
+    background-color: #f0f2f5;
+    color: #333;
+    font-weight: 600;
+    padding: 8px 12px;
+    border: 1px solid #e9eaec;
+    text-align: left;
+  }
+  td {
+    padding: 8px 12px;
+    border: 1px solid #e9eaec;
+  }
+  tbody tr:nth-child(even) {
+    background: #fafafa;
+  }
+}
+
+.md-code-block {
+  background: #1e1e2e !important;
+  color: #cdd6f4 !important;
+  border-radius: 8px !important;
+  padding: 14px !important;
+  overflow-x: auto;
+  margin: 10px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  border: none !important;
+  
+  code {
+    background: transparent !important;
+    color: #cdd6f4 !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+  }
+}
+
+.md-ul {
+  padding: 0;
+  margin: 8px 0 8px 20px;
+  list-style-type: disc;
+}
+
+.md-ul li {
+  line-height: 1.8;
+  margin-bottom: 4px;
 }

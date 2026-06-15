@@ -111,7 +111,23 @@
                   </span>
                 </div>
               </div>
-              <div v-if="item.snippet" class="snippet-info">
+              <div v-if="item.problems && item.problems.length" class="problem-list">
+                <div class="problem-list-label">
+                  <Icon type="ios-book" size="14" /> 推荐题目
+                </div>
+                <div
+                  v-for="prob in item.problems"
+                  :key="prob.id"
+                  class="problem-item"
+                  @click="goProblem(prob._id || prob.id)"
+                >
+                  <span class="problem-diff-tag" :style="getDifficultyStyle(prob.difficulty)">
+                    {{ formatDifficulty(prob.difficulty) }}
+                  </span>
+                  <span class="problem-title-link">#{{ prob._id }} {{ prob.title }}</span>
+                </div>
+              </div>
+              <div v-else-if="item.snippet" class="snippet-info">
                 {{ item.snippet }}
               </div>
               <div v-else class="no-problem">
@@ -264,6 +280,9 @@ export default {
       if (diff <= 2.5) return 'Easy'
       if (diff <= 3.5) return 'Mid'
       return 'Hard'
+    },
+    goProblem (problemId) {
+      this.$router.push({ name: 'problem-details', params: { problemID: problemId } })
     }
   }
 }
@@ -603,6 +622,55 @@ export default {
         background: rgba(45, 140, 240, 0.05);
         border-radius: 6px;
         border-left: 3px solid #2d8cf0;
+      }
+
+      .problem-list {
+        padding-left: 32px;
+        margin-top: 8px;
+
+        .problem-list-label {
+          font-size: 12px;
+          color: #808695;
+          margin-bottom: 6px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .problem-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 12px;
+          margin-bottom: 4px;
+          background: rgba(45, 140, 240, 0.06);
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          &:hover {
+            background: rgba(45, 140, 240, 0.15);
+            transform: translateX(4px);
+          }
+
+          .problem-diff-tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            flex-shrink: 0;
+          }
+
+          .problem-title-link {
+            color: #2d8cf0;
+            font-size: 13px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
       }
 
       .no-problem {

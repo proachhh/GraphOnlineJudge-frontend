@@ -60,6 +60,7 @@
 
 <script>
 import PathTimeline from './PathTimeline.vue'
+import { renderMarkdown } from '@/utils/markdown'
 
 const AGENT_COLORS = {
   'ProfileAgent': 'geekblue',
@@ -119,64 +120,6 @@ export default {
     }
   }
 }
-
-function escapeHtml (str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-}
-
-function renderMarkdown (text) {
-  var codeBlocks = []
-
-  text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, function (_, lang, code) {
-    var idx = codeBlocks.length
-    codeBlocks.push('<pre class="md-code-block"><code>' + escapeHtml(code.trim()) + '</code></pre>')
-    return '%%CB' + idx + '%%'
-  })
-
-  text = text.replace(/`([^`]+)`/g, function (_, code) {
-    return '<code>' + escapeHtml(code) + '</code>'
-  })
-
-  text = text.replace(/^### (.+)$/gm, '<h4>$1</h4>')
-  text = text.replace(/^## (.+)$/gm, '<h3>$1</h3>')
-  text = text.replace(/^# (.+)$/gm, '<h2>$1</h2>')
-
-  text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-  text = text.replace(/\*(.+?)\*/g, '<em>$1</em>')
-
-  text = text.replace(/~~(.+?)~~/g, '<del>$1</del>')
-
-  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-
-  text = text.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-  text = text.replace(/<\/blockquote>\n<blockquote>/g, '<br>')
-
-  text = text.replace(/^---+/gm, '<hr>')
-
-  text = text.replace(/^- (.+)$/gm, '<li class="md-li">$1</li>')
-  text = text.replace(/^\d+\. (.+)$/gm, '<li class="md-li">$1</li>')
-  text = text.replace(/((?:<li[^>]*>[\s\S]*?<\/li>\n?)+)/g, '<ul class="md-ul">$1</ul>')
-
-  text = text.replace(/%%CB(\d+)%%/g, function (_, idx) {
-    return codeBlocks[parseInt(idx)] || ''
-  })
-
-  text = text.replace(/\n/g, '<br>')
-
-  text = text.replace(/<br><\/blockquote>/g, '</blockquote>')
-  text = text.replace(/<blockquote>/g, '<blockquote><br>')
-
-  text = text.replace(/&amp;lt;/g, '&lt;')
-  text = text.replace(/&amp;gt;/g, '&gt;')
-  text = text.replace(/&amp;amp;/g, '&amp;')
-
-  return text
-}
-
 </script>
 
 <style lang="less" scoped>

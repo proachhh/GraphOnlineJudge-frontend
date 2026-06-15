@@ -434,7 +434,7 @@ export default {
     overflow-x: auto;
     margin: 16px 0;
     font-size: 15px;
-    line-height: 1.6;
+    line-height: 1.4;
 
     code {
       background: transparent;

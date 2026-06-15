@@ -42,14 +42,14 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
         '/api': {
-        target: 'http://127.0.0.1:8001',   // 你的测试后端地址
+        target: 'http://127.0.0.1:80',   // Docker 后端暴露在 80 端口
         changeOrigin: true,
         pathRewrite: {
         '^/api': '/api'
         }
       },
       '/public': {
-        target: 'http://127.0.0.1:8001',
+        target: 'http://127.0.0.1:80',
         changeOrigin: true,
         pathRewrite: {
           '^/public': '/public'

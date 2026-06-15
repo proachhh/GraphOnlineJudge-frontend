@@ -335,6 +335,14 @@ export default {
       this.$nextTick(() => {
         this.snapToEdge()
       })
+    },
+    '$route' (to) {
+      if (to.name === 'ai-chat-fullscreen') {
+        this.closeAIChat()
+      }
+      if (to.name === 'code-editor-fullscreen') {
+        this.closeCodeEditor()
+      }
     }
   },
   mounted () {

@@ -151,6 +151,7 @@
 </template>
 
 <script>
+import { renderMarkdown } from '@/utils/markdown'
 export default {
   name: 'ResourceCard',
   props: {
@@ -207,7 +208,7 @@ export default {
       if (typeof this.$markdownRender === 'function') {
         return this.$markdownRender(this.content)
       }
-      return this.content.replace(/\n/g, '<br>')
+      return renderMarkdown(this.content)
     }
   },
   methods: {
@@ -216,7 +217,7 @@ export default {
       if (typeof this.$markdownRender === 'function') {
         return this.$markdownRender(text)
       }
-      return text.replace(/\n/g, '<br>')
+      return renderMarkdown(text)
     },
     copyContent () {
       const text = typeof this.content === 'string' ? this.content : JSON.stringify(this.content, null, 2)

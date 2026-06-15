@@ -14,8 +14,14 @@
   .content-app {
     width: 100% !important;
     max-width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 0 70px 0 !important;
+  }
+  .content-app.mobile-nav {
+    margin-top: 0 !important;
+    padding-bottom: 70px !important;
+  }
+  .content-app.mobile-has-top-bar {
+    margin-top: 44px !important;
+    padding-bottom: 70px !important;
   }
 
   /* 通用宽度约束 */
@@ -109,12 +115,64 @@
       gap: 4px 10px !important;
     }
     .info-inline-item { font-size: 12px !important; }
+    /* 信息行内网格移动端紧凑显示 */
+    .problem-info-inline .info-inline-grid {
+      gap: 4px 10px !important;
+    }
+    .problem-info-inline .info-inline-item {
+      font-size: 12px !important;
+    }
     .sample { flex-direction: column !important; }
     .sample-input, .sample-output { width: 100% !important; }
     .CodeMirror { height: 260px !important; }
     #problem-content {
       padding: 12px !important;
       .content { font-size: 13px !important; }
+    }
+    #right-column {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 0 8px !important;
+    }
+    #right-column #info {
+      width: 100% !important;
+      overflow: visible !important;
+    }
+    #info ul {
+      padding: 12px !important;
+    }
+    #info ul li {
+      display: flex !important;
+      justify-content: space-between !important;
+      padding: 6px 0 !important;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px !important;
+    }
+    #info ul li p {
+      margin: 0 !important;
+    }
+    #info ul li p:first-child {
+      color: #64748b;
+      flex-shrink: 0;
+      margin-right: 12px;
+    }
+    #info ul li p:last-child {
+      color: #1e293b;
+      font-weight: 500;
+      text-align: right;
+    }
+    /* 垂直布局下饼图居中放大 */
+    #right-column #pieChart {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+    }
+    #right-column #pieChart .echarts {
+      height: 320px !important;
+      min-height: 320px !important;
+      width: 100% !important;
+      max-width: 360px !important;
+      margin: 0 auto !important;
     }
     .problem-info-side {
       width: 100% !important;
