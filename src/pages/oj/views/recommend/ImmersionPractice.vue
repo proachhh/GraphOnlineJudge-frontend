@@ -46,7 +46,7 @@
             <span class="diff-tag" :class="diffClass">{{ diffLabel }}</span>
           </div>
 
-          <div id="problem-content" class="markdown-body" v-katex>
+          <div id="problem-content" class="markdown-body" v-katex :key="'katex-' + currentIndex">
             <p class="title">{{ $t('m.Description') }}</p>
             <p class="content" v-html="currentProblem.description"></p>
 
@@ -790,11 +790,14 @@ export default {
       }
     },
     startResize (e) {
+      if (this.isResizing) return
       this.isResizing = true
       window.addEventListener('mousemove', this.handleResize)
       window.addEventListener('mouseup', this.stopResize)
       document.body.style.cursor = 'col-resize'
       document.body.style.userSelect = 'none'
+      clearTimeout(this._resizeTimer)
+      this._resizeTimer = setTimeout(() => this.stopResize(), 8000)
       e.preventDefault()
     },
     handleResize (e) {
@@ -811,6 +814,7 @@ export default {
       window.removeEventListener('mouseup', this.stopResize)
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
+      clearTimeout(this._resizeTimer)
     }
   }
 }

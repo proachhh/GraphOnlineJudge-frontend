@@ -22,8 +22,8 @@
       </transition>
     </div>
     <div class="footer">
-      <div v-html="websiteFooter"></div>
-      <span>Build Version: {{ version }}</span>
+      <div v-html="websiteFooter" style="display:inline"></div>
+      <span class="footer-version">Build Version: {{ version }}</span>
     </div>
 
     <el-dialog :title="$t('m.Latex_Editor')" :visible.sync="katexVisible">
@@ -216,10 +216,11 @@
       }
     }
 
-    span {
-      display: block;
-      margin-top: 6px;
+    .footer-version {
+      display: inline-block;
+      margin-left: 12px;
       color: #94a3b8;
+      font-size: 12px;
     }
   }
 
