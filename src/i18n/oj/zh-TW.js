@@ -614,6 +614,7 @@ export const m = {
   // NavBar.vue
   Home: '首頁',
   NavProblems: '試題',
+  Community: '社群',
   Contests: '比賽',
   NavStatus: '狀態',
   Rank: '排名',
@@ -801,7 +802,7 @@ export const m = {
   Lesson_Plan_Management: '教案管理',
   // GlobalSidebar.vue
   Code_Editor: '代碼編輯器',
-  Feedback: 'BUG回饋',
+  Feedback: '問題回饋',
   Feedback_Title: '回饋標題',
   Spark_AI_Assistant: '星火 AI 助手',
   Spark_AI: '星火',

@@ -619,6 +619,7 @@ export const m = {
   // NavBar.vue
   Home: 'Home',
   NavProblems: 'Problems',
+  Community: 'Community',
   Contests: 'Contests',
   NavStatus: 'Status',
   Rank: 'Rank',
@@ -806,7 +807,7 @@ export const m = {
   Lesson_Plan_Management: 'Lesson Plan Management',
   // GlobalSidebar.vue
   Code_Editor: 'Code Editor',
-  Feedback: 'Bug Report',
+  Feedback: 'Issue Report',
   Feedback_Title: 'Feedback Title',
   Spark_AI_Assistant: 'Spark AI Assistant',
   Spark_AI: 'Spark',

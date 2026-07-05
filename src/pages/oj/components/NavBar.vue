@@ -32,7 +32,7 @@
         </Menu-item>
         <Menu-item name="/forum">
           <Icon type="ios-people"></Icon>
-          论坛
+          {{$t('m.Community')}}
         </Menu-item>
         <!-- <Submenu name="rank">
           <template slot="title">

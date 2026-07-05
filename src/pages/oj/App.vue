@@ -14,11 +14,8 @@
     </div>
     <div class="global-footer" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'problem-page': isProblemPage, 'hide-footer': isFullWidthPage }">
       <p v-html="website.website_footer"></p>
-      <p>Powered by <a href="https://github.com/QingdaoU/OnlineJudge">GraphOnlineJudge</a>
+      <p>Powered by <a href="https://github.com/proachhh/GraphOnlineJudge-backend" target="_blank" rel="noopener noreferrer">GraphOnlineJudge</a>
         <span v-if="version">&nbsp; Version: {{ version }}</span>
-      </p>
-      <p>
-        <a href="http://47.108.158.48/" target="_blank" rel="noopener noreferrer" style="color:#666; text-decoration:none;">镜像仓库</a>
       </p>
     </div>
     <MobileBottomNav v-if="isMobile" />
