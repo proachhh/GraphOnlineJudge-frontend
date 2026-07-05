@@ -14,9 +14,13 @@ import Contest from './contest/Contest.vue'
 import Login from './general/Login.vue'
 import Home from './Home.vue'
 import ProblemImportOrExport from './problem/ImportAndExport.vue'
+import ForumPostManage from './forum/PostManage.vue'
+import ForumUserManage from './forum/UserManage.vue'
+import ForumReportManage from './forum/ReportManage.vue'
 
 export {
   Announcement, User, Conf, JudgeServer, Problem, ProblemList, Contest,
   ContestList, Login, Home, PruneTestCase, Dashboard, ProblemImportOrExport,
-  DataDashboard, ImmersionDashboard, Feedback
+  DataDashboard, ImmersionDashboard, Feedback,
+  ForumPostManage, ForumUserManage, ForumReportManage
 }

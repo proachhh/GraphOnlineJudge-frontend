@@ -35,6 +35,12 @@
         <template slot="title"><i class="el-icon-fa-book"></i>{{$t('m.Lesson_Plan')}}</template>
         <el-menu-item index="lesson-plan">{{$t('m.Lesson_Plan_Management')}}</el-menu-item>
       </el-submenu>
+      <el-submenu v-if="isSuperAdmin" index="forum">
+        <template slot="title"><i class="el-icon-fa-comments"></i>论坛管理</template>
+        <el-menu-item index="/forum/posts">帖子管理</el-menu-item>
+        <el-menu-item index="/forum/users">用户管理</el-menu-item>
+        <el-menu-item index="/forum/reports">举报处理</el-menu-item>
+      </el-submenu>
     </el-menu>
   </div>
 </template>

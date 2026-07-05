@@ -244,5 +244,19 @@ export default [
     name: 'code-editor-fullscreen',
     meta: {title: '代码编辑器'},
     component: () => import('@oj/views/editor/CodeEditorFullscreen.vue')
+  },
+
+  // 论坛
+  {
+    path: '/forum',
+    name: 'forum',
+    meta: {title: '论坛'},
+    component: () => import('@/pages/oj/views/forum/ForumList.vue')
+  },
+  {
+    path: '/agreement',
+    name: 'agreement',
+    meta: {title: '用户协议'},
+    component: () => import('@/pages/oj/views/Agreement.vue')
   }
 ]

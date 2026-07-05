@@ -1110,12 +1110,14 @@ export default {
     }
     .dot-nav {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: center;
       .dot {
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
+        min-width: 14px;
         border-radius: 50%;
         background: #e8eaec;
         cursor: pointer;

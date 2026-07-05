@@ -36,10 +36,15 @@
         </div>
       </FormItem>
     </Form>
+    <div class="agreement-row">
+      <Checkbox v-model="agreed" size="small"></Checkbox>
+      <span>我已阅读并同意 <a @click="agreementVisible = true">《用户协议与隐私政策》</a></span>
+    </div>
     <div class="register-footer">
       <Button
         type="primary"
         @click="handleRegister"
+        :disabled="!agreed"
         class="register-btn" long
         :loading="btnRegisterLoading">
         {{$t('m.UserRegister')}}
@@ -51,6 +56,9 @@
         {{$t('m.Already_Registed')}}
       </Button>
     </div>
+    <Modal v-model="agreementVisible" title="用户协议与隐私政策" :width="700" footer-hide>
+      <AgreementContent />
+    </Modal>
   </div>
 </template>
 
@@ -58,9 +66,11 @@
   import { mapGetters, mapActions } from 'vuex'
   import api from '@oj/api'
   import { FormMixin } from '@oj/components/mixins'
+  import AgreementContent from '@oj/components/AgreementContent'
 
   export default {
     mixins: [FormMixin],
+    components: { AgreementContent },
     mounted () {
       this.getCaptchaSrc()
     },
@@ -100,6 +110,8 @@
 
       return {
         btnRegisterLoading: false,
+        agreed: false,
+        agreementVisible: false,
         formRegister: {
           username: '',
           password: '',
@@ -226,6 +238,11 @@
       }
     }
   }
+}
+
+.agreement-row {
+  display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font-size: 13px; color: #64748b;
+  a { color: #1e3a8a; cursor: pointer; text-decoration: underline; }
 }
 
 .register-footer {

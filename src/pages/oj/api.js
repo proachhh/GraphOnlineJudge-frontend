@@ -312,6 +312,49 @@ export default {
   },
   getProfile () {
     return ajax('agent/profile/', 'get')
+  },
+  // 论坛
+  getForumCategories () {
+    return ajax('forum/categories/', 'get')
+  },
+  getForumPosts (params) {
+    return ajax('forum/posts/', 'get', { params })
+  },
+  getForumPostDetail (postId) {
+    return ajax(`forum/post/${postId}/`, 'get')
+  },
+  createForumPost (data) {
+    return ajax('forum/posts/', 'post', { data })
+  },
+  createForumComment (data) {
+    return ajax('forum/comments/', 'post', { data })
+  },
+  deleteForumComment (data) {
+    return ajax('forum/comments/', 'delete', { data })
+  },
+  editForumPost (postId, data) {
+    return ajax(`forum/post/${postId}/`, 'put', { data })
+  },
+  deleteForumPost (postId) {
+    return ajax(`forum/post/${postId}/`, 'delete')
+  },
+  forumLike (postId) {
+    return ajax('forum/like/', 'post', { data: { post_id: postId } })
+  },
+  forumBookmark (postId) {
+    return ajax('forum/bookmark/', 'post', { data: { post_id: postId } })
+  },
+  getForumComments (params) {
+    return ajax('forum/comment_list/', 'get', { params })
+  },
+  forumCommentLike (commentId) {
+    return ajax('forum/comment_like/', 'post', { data: { comment_id: commentId } })
+  },
+  forumReport (data) {
+    return ajax('forum/report/', 'post', { data })
+  },
+  getMuteStatus () {
+    return ajax('forum/mute_status/', 'get')
   }
 }
 
@@ -356,13 +399,14 @@ function ajax (url, method, options) {
       // 网络错误或 HTTP 状态码非 20x
       reject(res)
       let errorMsg = '网络错误，请稍后重试'
-      if (res.data) {
-        if (typeof res.data === 'string') {
-          errorMsg = res.data
-        } else if (res.data.data && typeof res.data.data === 'string') {
-          errorMsg = res.data.data
-        } else if (res.data.error) {
-          errorMsg = res.data.error
+      const resp = res.response || res
+      if (resp && resp.data) {
+        if (typeof resp.data === 'string') {
+          errorMsg = resp.data
+        } else if (resp.data.data && typeof resp.data.data === 'string') {
+          errorMsg = resp.data.data
+        } else if (resp.data.error) {
+          errorMsg = resp.data.error
         }
       } else if (res.statusText) {
         errorMsg = res.statusText

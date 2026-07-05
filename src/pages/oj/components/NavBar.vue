@@ -18,10 +18,6 @@
           <Icon type="trophy"></Icon>
           {{$t('m.Contests')}}
         </Menu-item>
-        <Menu-item name="/learning-report">
-          <Icon type="ios-pulse-strong"></Icon>
-          {{$t('m.NavStatus')}}
-        </Menu-item>
         <Menu-item name="/learning-path">
           <Icon type="ios-navigate"></Icon>
           {{$t('m.Learning_Path')}}
@@ -34,9 +30,9 @@
           <Icon type="flash"></Icon>
           {{$t('m.Immersive_Practice')}}
         </Menu-item>
-        <Menu-item name="/profile-onboarding">
-          <Icon type="ios-person"></Icon>
-          {{$t('m.Profile_Onboarding')}}
+        <Menu-item name="/forum">
+          <Icon type="ios-people"></Icon>
+          论坛
         </Menu-item>
         <!-- <Submenu name="rank">
           <template slot="title">
@@ -87,11 +83,13 @@
               <Icon type="ios-arrow-down" class="user-arrow" />
             </div>
             <Dropdown-menu slot="list">
-              <Dropdown-item name="/user-home">{{$t('m.MyHome')}}</Dropdown-item>
-              <Dropdown-item name="/status?myself=1">{{$t('m.MySubmissions')}}</Dropdown-item>
-              <Dropdown-item name="/setting/profile">{{$t('m.Settings')}}</Dropdown-item>
-              <Dropdown-item v-if="isAdminRole" name="/admin">{{$t('m.Management')}}</Dropdown-item>
-              <Dropdown-item divided name="/logout">{{$t('m.Logout')}}</Dropdown-item>
+              <Dropdown-item name="/user-home"><span class="drop-icon"><Icon type="ios-home" size="18"/></span>{{$t('m.MyHome')}}</Dropdown-item>
+              <Dropdown-item name="/learning-report"><span class="drop-icon"><Icon type="ios-pulse-strong" size="18"/></span>{{$t('m.NavStatus')}}</Dropdown-item>
+              <Dropdown-item name="/profile-onboarding"><span class="drop-icon"><Icon type="ios-person" size="18"/></span>{{$t('m.Profile_Onboarding')}}</Dropdown-item>
+              <Dropdown-item name="/status?myself=1"><span class="drop-icon"><Icon type="ios-paper" size="18"/></span>{{$t('m.MySubmissions')}}</Dropdown-item>
+              <Dropdown-item name="/setting/profile"><span class="drop-icon"><Icon type="ios-settings" size="18"/></span>{{$t('m.Settings')}}</Dropdown-item>
+              <Dropdown-item v-if="isAdminRole" name="/admin"><span class="drop-icon"><Icon type="ios-cog" size="18"/></span>{{$t('m.Management')}}</Dropdown-item>
+              <Dropdown-item divided name="/logout"><span class="drop-icon"><Icon type="ios-log-out" size="18"/></span>{{$t('m.Logout')}}</Dropdown-item>
             </Dropdown-menu>
           </Dropdown>
         </template>
@@ -162,11 +160,10 @@
         if (path.startsWith('/problem')) return '/problem'
         if (path.startsWith('/contest')) return '/contest'
         if (path.startsWith('/status') && this.$route.query.problemID) return '/problem'
-        if (path.startsWith('/learning-report') || path.startsWith('/status')) return '/learning-report'
         if (path.startsWith('/learning-path')) return '/learning-path'
         if (path.startsWith('/lesson-plan')) return '/lesson-plan'
         if (path.startsWith('/immersion')) return '/immersion'
-        if (path.startsWith('/profile-onboarding')) return '/profile-onboarding'
+        if (path.startsWith('/forum')) return '/forum'
         return '/' + path.split('/')[1]
       },
       isHome () {
@@ -439,24 +436,45 @@
       box-shadow: 0 8px 32px rgba(30, 58, 138, 0.12);
       border: 1px solid #e2e8f0;
       padding: 6px;
-      min-width: 180px;
+      min-width: 140px;
     }
 
     /deep/ .ivu-dropdown-menu {
       border-radius: 12px;
     }
 
+    .drop-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
     /deep/ .ivu-dropdown-item {
-      padding: 10px 16px;
+      padding: 8px 14px;
       border-radius: 8px;
-      margin: 2px 0;
-      font-size: 14px;
+      margin: 1px 0;
+      font-size: 18px !important;
+      line-height: 1;
+      font-weight: 500;
       color: #475569;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
-        background: linear-gradient(135deg, rgba(30, 58, 138, 0.06), rgba(59, 130, 246, 0.06));
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.08), rgba(59, 130, 246, 0.08));
         color: #1e3a8a;
+        padding-left: 18px;
+        box-shadow: inset 3px 0 0 #1e3a8a;
+      }
+
+      .ivu-icon {
+        transition: transform 0.25s ease;
+      }
+
+      &:hover .ivu-icon {
+        transform: translateX(2px);
       }
     }
 
@@ -529,4 +547,16 @@
   .ivu-menu-light {
     border-bottom: none !important;
   }
+</style>
+
+<style lang="less">
+/* 用户下拉菜单全局样式（穿透到body层） */
+.user-dropdown-menu,
+.ivu-select-dropdown {
+  .ivu-dropdown-item {
+    font-size: 18px !important;
+    line-height: 1 !important;
+    padding: 8px 14px !important;
+  }
+}
 </style>

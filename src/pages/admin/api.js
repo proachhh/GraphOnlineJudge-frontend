@@ -367,6 +367,30 @@ export default {
       params: { feedback_id: feedbackId }
     })
   },
+  // 论坛管理 - 帖子管理
+  getAdminForumPosts (params) {
+    return ajax('admin/forum/posts/', 'get', { params })
+  },
+  deleteAdminForumPosts (postIds) {
+    return ajax('admin/forum/posts/', 'delete', { data: { post_ids: postIds } })
+  },
+  // 论坛管理 - 举报管理
+  getAdminForumReports (params) {
+    return ajax('admin/forum/reports/', 'get', { params })
+  },
+  handleAdminForumReport (data) {
+    return ajax('admin/forum/reports/', 'put', { data })
+  },
+  // 论坛管理 - 用户禁言管理
+  getAdminForumUsers (params) {
+    return ajax('admin/forum/mute/', 'get', { params })
+  },
+  muteAdminForumUser (data) {
+    return ajax('admin/forum/mute/', 'post', { data })
+  },
+  unmuteAdminForumUser (userId) {
+    return ajax('admin/forum/mute/', 'delete', { data: { user_id: userId } })
+  },
 }
 
 /**

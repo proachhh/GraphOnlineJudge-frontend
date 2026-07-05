@@ -2,7 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 // 引入 view 组件
 import { Announcement, Conf, Contest, ContestList, Home, JudgeServer, Login,
-  Problem, ProblemList, User, PruneTestCase, Dashboard, ProblemImportOrExport, DataDashboard, ImmersionDashboard, Feedback } from './views'
+  Problem, ProblemList, User, PruneTestCase, Dashboard, ProblemImportOrExport, DataDashboard, ImmersionDashboard, Feedback,
+  ForumPostManage, ForumUserManage, ForumReportManage } from './views'
 const LessonPlan = () => import('./views/lesson/LessonPlan.vue')
 Vue.use(VueRouter)
 
@@ -119,6 +120,21 @@ export default new VueRouter({
           path: 'feedback',
           name: 'feedback',
           component: Feedback
+        },
+        {
+          path: '/forum/posts',
+          name: 'forum-posts',
+          component: ForumPostManage
+        },
+        {
+          path: '/forum/users',
+          name: 'forum-users',
+          component: ForumUserManage
+        },
+        {
+          path: '/forum/reports',
+          name: 'forum-reports',
+          component: ForumReportManage
         }
       ]
     },
