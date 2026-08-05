@@ -841,6 +841,8 @@ export const m = {
   Home_Announcements: '最新公告',
   Home_Features_Title: '为什么选择我们',
   Home_Features_Subtitle: '专业、高效、智能的算法学习平台',
+  Feature_Knowledge_Universe: '知识宇宙',
+  Feature_Knowledge_Universe_Desc: '可缩放、可探索的知识星图，点选任意知识点进入沉浸式学习舱',
   Feature_Knowledge_Graph: '智能知识图谱',
   Feature_Knowledge_Graph_Desc: '可视化展示知识点关联，帮助你系统性地学习和理解算法体系',
   Feature_Recommendation: '个性化推荐',

@@ -18,13 +18,9 @@
           <Icon type="trophy"></Icon>
           {{$t('m.Contests')}}
         </Menu-item>
-        <Menu-item name="/learning-path">
-          <Icon type="ios-navigate"></Icon>
-          {{$t('m.Learning_Path')}}
-        </Menu-item>
-        <Menu-item name="/lesson-plan">
-          <Icon type="ios-book"></Icon>
-          {{$t('m.Lesson_Plans')}}
+        <Menu-item name="/knowledge-universe">
+          <Icon type="ios-analytics"></Icon>
+          图谱
         </Menu-item>
         <Menu-item name="/immersion">
           <Icon type="flash"></Icon>
@@ -150,7 +146,7 @@
       ...mapGetters(['website', 'modalStatus', 'user', 'profile', 'isAuthenticated', 'isAdminRole']),
       logoSrc () {
         // 首页未滚动时显示 logo.png，学习页面（透明背景）也显示 logo.png，其他情况显示 logo2.png
-        const isLearningPath = this.$route.path === '/learning-path'
+        const isLearningPath = this.$route.path === '/knowledge-universe'
         return (this.isHome && !this.scrolled) || (isLearningPath && !this.scrolled) ? require('@/assets/logo.png') : require('@/assets/logo2.png')
       },
       activeMenu () {
@@ -160,14 +156,13 @@
         if (path.startsWith('/problem')) return '/problem'
         if (path.startsWith('/contest')) return '/contest'
         if (path.startsWith('/status') && this.$route.query.problemID) return '/problem'
-        if (path.startsWith('/learning-path')) return '/learning-path'
-        if (path.startsWith('/lesson-plan')) return '/lesson-plan'
+        if (path.startsWith('/knowledge-universe')) return '/knowledge-universe'
         if (path.startsWith('/immersion')) return '/immersion'
         if (path.startsWith('/forum')) return '/forum'
         return '/' + path.split('/')[1]
       },
       isHome () {
-        return this.$route.path === '/' || this.$route.path === '/home'
+        return this.$route.path === '/' || this.$route.path === '/home' || this.$route.path === '/knowledge-universe'
       },
       modalVisible: {
         get () {

@@ -304,12 +304,12 @@
       </el-form>
     </Panel>
 
-    <!-- 从 LOJ 链接导入对话框 -->
-    <el-dialog title="从 LOJ 链接导入题目" :visible.sync="scrapeDialogVisible" width="580px" :close-on-click-modal="false" @close="resetScrapeDialog">
+    <!-- 从 LOJ 导入对话框 -->
+    <el-dialog title="从 LOJ 导入题目" :visible.sync="scrapeDialogVisible" width="580px" :close-on-click-modal="false" @close="resetScrapeDialog">
       <div v-if="!scrapeMode || scrapeMode === 'input'">
         <el-form label-width="80px">
-          <el-form-item label="题目链接">
-            <el-input v-model="scrapeUrl" placeholder="https://loj.ac/p/5" @keyup.enter.native="doScrape">
+          <el-form-item label="题目编号">
+            <el-input v-model="scrapeUrl" placeholder="输入 LOJ 题目编号，如 5" @keyup.enter.native="doScrape">
               <el-button slot="append" icon="el-icon-download" @click="doScrape" :loading="scrapeLoading">
                 获取
               </el-button>
@@ -317,7 +317,7 @@
           </el-form-item>
         </el-form>
         <div v-if="scrapeLoading" style="text-align:center;padding:20px;color:#909399;">
-          <i class="el-icon-loading"></i> 正在从 LOJ 获取题目数据...
+          <i class="el-icon-loading"></i> {{ scrapeStageText || '正在处理...' }}
         </div>
         <div v-if="scrapeError" class="scrape-error-msg">
           <i class="el-icon-warning"></i> {{ scrapeError }}
@@ -420,6 +420,7 @@
         scrapeMode: 'input',
         scrapeUrl: '',
         scrapeLoading: false,
+        scrapeStageText: '',
         scrapeParsing: false,
         scrapeError: '',
         scrapeApiUrl: '',
@@ -774,6 +775,7 @@
         this.scrapeUrl = ''
         this.scrapeMode = 'input'
         this.scrapeError = ''
+        this.scrapeStageText = ''
         this.scrapeCurlCmd = ''
         this.scrapePowershellCmd = ''
         this.scrapeBrowserConsoleCmd = ''
@@ -781,57 +783,70 @@
       },
       doScrape () {
         if (!this.scrapeUrl.trim()) {
-          this.$message.warning('请输入 LOJ 题目链接')
+          this.$message.warning('请输入 LOJ 题目编号')
           return
         }
         this.scrapeLoading = true
         this.scrapeError = ''
+        this.scrapeStageText = '正在获取题目信息...'
         this.scrapeMode = 'input'
+        const lojUrl = this.scrapeUrl.trim()
 
-        api.scrapeLojProblem({ url: this.scrapeUrl.trim() }).then(res => {
-          const info = res.data.data
-          const apiUrl = info.api_url
-          const apiBody = info.api_body
-          const apiBodyStr = JSON.stringify(apiBody)
+        // 阶段一：获取题目元数据
+        api.fetchLojProblem({ url: lojUrl }).then(res => {
+          const d = res.data.data
+          if (d.problem_id) this.problem._id = String(d.problem_id)
+          if (d.title) this.problem.title = d.title
+          if (d.description) this.problem.description = d.description
+          if (d.input_description) this.problem.input_description = d.input_description
+          if (d.output_description) this.problem.output_description = d.output_description
+          if (d.hint) this.problem.hint = d.hint
+          if (d.time_limit) this.problem.time_limit = d.time_limit
+          if (d.memory_limit) this.problem.memory_limit = d.memory_limit
+          if (d.difficulty) this.problem.difficulty = d.difficulty
+          if (d.source) this.problem.source = d.source
+          if (d.tags && d.tags.length) this.problem.tags = d.tags
+          if (d.samples && d.samples.length) this.problem.samples = d.samples
 
-          // 保存 API 信息供手动模式使用
-          this.scrapeApiUrl = apiUrl
-          this.scrapeApiBodyStr = apiBodyStr
-          const escapedBody = apiBodyStr.replace(/'/g, `'\\''`)
-          this.scrapeCurlCmd = `curl -X POST '${apiUrl}' -H 'Content-Type: application/json' -d '${escapedBody}'`
-          this.scrapePowershellCmd = `iwr -Uri '${apiUrl}' -Method POST -ContentType 'application/json' -Body '${apiBodyStr}'`
-          this.scrapeBrowserConsoleCmd = `fetch('${apiUrl}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '${apiBodyStr.replace(/'/g, "\\'")}' }).then(r => r.json()).then(d => console.log(JSON.stringify(d, null, 2)))`
-
-          // 尝试浏览器直连 api.loj.ac
-          fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: apiBodyStr,
-            mode: 'cors'
-          }).then(fetchResp => {
-            if (fetchResp.ok) {
-              return fetchResp.json()
+          // 阶段二：下载测试点
+          this.scrapeStageText = '正在下载测试点...'
+          return api.fetchLojTestcases({ url: lojUrl })
+        }).then(res => {
+          this.scrapeLoading = false
+          const d = res.data.data || {}
+          if (d.test_case_id && d.test_case_score) {
+            let fileList = d.test_case_score
+            for (let file of fileList) {
+              file.score = (100 / fileList.length).toFixed(0)
+              if (!file.output_name && this.problem.spj) {
+                file.output_name = '-'
+              }
             }
-            throw new Error('HTTP ' + fetchResp.status)
-          }).then(jsonData => {
-            this.scrapeLoading = false
-            // 浏览器直连成功，直接解析填入
-            return this._fillProblemData(jsonData)
-          }).catch(() => {
-            // 浏览器直连失败（CORS 或网络问题），切换到手动模式
-            this.scrapeLoading = false
-            this.scrapeMode = 'manual'
-            this.$message.info('自动获取失败，请使用手动方式复制 JSON')
-          })
+            this.problem.test_case_id = d.test_case_id
+            this.problem.test_case_score = fileList
+            this.testCaseUploaded = true
+            this.error.testcase = ''
+            if (this.problem.id) this.loadTestCasePreview()
+          }
+
+          this.scrapeDialogVisible = false
+          let msg = '题目数据已从 LOJ 获取并填入表单，请检查并调整'
+          if (d.testcase_count) {
+            msg += `，已导入 ${d.testcase_count} 组测试点`
+          } else if (d.testcase_error) {
+            msg += `；${d.testcase_error}`
+          }
+          this.$message.success(msg)
         }).catch(err => {
           this.scrapeLoading = false
-          const errData = err && err.data
-          this.scrapeError = (errData && errData.data) || '链接解析失败，请检查链接格式'
+          const errData = err && err.response && err.response.data
+          this.scrapeError = (errData && errData.data) || '获取题目失败，请检查链接或网络'
         })
       },
       _fillProblemData (rawJson) {
         return api.parseLojJson({ raw: typeof rawJson === 'string' ? rawJson : JSON.stringify(rawJson) }).then(res => {
           const d = res.data.data
+          if (d.problem_id) this.problem._id = String(d.problem_id)
           if (d.title) this.problem.title = d.title
           if (d.description) this.problem.description = d.description
           if (d.input_description) this.problem.input_description = d.input_description

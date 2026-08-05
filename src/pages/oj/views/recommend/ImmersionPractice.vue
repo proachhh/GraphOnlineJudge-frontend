@@ -18,6 +18,7 @@
       <div id="problem-main">
         <!-- 布局切换 -->
         <div class="layout-toggle-row">
+          <el-button icon="el-icon-arrow-left" size="small" plain @click="$router.back()" style="margin-right:12px">返回</el-button>
           <RadioGroup v-model="layoutMode" type="button" size="small">
             <Radio label="horizontal">
               <Icon type="ios-pause" :style="{ transform: 'rotate(90deg)' }" size="14" />

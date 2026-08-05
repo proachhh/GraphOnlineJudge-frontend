@@ -177,6 +177,23 @@
         </el-table>
         <div v-if="!userRanking.length" class="no-data">暂无数据</div>
       </div>
+      <div class="table-panel">
+        <h3>最近提交活动</h3>
+        <el-table :data="recentSubmissions" :key="'t6-'+tableKey" size="small" stripe>
+          <el-table-column prop="username" label="用户" width="110" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="problem_id" label="题号" width="80"></el-table-column>
+          <el-table-column label="结果" width="100">
+            <template slot-scope="scope">
+              <el-tag :type="resultTagType(scope.row.result)" size="mini">{{ resultLabel(scope.row.result) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="language" label="语言" width="90" show-overflow-tooltip></el-table-column>
+          <el-table-column label="时间" width="180" class-name="nowrap-cell">
+            <template slot-scope="scope">{{ scope.row.create_time }}</template>
+          </el-table-column>
+        </el-table>
+        <div v-if="!recentSubmissions.length" class="no-data">暂无数据</div>
+      </div>
     </div>
 
     <div class="tables-row">
@@ -229,7 +246,8 @@ export default {
       mostCompleted: [],
       leastCompleted: [],
       topSubmittersAllTime: [],
-      topSubmittersWeek: []
+      topSubmittersWeek: [],
+      recentSubmissions: []
     }
   },
   mounted () {
@@ -248,6 +266,22 @@ export default {
     diffLabel (difficulty) {
       const map = { Low: '简单', Mid: '中等', High: '困难' }
       return map[difficulty] || difficulty
+    },
+    resultLabel (code) {
+      const map = {
+        0: '通过', 8: '部分通过',
+        '-1': '答案错误', '-2': '编译错误', 4: '运行错误',
+        1: '超时', 2: '超时', 3: '内存超限',
+        5: '系统错误', 6: '等待', 7: '评测中'
+      }
+      return map[code] != null ? map[code] : String(code)
+    },
+    resultTagType (code) {
+      if (code === 0) return 'success'
+      if (code === 8) return 'warning'
+      if (code === -1 || code === -2 || code === 4) return 'danger'
+      if (code >= 1 && code <= 3) return 'warning'
+      return 'info'
     },
     translateSubmissionResult (status) {
       const keyMap = {
@@ -285,6 +319,8 @@ export default {
         this.topSubmittersAllTime = (this.topSubmitters.all_time || []).map(item => ({ ...item }))
         this.topSubmittersWeek = (this.topSubmitters.this_week || []).map(item => ({ ...item }))
         this.userRanking = (data.user_ranking || []).map(item => ({ ...item }))
+        const recentActivity = data.recent_activity || {}
+        this.recentSubmissions = (recentActivity.recent_submissions || []).map(item => ({ ...item }))
         this.loading = false
         this.tableKey = Date.now()
         this.$forceUpdate()
@@ -458,6 +494,10 @@ export default {
   padding: 20px;
   min-height: 100vh;
   background: #f5f7fa;
+}
+
+.data-dashboard /deep/ .nowrap-cell .cell {
+  white-space: nowrap;
 }
 
 .page-header {

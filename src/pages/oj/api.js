@@ -283,6 +283,18 @@ export default {
   getKnowledgeGraph () {
     return ajax('knowledge-graph', 'get')
   },
+  getKnowledgeUniverse () {
+    return ajax('knowledge-universe', 'get')
+  },
+  getTopicProblems (params) {
+    return ajax('topic-problems', 'get', { params })
+  },
+  getTopicNeighbors (params) {
+    return ajax('topic-neighbors', 'get', { params })
+  },
+  askAI (data) {
+    return ajax('spark/chat/', 'post', { data })
+  },
   getLessonPlanList (params) {
     return ajax('lesson_plan', 'get', { params })
   },

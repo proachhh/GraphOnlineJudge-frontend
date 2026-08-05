@@ -29,6 +29,7 @@
     <div id="problem-main">
       <!-- 布局切换 -->
       <div class="layout-toggle-row">
+        <el-button icon="el-icon-arrow-left" size="small" plain @click="$router.back()" style="margin-right:12px">返回</el-button>
         <RadioGroup v-model="layoutMode" type="button" size="small">
           <Radio label="vertical">
             <span style="font-size: 12px">上下</span>
@@ -1043,6 +1044,10 @@
 
         .layout-toggle-row {
           flex-shrink: 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 8px 8px 0;
         }
 
         .problem-layout-wrapper {
@@ -1106,7 +1111,8 @@
 
       .layout-toggle-row {
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 12px;
       }
 

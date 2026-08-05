@@ -81,6 +81,16 @@ export default {
       heroOpacity: 1,
       featureKeys: [
         {
+          icon: 'md-globe',
+          titleKey: 'm.Feature_Knowledge_Universe',
+          descKey: 'm.Feature_Knowledge_Universe_Desc',
+          key: 'universe',
+          btnText: '进入知识宇宙',
+          btnIcon: 'ios-navigate',
+          color: '#0d1b3e',
+          screenshot: '/static/pictures/graph.png'
+        },
+        {
           icon: 'ios-analytics',
           titleKey: 'm.Feature_Knowledge_Graph',
           descKey: 'm.Feature_Knowledge_Graph_Desc',
@@ -126,16 +136,6 @@ export default {
           btnIcon: 'ios-person',
           color: '#1e3a8a',
           screenshot: '/static/pictures/agents.png'
-        },
-        {
-          icon: 'ios-book',
-          titleKey: 'm.Feature_Lesson',
-          descKey: 'm.Feature_Lesson_Desc',
-          key: 'lesson',
-          btnText: '查看教案',
-          btnIcon: 'ios-paper',
-          color: '#1e3a8a',
-          screenshot: '/static/pictures/lesson.png'
         }
       ],
       statKeys: [
@@ -166,21 +166,18 @@ export default {
       this.$router.push({ name: 'problem-list' })
     },
     goToLearningPath() {
-      this.$router.push({ name: 'learning-path' })
+      this.$router.push({ name: 'knowledge-universe' })
     },
     goToProfileOnboarding() {
       this.$router.push({ name: 'profile-onboarding' })
     },
-    goToLessonPlan() {
-      this.$router.push({ name: 'lesson-plan-list' })
-    },
     handleFeatureAction(key) {
       const routeMap = {
-        'knowledge-graph': 'learning-path',
+        'universe': 'knowledge-universe',
+        'knowledge-graph': 'knowledge-universe',
         'recommendation': 'problem-list',
         'evaluation': 'problem-list',
-        'agent': 'profile-onboarding',
-        'lesson': 'lesson-plan-list'
+        'agent': 'profile-onboarding'
       }
       const routeName = routeMap[key]
       if (routeName) {

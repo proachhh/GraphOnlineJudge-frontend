@@ -850,6 +850,8 @@ export const m = {
   Home_Announcements: 'Latest Announcements',
   Home_Features_Title: 'Why Choose Us',
   Home_Features_Subtitle: 'Professional, efficient, and intelligent algorithm learning platform',
+  Feature_Knowledge_Universe: 'Knowledge Universe',
+  Feature_Knowledge_Universe_Desc: 'A zoomable, explorable knowledge galaxy. Click any topic to enter an immersive learning pod.',
   Feature_Knowledge_Graph: 'Intelligent Knowledge Graph',
   Feature_Knowledge_Graph_Desc: 'Visualize knowledge point relationships to help you systematically learn and understand algorithm systems',
   Feature_Recommendation: 'Personalized Recommendation',

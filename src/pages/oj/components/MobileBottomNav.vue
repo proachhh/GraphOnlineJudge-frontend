@@ -36,14 +36,6 @@ export default {
           matchPaths: ['/contest']
         },
         {
-          key: 'lessons',
-          icon: 'ios-book',
-          iconActive: 'ios-book',
-          label: this.$t('m.Lesson_Plans'),
-          route: '/lesson-plan',
-          matchPaths: ['/lesson-plan']
-        },
-        {
           key: 'practice',
           icon: 'flash',
           iconActive: 'flash',

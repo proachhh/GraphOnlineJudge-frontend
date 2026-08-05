@@ -229,6 +229,21 @@ export default {
       data
     })
   },
+  fetchLojProblem (data) {
+    return ajax('admin/problem/fetch_loj', 'post', {
+      data
+    })
+  },
+  fetchLojTestcases (data) {
+    return ajax('admin/problem/fetch_loj_testcases', 'post', {
+      data
+    })
+  },
+  importLojProblem (data) {
+    return ajax('admin/problem/import_loj', 'post', {
+      data
+    })
+  },
   compileSPJ (data) {
     return ajax('admin/compile_spj', 'post', {
       data

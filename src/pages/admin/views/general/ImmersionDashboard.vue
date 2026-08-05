@@ -30,9 +30,12 @@
             <el-select
               v-model="selectedUserId"
               filterable
+              remote
+              clearable
               size="mini"
               placeholder="选择或搜索用户名"
               :loading="userSearchLoading"
+              :remote-method="searchUsers"
               @change="onUserSelect"
               @visible-change="onUserDropdownVisible"
               class="ua-user-select"
@@ -204,6 +207,7 @@ export default {
       userSearchOptions: [],
       userStatsLoading: false,
       userStats: null,
+      allUsersLoaded: false,
     }
   },
   computed: {
@@ -233,7 +237,7 @@ export default {
           title: '完成率最高 Top 10',
           data: this.mostCompleted,
           columns: [
-            { _key: 'id', prop: '_id', label: 'ID', width: '55' },
+            { _key: 'id', prop: '_id', label: 'ID', width: '72', className: 'nowrap-cell' },
             { _key: 'title', prop: 'title', label: '题目', showOverflowTooltip: true, minWidth: '120' },
             { _key: 'diff', label: '难度', width: '55', _html: (row) => `<span class="nowrap-cell" style="color:${this.diffColor(row.difficulty)}">${this.diffChar(row.difficulty)}</span>` },
             { _key: 'rate', label: '通过率', width: '72', _html: (row) => `<span class="nowrap-cell">${(row.pass_rate || 0).toFixed(1)}%</span>` }
@@ -243,7 +247,7 @@ export default {
           title: '完成率最低 Top 10',
           data: this.leastCompleted,
           columns: [
-            { _key: 'id', prop: '_id', label: 'ID', width: '55' },
+            { _key: 'id', prop: '_id', label: 'ID', width: '72', className: 'nowrap-cell' },
             { _key: 'title', prop: 'title', label: '题目', showOverflowTooltip: true, minWidth: '120' },
             { _key: 'diff', label: '难度', width: '55', _html: (row) => `<span class="nowrap-cell" style="color:${this.diffColor(row.difficulty)}">${this.diffChar(row.difficulty)}</span>` },
             { _key: 'rate', label: '通过率', width: '72', _html: (row) => `<span class="nowrap-cell">${(row.pass_rate || 0).toFixed(1)}%</span>` }
@@ -583,7 +587,7 @@ export default {
       this.fetchUserStats(uid)
     },
     onUserDropdownVisible (visible) {
-      if (visible && this.userSearchOptions.length === 0) {
+      if (visible && !this.allUsersLoaded) {
         this.loadAllUsers()
       }
     },
@@ -592,6 +596,7 @@ export default {
       api.getUserList(0, 200, '').then(res => {
         const list = (res.data.data && res.data.data.results) || []
         this.userSearchOptions = list.map(u => ({ id: u.id, username: u.username }))
+        this.allUsersLoaded = true
       }).catch(() => {
         this.userSearchOptions = []
       }).finally(() => {
@@ -1060,6 +1065,13 @@ export default {
     overflow-y: auto !important;
     &::-webkit-scrollbar { width: 0; }
   }
+  /* 隐藏 el-table 默认底部/右侧白线（深色背景下 ::before/::after 为 #ebeef5） */
+  /deep/ .el-table::before,
+  /deep/ .el-table::after,
+  /deep/ .el-table__body-wrapper {
+    background-color: transparent !important;
+    border: none !important;
+  }
 }
 
 .panel-table {
@@ -1087,6 +1099,10 @@ export default {
     color: #d0d8f0 !important;
     padding: 6px 4px;
     font-size: 13px;
+  }
+
+  /deep/ .dark-table td.nowrap-cell .cell {
+    white-space: nowrap;
   }
 
   /deep/ .dark-table tr:hover > td {

@@ -194,6 +194,22 @@ export default [
     component: () => import('@/pages/oj/views/recommend/LearningPath.vue')
   },
 
+  // knowledge universe
+  {
+    path: '/knowledge-universe',
+    name: 'knowledge-universe',
+    meta: { title: 'Knowledge Universe' },
+    component: () => import('@/pages/oj/views/recommend/KnowledgeUniverse.vue')
+  },
+
+  // learning pod
+  {
+    path: '/learn/topic/:topic',
+    name: 'learning-pod',
+    meta: { title: 'Learning Pod' },
+    component: () => import('@/pages/oj/views/recommend/LearningPod.vue')
+  },
+
   // immersion practice
   {
     path: '/immersion',

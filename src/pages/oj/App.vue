@@ -17,9 +17,6 @@
       <p>Powered by <a href="https://github.com/QingdaoU/OnlineJudge">GraphOnlineJudge</a>
         <span v-if="version">&nbsp; Version: {{ version }}</span>
       </p>
-      <p>
-        <a href="http://47.108.158.48/" target="_blank" rel="noopener noreferrer" style="color:#666; text-decoration:none;">镜像仓库</a>
-      </p>
     </div>
     <MobileBottomNav v-if="isMobile" />
     <BackTop></BackTop>
@@ -80,13 +77,13 @@
     computed: {
       ...mapState(['website', 'sidebarCollapsed']),
       isTabPage () {
-        return ['problem-list', 'contest-list', 'lesson-plan-list', 'immersion-practice', 'mobile-personal'].includes(this.$route.name)
+        return ['problem-list', 'contest-list', 'immersion-practice', 'mobile-personal'].includes(this.$route.name)
       },
       pageTitle () {
         return this.$route.meta && this.$route.meta.title ? this.$route.meta.title : ''
       },
       isHomePage () {
-        return this.$route.path === '/' || this.$route.path === '/home' || this.$route.path === '/learning-path'
+        return this.$route.path === '/' || this.$route.path === '/home' || this.$route.path === '/knowledge-universe'
       },
       isChatPage () {
         return this.$route.path === '/ai-chat-fullscreen'
@@ -95,7 +92,7 @@
         return this.$route.name === 'problem-details' || this.$route.name === 'contest-problem-details'
       },
       isFullWidthPage () {
-        return this.$route.name === 'immersion-practice'
+        return this.$route.name === 'immersion-practice' || this.$route.path === '/knowledge-universe'
       }
     },
     watch: {
