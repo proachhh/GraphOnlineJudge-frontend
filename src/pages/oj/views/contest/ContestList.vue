@@ -71,44 +71,34 @@
         </div>
 
         <div v-else-if="viewMode === 'card'" class="contest-cards">
-          <div v-for="contest in contests" :key="contest.id" class="contest-card" @click="goContest(contest)">
-            <div class="card-click-overlay"></div>
-            <div class="contest-cover">
-              <img v-if="getCoverImage(contest)" :src="getCoverImage(contest)" :alt="contest.title" />
-              <div v-else class="cover-placeholder">
-                <img src="../../../../assets/Cup.png" alt="trophy" />
-              </div>
-              <div class="contest-status">
+          <div v-for="contest in contests" :key="contest.id" class="contest-card-item" @click="goContest(contest)">
+            <div class="card-cover" v-if="getCoverImage(contest)">
+              <img :src="getCoverImage(contest)" :alt="contest.title" />
+              <div class="cover-status">
                 <Tag :color="CONTEST_STATUS_REVERSE[contest.status].color" size="small">
                   {{ $t('m.' + CONTEST_STATUS_REVERSE[contest.status].name.replace(/ /g, '_')) }}
                 </Tag>
               </div>
             </div>
-
-            <div class="contest-body">
-              <h3 class="contest-title">
-                {{ contest.title }}
-                <Icon v-if="contest.contest_type !== 'Public'" type="ios-lock" color="#e6a23c" size="16" />
-              </h3>
-
-              <div class="contest-meta-row">
-                <div class="meta-left">
-                  <span class="meta-item">
-                    <Icon type="ios-calendar" />
-                    {{ contest.start_time | localtime('YYYY-M-D HH:mm') }}
-                  </span>
-                  <span class="meta-item">
-                    <Icon type="ios-time" />
-                    {{ getDuration(contest.start_time, contest.end_time) }}
-                  </span>
-                </div>
-                <span class="rule-badge" :class="contest.rule_type.toLowerCase()">
-                  {{ contest.rule_type }}
-                </span>
-                <span class="enter-text">
-                  {{ $t('m.Enter') }}
-                  <Icon type="ios-arrow-forward" />
-                </span>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-title">{{ contest.title }}</span>
+                <Tag v-if="!getCoverImage(contest)" :color="CONTEST_STATUS_REVERSE[contest.status].color" size="small">
+                  {{ $t('m.' + CONTEST_STATUS_REVERSE[contest.status].name.replace(/ /g, '_')) }}
+                </Tag>
+              </div>
+              <div class="card-tags">
+                <span class="rule-badge" :class="contest.rule_type.toLowerCase()">{{ contest.rule_type }}</span>
+                <Tag v-if="contest.contest_type !== 'Public'" color="warning" size="small">
+                  <Icon type="ios-lock" size="12" /> 密码保护
+                </Tag>
+              </div>
+              <div class="card-meta">
+                <span class="meta-item"><Icon type="ios-calendar" /> {{ contest.start_time | localtime('YYYY-M-D HH:mm') }}</span>
+                <span class="meta-item"><Icon type="ios-time" /> {{ getDuration(contest.start_time, contest.end_time) }}</span>
+              </div>
+              <div class="card-action">
+                <span class="enter-btn">{{ $t('m.Enter') }} <Icon type="ios-arrow-forward" /></span>
               </div>
             </div>
           </div>
@@ -216,7 +206,7 @@ export default {
     goContest (contest) {
       if (contest.contest_type !== CONTEST_TYPE.PUBLIC && !this.isAuthenticated) {
         this.$error(this.$i18n.t('m.Please_login_first'))
-        this.$store.dispatch('changeModalStatus', { visible: true })
+        this.$router.push('/login')
       } else {
         this.$router.push({ name: 'contest-details', params: { contestID: contest.id } })
       }
@@ -229,6 +219,11 @@ export default {
       const desc = contest.description || ''
       const match = desc.match(/<img[^>]+src="([^"]+)"/)
       return match ? match[1] : null
+    },
+    stripDescription (desc) {
+      if (!desc) return '暂无描述'
+      const text = desc.replace(/<[^>]+>/g, '').trim()
+      return text || '暂无描述'
     }
   },
   computed: {
@@ -310,7 +305,7 @@ export default {
 
 <style lang="less" scoped>
 .contest-list-elegant {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -446,37 +441,31 @@ export default {
 /* 比赛卡片网格 */
 .contest-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
 }
 
-.contest-card {
-  position: relative;
+.contest-card-item {
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1px solid #ebeef5;
+  border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
-
-  .card-click-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-  }
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 20px rgba(30, 58, 138, 0.15);
     border-color: #1e3a8a;
   }
 }
-.contest-cover {
+
+.card-cover {
   position: relative;
   width: 100%;
   height: 120px;
   overflow: hidden;
-  margin-bottom: 14px;
+  border-bottom: 1px solid #f0f0f0;
 
   > img {
     width: 100%;
@@ -484,106 +473,120 @@ export default {
     object-fit: cover;
   }
 
-  .cover-placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #667eea 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    img {
-      width: 40px;
-      height: 40px;
-      filter: brightness(0) invert(1);
-      opacity: 0.85;
-    }
-  }
-
-  .contest-status {
+  .cover-status {
     position: absolute;
     top: 8px;
     right: 8px;
   }
 }
 
-.contest-body {
-  padding: 0 18px 16px;
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
 
-  .contest-title {
-    font-size: 18px;
+.card-body {
+  padding: 18px;
+}
+
+.card-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1e3a8a;
+  line-height: 1.4;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: #909399;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 42px;
+}
+
+.card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+
+  .rule-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
     font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 10px;
-    line-height: 1.3;
+    flex-shrink: 0;
 
-    i {
-      margin-left: 8px;
-    }
-  }
-
-  .contest-meta-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 10px;
-    border-top: 1px solid #f1f5f9;
-
-    .meta-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    &.oi {
+      background: rgba(64, 158, 255, 0.1);
+      color: #409eff;
     }
 
-    .meta-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 12px;
-      color: #94a3b8;
-
-      i {
-        color: #1e3a8a;
-        font-size: 13px;
-      }
-    }
-
-    .rule-badge {
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      flex-shrink: 0;
-
-      &.oi {
-        background: rgba(64, 158, 255, 0.1);
-        color: #409eff;
-      }
-
-      &.acm {
-        background: rgba(103, 194, 58, 0.1);
-        color: #67c23a;
-      }
-    }
-
-    .enter-text {
-      font-size: 13px;
-      color: #1e3a8a;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-
-      i {
-        font-size: 12px;
-      }
+    &.acm {
+      background: rgba(103, 194, 58, 0.1);
+      color: #67c23a;
     }
   }
 }
 
-.contest-card:hover .enter-text {
-  color: #3b82f6;
+.card-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 13px;
+  color: #606266;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    i {
+      color: #1e3a8a;
+      font-size: 13px;
+    }
+  }
+}
+
+.card-action {
+  margin-top: 12px;
+
+  .enter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #1e3a8a;
+    background: rgba(30, 58, 138, 0.08);
+    border: 1px solid rgba(30, 58, 138, 0.3);
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    i {
+      font-size: 12px;
+    }
+  }
+}
+
+.contest-card-item:hover .enter-btn {
+  background: #1e3a8a;
+  color: #fff;
 }
 
 .table-wrap {

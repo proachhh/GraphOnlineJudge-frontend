@@ -292,6 +292,95 @@ export default {
   getTopicNeighbors (params) {
     return ajax('topic-neighbors', 'get', { params })
   },
+  // Exercise Set (student)
+  getExerciseSets (params) {
+    return ajax('exercise/sets/', 'get', { params })
+  },
+  getExerciseTopics () {
+    return ajax('exercise/topics/', 'get')
+  },
+  getExerciseSetDetail (id) {
+    return ajax(`exercise/sets/${id}/`, 'get')
+  },
+  startExercise (id) {
+    return ajax(`exercise/sets/${id}/start/`, 'post')
+  },
+  submitExercise (id, data) {
+    return ajax(`exercise/sets/${id}/submit/`, 'post', { data })
+  },
+  getExerciseReport (subId) {
+    return ajax(`exercise/submissions/${subId}/report/`, 'get')
+  },
+  getExerciseRanking (setId) {
+    return ajax(`exercise/sets/${setId}/ranking/`, 'get')
+  },
+  // Boss Exam (student)
+  getBossExams (params) {
+    return ajax('exercise/boss/', 'get', { params })
+  },
+  getBossExamDetail (id) {
+    return ajax(`exercise/boss/${id}/`, 'get')
+  },
+  startBossExam (id) {
+    return ajax(`exercise/boss/${id}/start/`, 'post')
+  },
+  submitBossExam (id, data) {
+    return ajax(`exercise/boss/${id}/submit/`, 'post', { data })
+  },
+  getBossExamReport (subId) {
+    return ajax(`exercise/boss/submissions/${subId}/report/`, 'get')
+  },
+  // Teacher - Exercise Sets
+  getTeacherExerciseSets (params) {
+    return ajax('exercise/teacher/sets/', 'get', { params })
+  },
+  createExerciseSet (data) {
+    return ajax('exercise/teacher/sets/create/', 'post', { data })
+  },
+  updateExerciseSet (id, data) {
+    return ajax(`exercise/teacher/sets/${id}/update/`, 'put', { data })
+  },
+  deleteExerciseSet (id) {
+    return ajax(`exercise/teacher/sets/${id}/delete/`, 'delete')
+  },
+  publishExerciseSet (id) {
+    return ajax(`exercise/teacher/sets/${id}/publish/`, 'post')
+  },
+  getExerciseSubmissions (setId) {
+    return ajax(`exercise/teacher/sets/${setId}/submissions/`, 'get')
+  },
+  aiGenerateQuestions (data) {
+    return ajax('exercise/teacher/ai/generate-questions/', 'post', { data })
+  },
+  // Teacher - Boss Exams
+  getTeacherBossExams (params) {
+    return ajax('exercise/teacher/boss/', 'get', { params })
+  },
+  createBossExam (data) {
+    return ajax('exercise/teacher/boss/create/', 'post', { data })
+  },
+  updateBossExam (id, data) {
+    return ajax(`exercise/teacher/boss/${id}/update/`, 'put', { data })
+  },
+  deleteBossExam (id) {
+    return ajax(`exercise/teacher/boss/${id}/delete/`, 'delete')
+  },
+  publishBossExam (id) {
+    return ajax(`exercise/teacher/boss/${id}/publish/`, 'post')
+  },
+  // Teacher - Students
+  getTeacherStudents () {
+    return ajax('exercise/teacher/students/', 'get')
+  },
+  getTeacherStudentReport (userId) {
+    return ajax(`exercise/teacher/students/${userId}/report/`, 'get')
+  },
+  getTeacherStudentAiAnalysis (userId) {
+    return ajax(`exercise/teacher/students/${userId}/ai-analysis/`, 'post')
+  },
+  getTeacherTopics () {
+    return ajax('exercise/teacher/topics/', 'get')
+  },
   askAI (data) {
     return ajax('spark/chat/', 'post', { data })
   },
@@ -401,7 +490,11 @@ function ajax (url, method, options) {
         Vue.prototype.$error(errorMsg)
         reject(res)
         if (errorMsg.includes('Please login') || errorMsg.includes('登录')) {
-          store.dispatch('changeModalStatus', {'mode': 'login', 'visible': true})
+          // 跳转到独立登录页（仅当当前不在登录/注册页时）
+          const currentPath = window.location.pathname
+          if (currentPath !== '/login' && currentPath !== '/register') {
+            window.location.href = '/login'
+          }
         }
       } else {
         // 无错误，正常返回

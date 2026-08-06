@@ -28,6 +28,18 @@ export default [
     component: Home
   },
   {
+    name: 'login',
+    path: '/login',
+    meta: {title: 'Login'},
+    component: () => import('@oj/views/user/AuthPage.vue')
+  },
+  {
+    name: 'register',
+    path: '/register',
+    meta: {title: 'Register'},
+    component: () => import('@oj/views/user/AuthPage.vue')
+  },
+  {
     name: 'logout',
     path: '/logout',
     meta: {title: 'Logout'},
@@ -179,7 +191,7 @@ export default [
     component: NotFound
   },
 
-  //recommend
+  // recommend
   {
     path: '/learning-report',
     name: 'learning-report',
@@ -210,6 +222,27 @@ export default [
     component: () => import('@/pages/oj/views/recommend/LearningPod.vue')
   },
 
+  // exercise sets (student)
+  {
+    path: '/exercise',
+    name: 'exercise-list',
+    meta: { requiresAuth: true, title: '题集' },
+    component: () => import('@/pages/oj/views/recommend/ExerciseSets.vue')
+  },
+  {
+    path: '/exercise/:id',
+    name: 'exercise-detail',
+    meta: { requiresAuth: true, title: '试题练习' },
+    component: () => import('@/pages/oj/views/recommend/ExerciseDetail.vue')
+  },
+  // teacher dashboard
+  {
+    path: '/teacher',
+    name: 'teacher-dashboard',
+    meta: { requiresAuth: true, title: '教师管理' },
+    component: () => import('@/pages/oj/views/recommend/TeacherDashboard.vue')
+  },
+
   // immersion practice
   {
     path: '/immersion',
@@ -238,14 +271,6 @@ export default [
     name: 'lesson-plan-details',
     meta: {title: 'Lesson Plan Study'},
     component: () => import('@oj/views/lesson/LessonPlanStudy.vue')
-  },
-
-  // mobile personal hub
-  {
-    path: '/mobile/personal',
-    name: 'mobile-personal',
-    meta: {title: 'Personal Hub'},
-    component: () => import('@/pages/oj/views/general/MobilePersonal.vue')
   },
 
   // fullscreen pages

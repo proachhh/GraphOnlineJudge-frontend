@@ -607,9 +607,9 @@ export const m = {
   Latex_Editor: 'Latex 编辑器',
   // NavBar.vue
   Home: '首页',
-  NavProblems: '题目',
+  NavProblems: '题库',
   Community: '社区',
-  Contests: '题集',
+  Contests: '竞赛',
   NavStatus: '面板',
   Rank: '排名',
   ACM_Rank: 'ACM 排名',

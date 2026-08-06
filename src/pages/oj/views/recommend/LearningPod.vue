@@ -419,7 +419,7 @@ answer是正确选项的索引(0-3)。`
   justify-content: space-between;
   align-items: center;
   padding: 18px 24px;
-  background: #2d8cf0;
+  background: #1e3a8a;
   border-radius: 8px;
   color: #fff;
   margin-bottom: 16px;
@@ -470,8 +470,8 @@ answer是正确选项的索引(0-3)。`
 
 /* 深蓝按钮覆盖 Element 默认浅蓝 */
 .pod-tabs /deep/ .el-button--primary {
-  background: #2d8cf0;
-  border-color: #2d8cf0;
+  background: #1e3a8a;
+  border-color: #1e3a8a;
   border-radius: 4px;
 }
 .pod-tabs /deep/ .el-button--primary:hover {
@@ -480,13 +480,13 @@ answer是正确选项的索引(0-3)。`
 }
 /* tab 切换深蓝色 */
 .pod-tabs /deep/ .el-tabs__active-bar {
-  background-color: #2d8cf0;
+  background-color: #1e3a8a;
 }
 .pod-tabs /deep/ .el-tabs__item.is-active {
-  color: #2d8cf0;
+  color: #1e3a8a;
 }
 .pod-tabs /deep/ .el-tabs__item:hover {
-  color: #2d8cf0;
+  color: #1e3a8a;
 }
 
 .tab-content {

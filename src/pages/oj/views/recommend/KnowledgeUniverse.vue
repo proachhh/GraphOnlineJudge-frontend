@@ -200,7 +200,7 @@ export default {
           focusNodeAdjacency: true,
           emphasis: { focus: 'adjacency', lineStyle: { width: 3, opacity: 0.9 }, label: { fontWeight: 'bold' } },
           blur: { itemStyle: { opacity: 0.2 }, label: { opacity: 0.2 }, lineStyle: { opacity: 0.1 } },
-          force: { repulsion: 800, edgeLength: 200, gravity: 0.08, friction: 0.9, layoutAnimation: false },
+          force: { repulsion: 800, edgeLength: 200, gravity: 0.08, friction: 0.6, layoutAnimation: false },
           data: nodeData, edges: edgeData,
           lineStyle: { color: '#4A7A9E', width: 2, curveness: 0.2, opacity: 0.5 },
           itemStyle: { color: '#2E6A99', borderColor: '#8BB8D0', borderWidth: 2 },
@@ -209,22 +209,6 @@ export default {
         }],
       }
       this.chart.setOption(option, true)
-      // 布局稳定后切换为静态布局，避免力导向模拟持续运行干扰整体拖拽
-      this._freezeLayout()
-    },
-    _freezeLayout () {
-      clearTimeout(this._freezeTimer)
-      this._freezeTimer = setTimeout(() => {
-        if (!this.chart) return
-        const opt = this.chart.getOption()
-        const s0 = opt.series && opt.series[0]
-        if (!s0 || !s0.data) return
-        // 确保所有节点已完成位置计算
-        if (!s0.data.every(n => n.x != null && n.y != null)) return
-        // 保留计算后的坐标，切换为静态布局以停止力导向模拟
-        const nodes = s0.data.map(n => ({ ...n, fixed: true }))
-        this.chart.setOption({ series: [{ layout: 'none', data: nodes }] })
-      }, 2000)
     },
     onNodeClick (rawName) {
       if (this.selectMode === 'start') {
@@ -306,8 +290,8 @@ export default {
   background: linear-gradient(180deg, rgba(13,27,46,0.9), transparent);
 }
 .ku-title { color: #fff; font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-.ku-title i { font-size: 24px; color: #4A7A9E; }
-.ku-meta { font-size: 14px; font-weight: 400; color: #8BB8D0; }
+.ku-title i { font-size: 24px; color: #60a5fa; }
+.ku-meta { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.85); }
 
 /* 路径规划卡片 */
 .ku-path-card {
@@ -320,7 +304,7 @@ export default {
 }
 .card-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 4px; }
 .path-field { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-.field-label { font-size: 14px; color: #8BB8D0; min-width: 42px; cursor: pointer; display: flex; align-items: center; gap: 2px; }
+.field-label { font-size: 14px; color: rgba(255,255,255,0.85); min-width: 42px; cursor: pointer; display: flex; align-items: center; gap: 2px; }
 .field-label i.active { color: #4A9EE6; }
 .path-result { margin-top: 10px; max-height: 220px; overflow-y: auto; }
 .path-step { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 14px; }
@@ -328,7 +312,7 @@ export default {
 .step-num { background: #4A7A9E; color: #fff; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
 .step-name { color: #fff; font-size: 15px; }
 .path-error { color: #ff6b6b; font-size: 14px; margin-top: 8px; }
-.path-hint { color: #8BB8D0; font-size: 13px; margin-top: 8px; }
+.path-hint { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 8px; }
 
 /* 详情卡片 */
 .ku-detail-card {
@@ -339,11 +323,11 @@ export default {
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.5);
 }
-.detail-close { margin-left: auto; cursor: pointer; color: #8BB8D0; }
+.detail-close { margin-left: auto; cursor: pointer; color: rgba(255,255,255,0.85); }
 .detail-close:hover { color: #ff6b6b; }
 .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(74,122,158,0.2); }
-.detail-label { color: #8BB8D0; font-size: 15px; }
-.detail-value { color: #E8F1F8; font-weight: 600; font-size: 15px; }
+.detail-label { color: rgba(255,255,255,0.85); font-size: 15px; }
+.detail-value { color: #fff; font-weight: 600; font-size: 15px; }
 .mastery-bar-wrap { position: relative; flex: 1; height: 16px; margin-left: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; }
 .mastery-bar { height: 100%; border-radius: 8px; transition: width 0.3s; }
 .mastery-text { position: absolute; right: 6px; top: 0; line-height: 16px; font-size: 11px; color: #fff; text-shadow: 0 0 2px rgba(0,0,0,0.5); }
@@ -357,7 +341,7 @@ export default {
 .ku-path-card /deep/ .el-input__inner {
   background: rgba(10,10,26,0.6);
   border-color: rgba(74,122,158,0.3);
-  color: #E8F1F8;
+  color: #fff;
 }
 .ku-path-card /deep/ .el-input.active .el-input__inner {
   border-color: #4A9EE6;

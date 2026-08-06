@@ -7,12 +7,17 @@
       <span class="hamburger-btn" @click="toggleSideMenu">
         <i class="el-icon-menu"></i>
       </span>
-      <i class="el-icon-fa-font katex-editor" @click="katexVisible=true" ></i>
+      <div class="header-spacer"></div>
+      <i class="el-icon-fa-font katex-editor" @click="katexVisible=true" title="LaTeX 编辑器"></i>
       <screen-full :width="14" :height="14" class="screen-full"></screen-full>
-      <el-dropdown @command="handleCommand">
-        <span>{{user.username}}<i class="el-icon-caret-bottom el-icon--right"></i></span>
+      <el-dropdown @command="handleCommand" class="user-dropdown">
+        <span class="user-trigger">
+          <i class="el-icon-user-solid user-avatar-icon"></i>
+          {{user.username}}
+          <i class="el-icon-caret-bottom el-icon--right"></i>
+        </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="logout">Logout</el-dropdown-item>
+          <el-dropdown-item command="logout"><i class="el-icon-switch-button"></i> 退出登录</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
@@ -119,37 +124,72 @@
 
   #header {
     text-align: right;
-    padding-left: 210px;
-    padding-right: 30px;
-    line-height: 50px;
-    height: 50px;
-    background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
-    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.06);
-    border-bottom: 1px solid #e2e8f0;
+    padding-left: 220px;
+    padding-right: 24px;
+    line-height: 56px;
+    height: 56px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(30, 58, 138, 0.06);
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .header-spacer { flex: 1; }
 
     .hamburger-btn {
       display: none;
-      float: left;
-      margin-left: 12px;
       cursor: pointer;
       font-size: 20px;
       color: #1e3a8a;
       transition: color 0.2s;
 
       &:hover {
-        color: #667eea;
+        color: #3b82f6;
       }
     }
-    
+
+    .katex-editor {
+      cursor: pointer;
+      color: #64748b;
+      font-size: 16px;
+      transition: color 0.2s ease;
+      &:hover { color: #1e3a8a; }
+    }
+
     .screen-full {
-      margin-right: 8px;
+      margin-right: 4px;
+      color: #64748b;
+      cursor: pointer;
+    }
+
+    .user-dropdown { cursor: pointer; }
+
+    .user-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #1f2937;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 16px;
+      background: #f1f5f9;
+      transition: background 0.2s;
+
+      &:hover { background: #e0e7ff; }
+
+      .user-avatar-icon {
+        font-size: 16px;
+        color: #1e3a8a;
+      }
     }
   }
 
   .content-app {
     padding-top: 20px;
-    padding-right: 10px;
-    padding-left: 210px;
+    padding-right: 20px;
+    padding-left: 240px;
   }
 
   // ========== 移动端适配 ==========
@@ -161,7 +201,8 @@
     }
 
     #header {
-      padding-left: 10px;
+      padding-left: 16px;
+      padding-right: 16px;
 
       .hamburger-btn {
         display: inline-block;
@@ -169,7 +210,8 @@
     }
 
     .content-app {
-      padding-left: 10px;
+      padding-left: 16px;
+      padding-right: 16px;
     }
   }
 

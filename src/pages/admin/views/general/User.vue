@@ -200,6 +200,7 @@
             <el-form-item :label="$t('m.User_Type')">
               <el-select v-model="user.admin_type">
                 <el-option label="Regular User" value="Regular User"></el-option>
+                <el-option label="Teacher" value="Teacher"></el-option>
                 <el-option label="Admin" value="Admin"></el-option>
                 <el-option label="Super Admin" value="Super Admin"></el-option>
               </el-select>

@@ -29,7 +29,9 @@
     <div id="problem-main">
       <!-- 布局切换 -->
       <div class="layout-toggle-row">
-        <el-button icon="el-icon-arrow-left" size="small" plain @click="$router.back()" style="margin-right:12px">返回</el-button>
+        <div class="toggle-left">
+          <el-button icon="el-icon-arrow-left" size="small" plain @click="$router.back()">返回</el-button>
+        </div>
         <RadioGroup v-model="layoutMode" type="button" size="small">
           <Radio label="vertical">
             <span style="font-size: 12px">上下</span>

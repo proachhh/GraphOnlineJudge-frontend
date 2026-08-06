@@ -22,6 +22,10 @@
           <Icon type="ios-analytics"></Icon>
           图谱
         </Menu-item>
+        <Menu-item name="/exercise">
+          <Icon type="ios-copy"></Icon>
+          题集
+        </Menu-item>
         <Menu-item name="/immersion">
           <Icon type="flash"></Icon>
           {{$t('m.Immersive_Practice')}}
@@ -62,12 +66,12 @@
           <Button type="ghost"
                   ref="loginBtn"
                   shape="circle"
-                  @click="handleBtnClick('login')">{{$t('m.Login')}}
+                  @click="goLogin">{{$t('m.Login')}}
           </Button>
           <Button v-if="website.allow_register"
                   type="ghost"
                   shape="circle"
-                  @click="handleBtnClick('register')"
+                  @click="goRegister"
                   style="margin-left: 8px;">{{$t('m.Register')}}
           </Button>
         </template>
@@ -84,6 +88,7 @@
               <Dropdown-item name="/profile-onboarding"><span class="drop-icon"><Icon type="ios-person" size="18"/></span>{{$t('m.Profile_Onboarding')}}</Dropdown-item>
               <Dropdown-item name="/status?myself=1"><span class="drop-icon"><Icon type="ios-paper" size="18"/></span>{{$t('m.MySubmissions')}}</Dropdown-item>
               <Dropdown-item name="/setting/profile"><span class="drop-icon"><Icon type="ios-settings" size="18"/></span>{{$t('m.Settings')}}</Dropdown-item>
+              <Dropdown-item v-if="isTeacher || isAdminRole" name="/teacher"><span class="drop-icon"><Icon type="md-school" size="18"/></span>教师管理</Dropdown-item>
               <Dropdown-item v-if="isAdminRole" name="/admin"><span class="drop-icon"><Icon type="ios-cog" size="18"/></span>{{$t('m.Management')}}</Dropdown-item>
               <Dropdown-item divided name="/logout"><span class="drop-icon"><Icon type="ios-log-out" size="18"/></span>{{$t('m.Logout')}}</Dropdown-item>
             </Dropdown-menu>
@@ -91,25 +96,13 @@
         </template>
       </div>
     </div>
-    
-    <Modal v-model="modalVisible" :width="420" class="auth-modal">
-      <div slot="header" class="modal-title">{{$t('m.Welcome_to')}} {{website.website_name_shortcut}}</div>
-      <component :is="modalStatus.mode" v-if="modalVisible"></component>
-      <div slot="footer" style="display: none"></div>
-    </Modal>
   </div>
 </template>
 
 <script>
   import { mapGetters, mapActions } from 'vuex'
-  import login from '@oj/views/user/Login'
-  import register from '@oj/views/user/Register'
 
   export default {
-    components: {
-      login,
-      register
-    },
     data () {
       return {
         scrolled: false
@@ -123,19 +116,22 @@
       window.removeEventListener('scroll', this.handleScroll)
     },
     methods: {
-      ...mapActions(['getProfile', 'changeModalStatus']),
+      ...mapActions(['getProfile']),
       handleRoute (route) {
-        if (route && route.indexOf('admin') < 0) {
-          this.$router.push(route)
-        } else {
+        if (!route) return
+        if (route.indexOf('admin') >= 0) {
           window.open('/admin/')
+        } else if (route === '/teacher') {
+          window.open('/teacher/', '_blank')
+        } else {
+          this.$router.push(route)
         }
       },
-      handleBtnClick (mode) {
-        this.changeModalStatus({
-          visible: true,
-          mode: mode
-        })
+      goLogin () {
+        this.$router.push('/login')
+      },
+      goRegister () {
+        this.$router.push('/register')
       },
       handleScroll () {
         // 滚动到公告区域（约100vh）时才变白色背景
@@ -143,7 +139,7 @@
       }
     },
     computed: {
-      ...mapGetters(['website', 'modalStatus', 'user', 'profile', 'isAuthenticated', 'isAdminRole']),
+      ...mapGetters(['website', 'user', 'profile', 'isAuthenticated', 'isAdminRole', 'isTeacher']),
       logoSrc () {
         // 首页未滚动时显示 logo.png，学习页面（透明背景）也显示 logo.png，其他情况显示 logo2.png
         const isLearningPath = this.$route.path === '/knowledge-universe'
@@ -157,20 +153,13 @@
         if (path.startsWith('/contest')) return '/contest'
         if (path.startsWith('/status') && this.$route.query.problemID) return '/problem'
         if (path.startsWith('/knowledge-universe')) return '/knowledge-universe'
+        if (path.startsWith('/exercise')) return '/exercise'
         if (path.startsWith('/immersion')) return '/immersion'
         if (path.startsWith('/forum')) return '/forum'
         return '/' + path.split('/')[1]
       },
       isHome () {
         return this.$route.path === '/' || this.$route.path === '/home' || this.$route.path === '/knowledge-universe'
-      },
-      modalVisible: {
-        get () {
-          return this.modalStatus.visible
-        },
-        set (value) {
-          this.changeModalStatus({visible: value})
-        }
       }
     }
   }
@@ -480,35 +469,6 @@
     }
   }
 
-  .auth-modal {
-    /deep/ .ivu-modal {
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 16px 48px rgba(30, 58, 138, 0.12);
-    }
-
-    /deep/ .ivu-modal-header {
-      border-bottom: 1px solid #f1f5f9;
-      padding: 20px 28px 16px;
-      background: linear-gradient(135deg, #f8fafc, #fff);
-    }
-
-    /deep/ .ivu-modal-body {
-      padding: 28px 28px 24px;
-    }
-
-    /deep/ .ivu-modal-close .ivu-icon-ios-close {
-      color: #94a3b8;
-      &:hover { color: #475569; }
-    }
-
-    /deep/ .modal-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: #1e3a8a;
-    }
-  }
-  
   @media (max-width: 1200px) {
     #header .header-content {
       gap: 16px;
@@ -516,17 +476,11 @@
     
     .oj-menu {
       max-width: 600px;
-      
+
       .ivu-menu-item, .ivu-menu-submenu-title {
         padding: 0 12px;
         font-size: 14px;
       }
-    }
-  }
-  
-  @media (max-width: 992px) {
-    .oj-menu {
-      display: none;
     }
   }
 

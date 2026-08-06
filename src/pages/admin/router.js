@@ -23,8 +23,7 @@ export default new VueRouter({
       children: [
         {
           path: '',
-          name: 'dashboard',
-          component: Dashboard
+          redirect: '/data-dashboard'
         },
         {
           path: '/data-dashboard',
