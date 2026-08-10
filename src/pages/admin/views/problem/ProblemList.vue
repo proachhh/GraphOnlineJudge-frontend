@@ -151,7 +151,7 @@
         InlineEditDialogVisible: false,
         makePublicDialogVisible: false,
         addProblemDialogVisible: false,
-        sortOrder: 'create_time'
+        sortOrder: 'id'
       }
     },
     mounted () {
@@ -189,7 +189,8 @@
           limit: this.pageSize,
           offset: (page - 1) * this.pageSize,
           keyword: this.keyword,
-          contest_id: this.contestId
+          contest_id: this.contestId,
+          sort: this.sortOrder
         }
         api[funcName](params).then(res => {
           this.loading = false
@@ -198,7 +199,6 @@
             problem.isEditing = false
           }
           this.problemList = res.data.data.results
-          this.sortCurrentList()
         }, res => {
           this.loading = false
         })
@@ -248,23 +248,9 @@
       getPublicProblem () {
         api.getProblemList()
       },
-      sortCurrentList () {
-        if (!this.problemList || this.problemList.length === 0) return
-        if (this.sortOrder === 'id') {
-          this.problemList = this.problemList.slice().sort((a, b) => {
-            const na = parseInt(a._id), nb = parseInt(b._id)
-            if (!isNaN(na) && !isNaN(nb)) return na - nb
-            const sa = String(a._id || ''), sb = String(b._id || '')
-            return sa.localeCompare(sb)
-          })
-        } else {
-          this.problemList = this.problemList.slice().sort((a, b) => {
-            return new Date(b.create_time) - new Date(a.create_time)
-          })
-        }
-      },
       onSortChange () {
-        this.sortCurrentList()
+        this.currentPage = 1
+        this.getProblemList(1)
       }
     },
     watch: {

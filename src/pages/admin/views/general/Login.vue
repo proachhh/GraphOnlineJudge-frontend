@@ -4,7 +4,7 @@
     <div class="brand-side">
       <div class="brand-bg"></div>
       <div class="brand-content">
-        <img src="../../../assets/logo3.png" alt="logo" class="brand-logo" />
+        <img src="../../../../assets/logo3.png" alt="logo" class="brand-logo" />
         <h1 class="brand-title">管理后台</h1>
         <p class="brand-subtitle">在线评测系统 · 管理控制台</p>
         <ul class="brand-features">
