@@ -381,6 +381,12 @@ export default {
   getTeacherTopics () {
     return ajax('exercise/teacher/topics/', 'get')
   },
+  getTeacherStats () {
+    return ajax('exercise/teacher/stats/', 'get')
+  },
+  teacherCodeCheck (params) {
+    return ajax('exercise/teacher/code-check/', 'get', { params })
+  },
   askAI (data) {
     return ajax('spark/chat/', 'post', { data })
   },
@@ -389,6 +395,12 @@ export default {
   },
   getLessonPlanDetail (id) {
     return ajax('lesson_plan', 'get', { params: { id } })
+  },
+  getLessonPlanProgress (id) {
+    return ajax('lesson_plan/progress', 'get', { params: { lesson_plan_id: id } })
+  },
+  aiGenerateLessonPlan (data) {
+    return ajax('lesson_plan/ai_generate', 'post', { data })
   },
   analyzeError (data) {
     return ajax('agent/chat/', 'post', { data })
@@ -401,6 +413,12 @@ export default {
   },
   codeReview (data) {
     return ajax('spark/code-review/', 'post', { data })
+  },
+  codeReviewStructured (data) {
+    return ajax('spark/code-review-structured/', 'post', { data })
+  },
+  visualizeCode (data) {
+    return ajax('spark/visualize-code/', 'post', { data })
   },
   getTopicSummary (data) {
     return ajax('spark/topic-summary/', 'post', { data })
@@ -489,8 +507,8 @@ function ajax (url, method, options) {
         }
         Vue.prototype.$error(errorMsg)
         reject(res)
-        if (errorMsg.includes('Please login') || errorMsg.includes('登录')) {
-          // 跳转到独立登录页（仅当当前不在登录/注册页时）
+        // 仅在 login-required 错误时跳转登录页，permission-denied 不跳转
+        if (res.data.error === 'login-required') {
           const currentPath = window.location.pathname
           if (currentPath !== '/login' && currentPath !== '/register') {
             window.location.href = '/login'
@@ -504,6 +522,7 @@ function ajax (url, method, options) {
       // 网络错误或 HTTP 状态码非 20x
       reject(res)
       let errorMsg = '网络错误，请稍后重试'
+      let shouldRedirect = false
       const resp = res.response || res
       if (resp && resp.data) {
         if (typeof resp.data === 'string') {
@@ -513,10 +532,20 @@ function ajax (url, method, options) {
         } else if (resp.data.error) {
           errorMsg = resp.data.error
         }
+        // 401 状态码或 login-required 错误才跳转登录页
+        if (resp.status === 401 || (resp.data && resp.data.error === 'login-required')) {
+          shouldRedirect = true
+        }
       } else if (res.statusText) {
         errorMsg = res.statusText
       }
       Vue.prototype.$error(errorMsg)
+      if (shouldRedirect) {
+        const currentPath = window.location.pathname
+        if (currentPath !== '/login' && currentPath !== '/register') {
+          window.location.href = '/login'
+        }
+      }
     })
   })
 }

@@ -50,7 +50,8 @@ export default {
     iconColor: { type: String, default: '#2d8cf0' },
     btnText: { type: String, default: 'AI 分析' },
     btnType: { type: String, default: 'primary' },
-    fetchFn: { type: Function, required: true }
+    fetchFn: { type: Function, required: true },
+    streamFn: { type: Function, default: null }
   },
   data () {
     return {
@@ -69,6 +70,15 @@ export default {
     async fetchAI () {
       this.loading = true
       this.isExpanded = true
+      this.result = ''
+
+      if (this.streamFn) {
+        await this.fetchAIStream()
+      } else {
+        await this.fetchAINormal()
+      }
+    },
+    async fetchAINormal () {
       try {
         const res = await this.fetchFn()
         const data = res.data || res
@@ -85,6 +95,54 @@ export default {
           errMsg = e.message
         }
         this.result = '请求失败：' + errMsg
+      } finally {
+        this.loading = false
+      }
+    },
+    async fetchAIStream () {
+      try {
+        const { url, body } = this.streamFn()
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify(body)
+        })
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}))
+          this.result = '请求失败：' + (errData.error || res.statusText)
+          return
+        }
+
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n\n')
+          buffer = lines.pop()
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6).trim()
+              if (data === '[DONE]') return
+              try {
+                const parsed = JSON.parse(data)
+                if (parsed.text) {
+                  this.result += parsed.text
+                }
+              } catch (e) {}
+            }
+          }
+        }
+        if (!this.result) {
+          this.result = 'AI 暂未返回内容，请重试'
+        }
+      } catch (e) {
+        this.result = '请求失败：' + (e.message || '网络错误')
       } finally {
         this.loading = false
       }

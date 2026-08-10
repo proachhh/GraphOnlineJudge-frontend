@@ -32,6 +32,20 @@
         </div>
       </div>
 
+      <!-- 学习进度条 -->
+      <div class="progress-bar-section" v-if="progress.total > 0 || progressLoaded">
+        <div class="progress-info">
+          <Icon type="ios-checkmark-circle" class="progress-icon" :class="{ done: progress.solved === progress.total && progress.total > 0 }" />
+          <span class="progress-label">学习进度</span>
+          <span class="progress-count"><b>{{ progress.solved }}</b> / {{ progress.total }}</span>
+          <span class="progress-percent" v-if="progress.total > 0">{{ Math.round(progress.solved / progress.total * 100) }}%</span>
+          <span class="progress-hint" v-else>本教案暂无关联题目</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" :style="{ width: (progress.total > 0 ? (progress.solved / progress.total * 100) : 0) + '%' }"></div>
+        </div>
+      </div>
+
       <!-- 主内容区 -->
       <div class="main-content" ref="mainContent">
         <!-- 左侧：教案内容 / PDF 预览 -->
@@ -84,6 +98,7 @@
                   <Tag :color="getDifficultyColor(problem.difficulty)" size="small">
                     {{ problem.difficulty }}
                   </Tag>
+                  <Icon v-if="isSolved(problem)" type="ios-checkmark-circle" class="solved-mark" title="已通过" />
                 </div>
                 <Icon type="ios-arrow-forward" class="arrow-icon" />
               </div>
@@ -103,6 +118,7 @@
                   <Tag :color="getDifficultyColor(problem.difficulty)" size="small">
                     {{ problem.difficulty }}
                   </Tag>
+                  <Icon v-if="isSolved(problem)" type="ios-checkmark-circle" class="solved-mark" title="已通过" />
                 </div>
                 <p class="problem-title">{{ problem.title }}</p>
                 <div class="card-bottom">
@@ -117,7 +133,7 @@
           <div v-else class="embedded-problem-container">
             <div class="problem-header">
               <div class="header-left">
-                <Button type="text" @click="currentProblem = null" icon="ios-arrow-back">Back to List</Button>
+                <Button type="text" @click="backToList" icon="ios-arrow-back">Back to List</Button>
                 <span class="divider">|</span>
                 <span class="problem-id">{{ currentProblem._id }}</span>
                 <h2 class="problem-title">{{ currentProblem.title }}</h2>
@@ -159,7 +175,9 @@ export default {
       isResizing: false,
       currentProblem: null,
       showFullRight: false,
-      viewMode: 'list'
+      viewMode: 'list',
+      progress: { total: 0, solved: 0, problems: [] },
+      progressLoaded: false
     }
   },
   computed: {
@@ -196,9 +214,28 @@ export default {
       api.getLessonPlanDetail(id).then(res => {
         this.lessonPlan = res.data.data
         this.loading = false
+        this.loadProgress()
       }).catch(() => {
         this.loading = false
       })
+    },
+    loadProgress () {
+      const id = this.$route.params.id
+      api.getLessonPlanProgress(id).then(res => {
+        this.progress = res.data.data || { total: 0, solved: 0, problems: [] }
+        this.progressLoaded = true
+      }).catch(() => {
+        this.progressLoaded = true
+      })
+    },
+    isSolved (problem) {
+      if (!this.progress || !this.progress.problems) return false
+      const p = this.progress.problems.find(x => x.problem_id === problem.id)
+      return !!(p && p.solved)
+    },
+    backToList () {
+      this.currentProblem = null
+      this.loadProgress()
     },
     selectProblem (problem) {
       this.currentProblem = problem
@@ -329,11 +366,65 @@ export default {
   }
 }
 
+/* 学习进度条 */
+.progress-bar-section {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e8f5e9 100%);
+  border-bottom: 1px solid #e2e8f0;
+
+  .progress-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+
+    .progress-icon {
+      font-size: 20px;
+      color: #c0c8d8;
+      &.done { color: #19be6b; }
+    }
+    .progress-label { font-size: 14px; color: #64748b; }
+    .progress-count {
+      font-size: 15px; color: #1e3a8a;
+      b { font-size: 18px; font-weight: 700; }
+    }
+    .progress-percent {
+      margin-left: auto;
+      font-size: 13px; font-weight: 600;
+      color: #2d8cf0;
+      background: rgba(45,140,240,0.1);
+      padding: 2px 10px;
+      border-radius: 10px;
+    }
+    .progress-hint { margin-left: auto; font-size: 13px; color: #94a3b8; }
+  }
+
+  .progress-track {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2d8cf0, #19be6b);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+  }
+}
+
 /* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
+}
+
+.solved-mark {
+  color: #19be6b;
+  font-size: 18px;
+  margin-left: 2px;
 }
 
 /* 左侧内容 */
@@ -571,6 +662,12 @@ export default {
     display: flex;
     align-items: center;
     gap: 10px;
+
+    .solved-mark {
+      color: #19be6b;
+      font-size: 18px;
+      margin-left: 2px;
+    }
 
     .problem-id {
       font-size: 0.8rem;

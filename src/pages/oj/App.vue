@@ -7,9 +7,6 @@
     </div>
     <div class="global-footer" v-if="!isStandalonePage" :class="{ 'home-page': isHomePage, 'chat-page': isChatPage, 'problem-page': isProblemPage, 'hide-footer': isFullWidthPage }">
       <p v-html="website.website_footer"></p>
-      <p>Powered by <a href="https://github.com/QingdaoU/OnlineJudge">GraphOnlineJudge</a>
-        <span v-if="version">&nbsp; Version: {{ version }}</span>
-      </p>
     </div>
     <BackTop></BackTop>
   </div>
@@ -132,7 +129,7 @@
 .global-footer {
   position: relative;
   z-index: 1;
-  padding: 14px 2% 18px;
+  padding: 10px 2% 10px;
   text-align: center;
   font-size: 13px;
   background: #f5f7fa;
@@ -164,7 +161,7 @@
     left: 0;
     right: 0;
     z-index: 30;
-    padding: 10px 2% 14px;
+    padding: 8px 2% 8px;
     background: #f5f7fa;
     border-top: 1px solid #e8eaec;
   }

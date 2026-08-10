@@ -430,10 +430,11 @@ function ajax (url, method, options) {
     }).then(res => {
       // API正常返回(status=20x), 是否错误通过有无error判断
       if (res.data.error != null) {
-        Vue.prototype.$error(res.data.data)
+        let errorMsg = res.data.data || res.data.error || '操作失败'
+        Vue.prototype.$error(errorMsg)
         reject(res)
-        // // 若后端返回为登录，则为session失效，应退出当前登录用户
-        if (res.data.data.startsWith('Please login')) {
+        // 仅在 login-required 错误时跳转登录页
+        if (res.data.error === 'login-required') {
           router.push({name: 'login'})
         }
       } else {
@@ -445,7 +446,23 @@ function ajax (url, method, options) {
     }, res => {
       // API请求异常，一般为Server error 或 network error
       reject(res)
-      Vue.prototype.$error(res.data.data)
+      let errorMsg = '网络错误，请稍后重试'
+      const resp = res.response || res
+      if (resp && resp.data) {
+        if (typeof resp.data === 'string') {
+          errorMsg = resp.data
+        } else if (resp.data.data && typeof resp.data.data === 'string') {
+          errorMsg = resp.data.data
+        } else if (resp.data.error) {
+          errorMsg = resp.data.error
+        }
+        if (resp.status === 401 || (resp.data && resp.data.error === 'login-required')) {
+          router.push({name: 'login'})
+        }
+      } else if (res.statusText) {
+        errorMsg = res.statusText
+      }
+      Vue.prototype.$error(errorMsg)
     })
   })
 }

@@ -5,7 +5,8 @@
           @on-change="onChange"
           @on-page-size-change="onPageSizeChange"
           :show-sizer="showSizer"
-          :page-size-opts="[10, 30, 50, 100, 200]"
+          :show-elevator="true"
+          :page-size-opts="pageSizeOpts"
           :current="current"></Page>
   </div>
 </template>
@@ -26,6 +27,11 @@
         required: false,
         type: Boolean,
         default: false
+      },
+      pageSizeOpts: {
+        required: false,
+        type: Array,
+        default: () => [10, 30, 50, 100, 200]
       },
       current: {
         required: false,

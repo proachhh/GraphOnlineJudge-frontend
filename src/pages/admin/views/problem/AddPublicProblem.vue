@@ -1,5 +1,14 @@
 <template>
   <div class="add-public-problem">
+    <div class="batch-fill-row">
+      <span class="batch-label">按 Display ID 范围批量添加：</span>
+      <el-input v-model="batchStart" placeholder="起始 ID" class="batch-input" size="small"></el-input>
+      <span class="batch-sep">—</span>
+      <el-input v-model="batchEnd" placeholder="结束 ID" class="batch-input" size="small"></el-input>
+      <el-button type="primary" size="small" icon="el-icon-plus" :loading="batchLoading" @click="batchFill">批量添加</el-button>
+      <span v-if="batchResult" class="batch-result" :class="{ 'batch-success': batchResult.success, 'batch-fail': !batchResult.success }">{{ batchResult.msg }}</span>
+    </div>
+
     <div class="search-row">
       <el-input
         v-model="keyword"
@@ -91,7 +100,11 @@ export default {
       problems: [],
       keyword: '',
       errorMsg: '',
-      searched: false
+      searched: false,
+      batchStart: '',
+      batchEnd: '',
+      batchLoading: false,
+      batchResult: null
     }
   },
   mounted () {
@@ -101,6 +114,57 @@ export default {
     doSearch () {
       this.searched = true
       this.getPublicProblem(1)
+    },
+    async batchFill () {
+      const start = parseInt(this.batchStart)
+      const end = parseInt(this.batchEnd)
+      if (isNaN(start) || isNaN(end)) {
+        this.batchResult = { success: false, msg: '请输入有效的数字 ID 范围' }
+        return
+      }
+      if (start > end) {
+        this.batchResult = { success: false, msg: '起始 ID 不能大于结束 ID' }
+        return
+      }
+      this.batchLoading = true
+      this.batchResult = null
+      try {
+        const res = await api.getProblemList({ keyword: '', offset: 0, limit: 10000, show_all: 'true' })
+        const allProblems = res.data.data.results || []
+        const matched = allProblems.filter(p => {
+          const numId = parseInt(p._id)
+          return !isNaN(numId) && numId >= start && numId <= end
+        })
+        if (matched.length === 0) {
+          this.batchResult = { success: false, msg: `未找到 Display ID 在 ${start} 到 ${end} 范围内的公共题目` }
+          this.batchLoading = false
+          return
+        }
+        let successCount = 0
+        let failCount = 0
+        for (const p of matched) {
+          try {
+            await api.addProblemFromPublic({
+              problem_id: p.id,
+              contest_id: this.contestID,
+              display_id: p._id
+            })
+            successCount++
+          } catch (e) {
+            failCount++
+          }
+        }
+        if (failCount === 0) {
+          this.batchResult = { success: true, msg: `成功添加 ${successCount} 道题目` }
+          this.$emit('on-change')
+        } else {
+          this.batchResult = { success: failCount < matched.length, msg: `成功 ${successCount} 道，失败 ${failCount} 道（可能已存在）` }
+          this.$emit('on-change')
+        }
+      } catch (err) {
+        this.batchResult = { success: false, msg: '获取题目列表失败，请重试' }
+      }
+      this.batchLoading = false
     },
     onPageChange (page) {
       this.getPublicProblem(page)
@@ -140,6 +204,7 @@ export default {
         {
           confirmButtonText: '确认添加',
           cancelButtonText: '取消',
+          inputValue: row._id || '',
           inputPattern: /^\S+$/,
           inputErrorMessage: 'Display ID 不能为空或包含空格'
         }
@@ -184,6 +249,45 @@ export default {
 
 .search-row {
   margin-bottom: 16px;
+}
+
+.batch-fill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #f0f7ff;
+  border-radius: 6px;
+  border: 1px solid #d4e4ff;
+}
+
+.batch-label {
+  font-size: 13px;
+  color: #1e3a8a;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.batch-input {
+  width: 120px;
+}
+
+.batch-sep {
+  color: #909399;
+}
+
+.batch-result {
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+.batch-success {
+  color: #67c23a;
+}
+
+.batch-fail {
+  color: #f56c6c;
 }
 
 .search-input {

@@ -15,11 +15,11 @@
         @click="switchContestProblem(p)"
       >
         <span class="sidebar-pid">{{ p._id }}</span>
-        <span class="sidebar-ptitle">{{ p.title }}</span>
+        <span class="sidebar-ptitle" :title="cleanTitle(p.title)">{{ cleanTitle(p.title) }}</span>
       </div>
     </div>
     <div class="sidebar-footer">
-      <router-link :to="{ name: 'contest-problem-list', params: { contestID: contestID } }">
+      <router-link :to="{ name: 'contest-details', params: { contestID: contestID } }">
         <Icon type="ios-arrow-back" />
         <span>返回题目列表</span>
       </router-link>
@@ -125,6 +125,7 @@
             btnText="获取提示"
             btnType="warning"
             :fetchFn="fetchHint"
+            :streamFn="fetchHintStream"
           />
 
           <Card :padding="20" id="submit-code" dis-hover ref="submitCodeCard">
@@ -171,6 +172,14 @@
             <Button type="primary" :loading="selfTesting" @click="runSelfTest">
               {{$t('m.Self_Test')}}
             </Button>
+            <Button type="info" @click="goVisualizer" title="逐步可视化代码执行过程">
+              <Icon type="ios-code-working"></Icon>
+              可视化执行
+            </Button>
+            <Button type="success" v-if="submissionId" @click="goCodeReview" title="AI 分析代码质量">
+              <Icon type="ios-pulse-strong"></Icon>
+              AI 审查
+            </Button>
 
             <template v-if="captchaRequired">
               <Tooltip content="Click to refresh" placement="top">
@@ -187,6 +196,10 @@
             <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
               {{$t('m.' + submissionStatus.text.replace(/ /g, "_"))}}
             </Tag>
+            <Button type="success" size="small" @click="goCodeReview" style="margin-left: 8px;">
+              <Icon type="ios-pulse-strong"></Icon>
+              AI 审查代码
+            </Button>
           </template>
           <template v-else-if="this.contestID && !OIContestRealTimePermission">
             <span class="status-text">{{$t('m.Submitted_successfully')}}</span>
@@ -249,7 +262,7 @@
         </div>
         <ul>
           <li><p>ID</p>
-            <p>{{problem._id}}</p></li>
+            <p>{{problem._id || '—'}}</p></li>
           <li>
             <p>{{$t('m.Time_Limit')}}</p>
             <p>{{ problem.time_limit || '—' }}MS</p></li>
@@ -258,8 +271,7 @@
             <p>{{ problem.memory_limit || '—' }}MB</p></li>
           <li>
             <p>{{$t('m.IOMode')}}</p>
-            <p>{{problem.io_mode.io_mode}}</p>
-          </li>
+            <p>{{ (problem.io_mode && problem.io_mode.io_mode) || '—' }}</p></li>
           <li>
             <p>{{$t('m.Created')}}</p>
             <p>{{ problem.created_by && problem.created_by.username || '—' }}</p></li>
@@ -371,6 +383,9 @@
       </div>
     </div>
   </div>
+
+    <!-- 代码执行可视化弹窗 -->
+    <CodeVizModal :visible.sync="vizModalVisible" :code="code" />
   </div>
 </template>
 
@@ -379,6 +394,7 @@
   import {types} from '../../../../store'
   import CodeMirror from '@oj/components/CodeMirror.vue'
   import AICard from '@oj/components/AICard.vue'
+  import CodeVizModal from '@oj/views/code/CodeVizModal.vue'
   import storage from '@/utils/storage'
   import {FormMixin} from '@oj/components/mixins'
   import {JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey} from '@/utils/constants'
@@ -386,6 +402,7 @@
   import {pie, largePie} from './chartData'
   import * as echarts from 'echarts'
   import { m } from '@/i18n/oj/zh-CN.js'
+  import {renderElement} from '@/plugins/katex'
 
   // 只显示这些状态的图形占用
   const filtedStatus = ['-1', '-2', '0', '1', '2', '3', '4', '8']
@@ -394,7 +411,8 @@
     name: 'Problem',
     components: {
       CodeMirror,
-      AICard
+      AICard,
+      CodeVizModal
     },
     mixins: [FormMixin],
     data () {
@@ -405,6 +423,7 @@
         submissionExists: false,
         layoutMode: 'horizontal',
         leftWidth: 50,
+        vizModalVisible: false,
         isResizing: false,
         captchaCode: '',
         captchaSrc: '',
@@ -478,22 +497,48 @@
     },
     methods: {
       ...mapActions(['changeDomTitle']),
+      cleanTitle (title) {
+        if (!title) return title
+        // 去除「...」前缀（如「一本通 1.1 例 1」），只保留实际标题
+        return title.replace(/^「[^」]*」\s*/, '')
+      },
       fetchHint () {
         return api.getProblemHint({
           problem_id: this.problemID,
           message: `题目《${this.problem.title || ''}》(ID: ${this.problemID}) 怎么做？请给我解题提示。`
         })
       },
+      fetchHintStream () {
+        return {
+          url: '/api/spark/problem-hint/stream/',
+          body: { problem_id: this.problemID, hint_level: 1 }
+        }
+      },
       processMathContent (text) {
         if (!text) return text
+        // 去除 \r 回车符，避免渲染时产生多余换行
+        text = text.replace(/\r/g, '')
+        // 合并连续的 <br> 标签
+        text = text.replace(/(<br\s*\/?>\s*){3,}/g, '<br><br>')
         const placeholders = []
         text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, inner) => {
           placeholders.push(inner)
           return '@@LPH' + (placeholders.length - 1) + '@@'
         })
-        text = text.replace(/\\\[([\s\S]*?)\\\]/g, '$$$1$$')
-        text = text.replace(/\\\(([\s\S]*?)\\\)/g, '$$1$$')
-        text = text.replace(/(^|[^$@])\$(?!\$)([^$\n]+?)\$(?!\$|$|[0-9])/g, '$1$$2$')
+        text = text.replace(/\\\[([\s\S]*?)\\\]/g, (m, g1) => '$$' + g1 + '$$')
+        text = text.replace(/\\\(([\s\S]*?)\\\)/g, (m, g1) => '$' + g1 + '$')
+        text = text.replace(/(^|[^$@])\$(?!\$)([^$\n]+?)\$(?!\$|$|[0-9])/g, (m, g1, g2) => g1 + '$' + g2 + '$')
+
+        // 提取已有 $$...$$ 和 $...$ 公式到占位符，防止 ranges 逻辑重复包裹导致 $$ 块级渲染
+        const mathDelimPlaceholders = []
+        text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
+          mathDelimPlaceholders.push(match)
+          return '@@MDP' + (mathDelimPlaceholders.length - 1) + '@@'
+        })
+        text = text.replace(/\$(?!\$)([^$\n]+?)\$(?!\$)/g, (match) => {
+          mathDelimPlaceholders.push(match)
+          return '@@MDP' + (mathDelimPlaceholders.length - 1) + '@@'
+        })
 
         const tagPlaceholders = []
         text = text.replace(/(<[^>]+>)/g, (match) => {
@@ -539,6 +584,7 @@
         }
 
         text = text.replace(/@@TAG(\d+)@@/g, (m, idx) => tagPlaceholders[parseInt(idx)])
+        text = text.replace(/@@MDP(\d+)@@/g, (m, idx) => mathDelimPlaceholders[parseInt(idx)])
         text = text.replace(/@@LPH(\d+)@@/g, (m, idx) => '$$' + placeholders[parseInt(idx)] + '$$')
         return text
       },
@@ -553,16 +599,24 @@
         api[func](this.problemID, this.contestID).then(res => {
           this.$Loading.finish()
           let problem = res.data.data
+          // 先处理数学公式内容，再赋值，避免 v-html 先渲染未处理内容导致 v-katex 时序问题
           problem.description = this.processMathContent(problem.description)
           problem.input_description = this.processMathContent(problem.input_description)
           problem.output_description = this.processMathContent(problem.output_description)
           problem.hint = this.processMathContent(problem.hint)
+          this.problem = problem
+          // 确保 DOM 更新后手动触发 katex 渲染，解决 transition 包裹下 componentUpdated 时序问题
+          this.$nextTick(() => {
+            const el = document.getElementById('problem-content')
+            if (el) renderElement(el)
+          })
           this.changeDomTitle({title: problem.title})
           api.submissionExists(problem.id).then(res => {
             this.submissionExists = res.data.data
           })
-          problem.languages = problem.languages.sort()
-          this.problem = problem
+          if (problem.languages) {
+            problem.languages = problem.languages.sort()
+          }
           this.changePie(problem)
 
           if (problem.samples && problem.samples.length > 0) {
@@ -574,7 +628,9 @@
             return
           }
           // try to load problem template
-          this.language = this.problem.languages[0]
+          if (this.problem.languages && this.problem.languages.length > 0) {
+            this.language = this.problem.languages[0]
+          }
           let template = this.problem.template
           if (template && template[this.language]) {
             this.code = template[this.language]
@@ -585,7 +641,13 @@
       },
       loadContestProblems () {
         api.getContestProblemList(this.contestID).then(res => {
-          this.contestProblems = res.data.data || []
+          const list = res.data.data || []
+          list.sort((a, b) => {
+            const na = parseInt(a._id), nb = parseInt(b._id)
+            if (!isNaN(na) && !isNaN(nb)) return na - nb
+            return String(a._id || '').localeCompare(String(b._id || ''))
+          })
+          this.contestProblems = list
         }).catch(() => {})
       },
       switchContestProblem (problem) {
@@ -668,6 +730,23 @@
       },
       handleRoute (route) {
         this.$router.push(route)
+      },
+      goVisualizer () {
+        if (!this.code || !this.code.trim()) {
+          this.$Message.warning('请先输入代码')
+          return
+        }
+        if (this.language !== 'Python3' && this.language !== 'Python2' && this.language !== 'python') {
+          this.$Message.info('可视化执行当前仅支持 Python，可切换语言后重试')
+        }
+        this.vizModalVisible = true
+      },
+      goCodeReview () {
+        if (!this.submissionId) {
+          this.$Message.warning('请先提交代码')
+          return
+        }
+        this.$router.push('/code-review?submission_id=' + this.submissionId)
       },
       onChangeLang (newLang) {
         if (this.problem.template[newLang]) {
@@ -1081,7 +1160,6 @@
           ::v-deep .layout-left .ivu-card-body {
             flex: 1 1 0%;
             min-height: 0;
-            overflow-y: auto;
           }
 
           .layout-right {
@@ -1987,6 +2065,19 @@
 /* 强制 full-width-layout 铺满全屏 */
 .problem-page-root > .flex-container.full-width-layout {
   z-index: 30 !important;
+}
+
+/* 隐藏所有滚动条但保留滚动功能 */
+.problem-page-root,
+.problem-page-root * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.problem-page-root *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 </style>
 

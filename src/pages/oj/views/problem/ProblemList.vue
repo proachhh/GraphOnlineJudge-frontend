@@ -1,9 +1,32 @@
 <template>
   <div class="problem-list-elegant">
 
+    <!-- 页头横幅 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h2 class="header-title"><Icon type="ios-keypad"></Icon> 题目列表</h2>
+      </div>
+      <div class="header-stats">
+        <div class="hs-item">
+          <span class="hs-num">{{ total }}</span>
+          <span class="hs-label">题目总数</span>
+        </div>
+        <div class="hs-divider"></div>
+        <div class="hs-item">
+          <span class="hs-num">{{ tagList.length }}</span>
+          <span class="hs-label">标签分类</span>
+        </div>
+        <div class="hs-divider"></div>
+        <Button type="warning" class="pick-random-btn" @click="pickone">
+          <Icon type="ios-shuffle"></Icon>
+          随机一题
+        </Button>
+      </div>
+    </div>
+
     <Row type="flex" :gutter="24">
       <!-- 左侧题目列表 -->
-      <Col :span="19">
+      <Col :span="18">
         <div class="problem-panel">
           <div class="filter-bar">
             <div class="filter-left">
@@ -78,7 +101,7 @@
                 <span class="card-problem-id">{{ problem._id }}</span>
                 <Tag :color="getCardDiffColor(problem.difficulty)" size="small">{{ $t('m.' + problem.difficulty) }}</Tag>
               </div>
-              <p class="card-problem-title">{{ problem.title }}</p>
+              <p class="card-problem-title">{{ cleanTitle(problem.title) }}</p>
               <div v-if="showTags" class="card-tags">
                 <span
                   v-for="tag in problem.tags.slice(0, 2)"
@@ -130,7 +153,7 @@
       </Col>
 
       <!-- 右侧标签栏（卡片样式） -->
-      <Col :span="5">
+      <Col :span="6">
         <div class="sidebar-panel">
           <div class="sidebar-header">
             <Icon type="ios-pricetags" />
@@ -228,14 +251,14 @@ export default {
                   this.$router.push({ name: 'problem-details', params: { problemID: params.row._id } })
                 }
               }
-            }, params.row.title)
+            }, this.cleanTitle(params.row.title))
             return h('Poptip', {
               props: {
                 trigger: 'hover',
                 placement: 'top',
                 transfer: true
               }
-            }, [titleEl, h('div', { slot: 'content' }, params.row.title)])
+            }, [titleEl, h('div', { slot: 'content' }, this.cleanTitle(params.row.title))])
           }
         },
         {
@@ -313,6 +336,10 @@ export default {
     })
   },
   methods: {
+    cleanTitle (title) {
+      if (!title) return title
+      return title.replace(/^「[^」]*」\s*/, '')
+    },
     init (simulate = false) {
       this.routeName = this.$route.name
       let query = this.$route.query
@@ -337,29 +364,18 @@ export default {
     },
     getProblemList () {
       this.loadings.table = true
+      const offset = (this.query.page - 1) * this.query.limit
       const filterParams = {
         keyword: this.query.keyword,
         difficulty: this.query.difficulty,
         tag: this.query.tag
       }
-      api.getProblemList(0, 250, filterParams).then(res => {
+      api.getProblemList(offset, this.query.limit, filterParams).then(res => {
         this.loadings.table = false
-        this.total = Math.min(res.data.data.total, 250)
-        const sorted = (res.data.data.results || []).slice().sort((a, b) => {
-          const na = parseInt(a._id), nb = parseInt(b._id)
-          if (!isNaN(na) && !isNaN(nb)) return na - nb
-          const sa = String(a._id || ''), sb = String(b._id || '')
-          const ma = sa.match(/\d+/), mb = sb.match(/\d+/)
-          if (ma && mb) {
-            const diff = Number(ma[0]) - Number(mb[0])
-            if (diff !== 0) return diff
-          }
-          return sa.localeCompare(sb)
-        })
-        const start = (this.query.page - 1) * this.query.limit
-        this.problemList = sorted.slice(start, start + this.query.limit)
+        this.total = res.data.data.total
+        this.problemList = res.data.data.results || []
         if (this.isAuthenticated) {
-          this.addStatusColumn(this.problemTableColumns, sorted)
+          this.addStatusColumn(this.problemTableColumns, this.problemList)
         }
       }, res => {
         this.loadings.table = false
@@ -554,7 +570,125 @@ export default {
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     padding: 20px;
+    margin-bottom: 20px;
   }
+
+  // 页头横幅
+  .page-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    border-radius: 12px;
+    padding: 24px 28px;
+    color: #fff;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(30, 58, 138, 0.25);
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-title i { font-size: 26px; }
+    .header-sub {
+      font-size: 14px;
+      opacity: 0.85;
+      margin: 0;
+    }
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .hs-item { text-align: center; }
+    .hs-num {
+      display: block;
+      font-size: 26px;
+      font-weight: 700;
+    }
+    .hs-label { font-size: 13px; opacity: 0.8; }
+    .hs-divider {
+      width: 1px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .pick-random-btn {
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-weight: 600;
+    }
+  }
+
+  // 难度快捷筛选
+  .diff-quick {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .diff-quick-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #475569;
+    transition: all 0.2s;
+  }
+  .diff-quick-item:hover {
+    background: #f0f4f8;
+    color: #1e3a8a;
+  }
+  .diff-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .diff-quick-name { flex: 1; }
+  .diff-quick-arrow {
+    font-size: 12px;
+    color: #cbd5e1;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .diff-quick-item:hover .diff-quick-arrow { opacity: 1; }
+
+  // 快捷入口
+  .quick-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .ql-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #475569;
+    transition: all 0.2s;
+  }
+  .ql-item:hover {
+    background: #eff6ff;
+    color: #1e3a8a;
+  }
+  .ql-icon { font-size: 18px; color: #1e3a8a; }
+  .ql-arrow {
+    margin-left: auto;
+    font-size: 12px;
+    color: #cbd5e1;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .ql-item:hover .ql-arrow { opacity: 1; }
 
   // 筛选栏样式（与卡片内部协调）
   .filter-bar {

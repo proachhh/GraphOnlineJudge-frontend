@@ -1,6 +1,18 @@
 <template>
   <div class="forum-page">
     <div class="forum-container">
+      <aside class="forum-sidebar">
+        <div class="sidebar-title">版块导航</div>
+        <div class="cat-item" :class="{active: currentCategory === 'all'}" @click="switchCategory('all')">
+          <Icon type="ios-list" size="18" />
+          <span>全部</span>
+        </div>
+        <div v-for="c in realCategories" :key="c.id" class="cat-item" :class="{active: currentCategory === c.id}" @click="switchCategory(c.id)">
+          <Icon :type="c.icon || 'ios-chatbubbles'" size="18" />
+          <span>{{ c.name }}</span>
+        </div>
+      </aside>
+      <div class="forum-main">
       <div class="forum-header-bar">
         <div class="header-left">
           <span class="forum-title">社区</span>
@@ -104,11 +116,17 @@
         </Card>
         <Page :total="totalPosts" :page-size="limit" :current="page" @on-change="changePage" class="forum-pagination"/>
       </div>
+      </div>
     </div>
 
     <Modal v-model="showEditor" :title="editingPost ? '编辑' : '发动态'" :width="800" :footer-hide="true"
       @on-cancel="showEditor = false" class="forum-editor-modal">
       <Form :label-width="60">
+        <FormItem label="版块" required v-if="!editingPost">
+          <Select v-model="createCategoryId" placeholder="选择版块">
+            <Option v-for="c in realCategories" :key="c.id" :value="c.id" :label="c.name"></Option>
+          </Select>
+        </FormItem>
         <FormItem label="标题"><Input v-model="createTitle" placeholder="标题（可选）" maxlength="256"/></FormItem>
         <FormItem label="内容" required><Simditor v-model="createContent"></Simditor></FormItem>
       </Form>
@@ -179,6 +197,7 @@ export default {
   data () {
     return {
       searchKeyword: '', posts: [], totalPosts: 0, page: 1, limit: 10, loading: false, currentFilter: 'all',
+      currentCategory: 'all', createCategoryId: '',
       realCategories: [],
       expandedPost: null, replyContents: {}, replyTarget: null, replyPostId: null, submittingMap: {},
       showEditor: false, editingPost: null, createTitle: '', createContent: '', posting: false,
@@ -214,6 +233,7 @@ export default {
       const params = { page: this.page, limit: this.limit }
       if (this.currentFilter === 'mine') params.mine = '1'
       if (this.currentFilter === 'bookmark') params.bookmarked = '1'
+      if (this.currentCategory !== 'all') params.category_id = this.currentCategory
       const res = await api.getForumPosts(params)
       const d = res.data.data
       this.posts = (d.results || []).map(p => {
@@ -270,6 +290,7 @@ export default {
     },
     changePage (p) { this.page = p; this.expandedPost = null; this.fetchData() },
     switchFilter (key) { this.currentFilter = key; this.page = 1; this.fetchData() },
+    switchCategory (id) { this.currentCategory = id; this.page = 1; this.expandedPost = null; this.fetchData() },
     async doSearch () {
       this.page = 1; this.loading = true
       const res = await api.getForumPosts({ search: this.searchKeyword, page: 1, limit: this.limit })
@@ -297,10 +318,14 @@ export default {
       post._commentLimit = d.limit || 10
     },
     changeCommentPage (post, page) { this.loadMoreComments(post, page) },
-    openCreate () { this.editingPost = null; this.createTitle = ''; this.createContent = ''; this.showEditor = true },
+    openCreate () {
+      this.editingPost = null; this.createTitle = ''; this.createContent = ''
+      this.createCategoryId = this.currentCategory !== 'all' ? this.currentCategory : (this.realCategories[0] && this.realCategories[0].id || '')
+      this.showEditor = true
+    },
     isOwnPost (post) { return this.user && post.author && this.user.id === post.author.id },
     isOwnComment (c) { return this.user && c.author && this.user.id === c.author.id },
-    startEdit (post) { this.editingPost = post; this.createTitle = post.title; this.createContent = post.content; this.showEditor = true },
+    startEdit (post) { this.editingPost = post; this.createTitle = post.title; this.createContent = post.content; this.createCategoryId = (post.category && post.category.id) || ''; this.showEditor = true },
     async submitPost () {
       const content = this.createContent.trim()
       if (!content) { this.$Message.warning('请输入内容'); return }
@@ -314,7 +339,8 @@ export default {
             this.$el.querySelectorAll('.post-body').forEach(body => { this.layoutImages(body) })
           })
         } else {
-          const catId = this.realCategories.length ? this.realCategories[0].id : 'all'
+          const catId = this.createCategoryId || (this.realCategories.length ? this.realCategories[0].id : '')
+          if (!catId) { this.$Message.warning('请选择版块'); this.posting = false; return }
           await api.createForumPost({ title: this.createTitle.trim() || '无标题', content, category_id: catId })
           this.$Message.success('发布成功'); this.page = 1; this.fetchData()
         }
@@ -376,7 +402,19 @@ export default {
 
 <style lang="less" scoped>
 .forum-page { min-height: calc(100vh - 80px); background: #f5f7fa; padding: 24px 0; margin-top: 80px; }
-.forum-container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+.forum-container { max-width: 1080px; margin: 0 auto; padding: 0 20px; display: flex; gap: 20px; align-items: flex-start; }
+.forum-sidebar {
+  width: 200px; flex-shrink: 0; background: #fff; border-radius: 12px; padding: 10px;
+  position: sticky; top: 90px; box-shadow: 0 2px 12px rgba(30,58,138,0.08);
+  .sidebar-title { font-size: 12px; color: #808695; padding: 8px 10px 6px; letter-spacing: 1px; }
+  .cat-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+    cursor: pointer; color: #515a6e; transition: all .15s; font-size: 14px; margin-bottom: 2px;
+    &:hover { background: #f0f7ff; color: #1e3a8a; }
+    &.active { background: linear-gradient(135deg, #1e3a8a, #2d8cf0); color: #fff; box-shadow: 0 3px 10px rgba(45,140,240,0.3); }
+  }
+}
+.forum-main { flex: 1; min-width: 0; }
 .forum-header-bar {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
   .header-left { display: flex; align-items: center; gap: 10px; }
@@ -455,4 +493,12 @@ export default {
 .forum-pagination { margin-top: 20px; text-align: center; }
 .modal-footer { text-align: right; padding-top: 12px; border-top: 1px solid #e8eaec; button { margin-left: 8px; } }
 .forum-editor-modal /deep/ .simditor .simditor-toolbar { display: flex !important; flex-wrap: wrap; }
+@media (max-width: 768px) {
+  .forum-container { flex-direction: column; }
+  .forum-sidebar {
+    width: 100%; position: static; display: flex; gap: 6px; overflow-x: auto; padding: 8px;
+    .sidebar-title { display: none; }
+    .cat-item { flex-shrink: 0; padding: 6px 14px; margin-bottom: 0; }
+  }
+}
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="teacher-dashboard">
     <div v-if="!canAccess" class="no-access">
-      <i class="el-icon-lock"></i>
+      <i class="el-icon-warning"></i>
       <p>仅教师可访问此页面</p>
     </div>
 
@@ -9,25 +9,161 @@
       <!-- ============ 左侧侧边栏 ============ -->
       <aside class="td-sidebar">
         <div class="sidebar-title">
-          <i class="el-icon-s-custom"></i>
+          <i class="el-icon-setting"></i>
           <span>教师管理</span>
         </div>
         <nav class="sidebar-nav">
+          <div class="nav-item" :class="{ active: activeSection === 'stats' }" @click="switchSection('stats')">
+            <i class="el-icon-menu"></i>
+            <span>学情统计</span>
+          </div>
           <div class="nav-item" :class="{ active: activeSection === 'sets' }" @click="switchSection('sets')">
             <i class="el-icon-document"></i>
             <span>题集管理</span>
           </div>
           <div class="nav-item" :class="{ active: activeSection === 'students' }" @click="switchSection('students')">
-            <i class="el-icon-user"></i>
+            <i class="el-icon-news"></i>
             <span>学生报告</span>
+          </div>
+          <div class="nav-item" :class="{ active: activeSection === 'check' }" @click="switchSection('check')">
+            <i class="el-icon-search"></i>
+            <span>代码查重</span>
           </div>
         </nav>
       </aside>
 
       <!-- ============ 右侧内容区 ============ -->
       <main class="td-content">
+        <!-- ===== 学情统计 ===== -->
+        <template v-if="section === 'stats'">
+          <div class="content-toolbar">
+            <h2 class="content-title">学情统计</h2>
+            <el-button size="small" icon="el-icon-refresh" @click="loadStats" :loading="statsLoading">刷新</el-button>
+          </div>
+
+          <div v-loading="statsLoading" class="stats-wrap">
+            <!-- 汇总卡片 -->
+            <div class="stat-cards" v-if="stats">
+              <div class="stat-card sc-blue">
+                <i class="el-icon-news"></i>
+                <div class="sc-body">
+                  <span class="sc-num">{{ stats.summary.total_students }}</span>
+                  <span class="sc-label">学生总数</span>
+                </div>
+              </div>
+              <div class="stat-card sc-cyan">
+                <i class="el-icon-document"></i>
+                <div class="sc-body">
+                  <span class="sc-num">{{ stats.summary.total_sets }}</span>
+                  <span class="sc-label">题集数 / 已发布 {{ stats.summary.published_sets }}</span>
+                </div>
+              </div>
+              <div class="stat-card sc-orange">
+                <i class="el-icon-star-on"></i>
+                <div class="sc-body">
+                  <span class="sc-num">{{ stats.summary.total_boss }}</span>
+                  <span class="sc-label">Boss 挑战数</span>
+                </div>
+              </div>
+              <div class="stat-card sc-green">
+                <i class="el-icon-edit-outline"></i>
+                <div class="sc-body">
+                  <span class="sc-num">{{ stats.summary.total_submissions }}</span>
+                  <span class="sc-label">总提交数 / 已评 {{ stats.summary.graded_submissions }}</span>
+                </div>
+              </div>
+              <div class="stat-card sc-purple">
+                <i class="el-icon-rank"></i>
+                <div class="sc-body">
+                  <span class="sc-num">{{ stats.summary.avg_score }}</span>
+                  <span class="sc-label">平均分</span>
+                </div>
+              </div>
+              <div class="stat-card sc-red">
+                <i class="el-icon-circle-check"></i>
+                <div class="sc-body">
+                  <span class="sc-num">{{ stats.summary.pass_rate }}%</span>
+                  <span class="sc-label">及格率</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 图表区 -->
+            <div class="charts-row" v-if="stats">
+              <div class="chart-card">
+                <h3 class="chart-title">提交趋势（近 14 天）</h3>
+                <div class="chart-box" ref="trendChart"></div>
+              </div>
+              <div class="chart-card">
+                <h3 class="chart-title">成绩分布</h3>
+                <div class="chart-box" ref="scoreDistChart"></div>
+              </div>
+            </div>
+            <div class="charts-row" v-if="stats">
+              <div class="chart-card">
+                <h3 class="chart-title">知识点题集分布</h3>
+                <div class="chart-box" ref="topicChart"></div>
+              </div>
+              <div class="chart-card">
+                <h3 class="chart-title">难度分布</h3>
+                <div class="chart-box" ref="diffChart"></div>
+              </div>
+            </div>
+
+            <!-- Top 学生 + 近期提交 -->
+            <div class="charts-row" v-if="stats">
+              <div class="chart-card chart-card-table">
+                <h3 class="chart-title">Top 学生（按平均分）</h3>
+                <el-table :data="stats.top_students" size="small" empty-text="暂无数据">
+                  <el-table-column type="index" label="#" width="50"></el-table-column>
+                  <el-table-column prop="username" label="学生" min-width="120"></el-table-column>
+                  <el-table-column prop="sub_count" label="提交数" width="90"></el-table-column>
+                  <el-table-column label="平均分" width="100">
+                    <template slot-scope="{row}">
+                      <el-tag size="mini" :type="row.avg_score >= 80 ? 'success' : (row.avg_score >= 60 ? 'warning' : 'danger')">{{ row.avg_score }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" width="100">
+                    <template slot-scope="{row}">
+                      <el-button size="mini" type="primary" plain @click="jumpStudentReport(row)">查看</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+              <div class="chart-card chart-card-table">
+                <h3 class="chart-title">近期提交</h3>
+                <el-table :data="stats.recent_submissions" size="small" empty-text="暂无数据">
+                  <el-table-column prop="username" label="学生" width="110"></el-table-column>
+                  <el-table-column label="题目" min-width="140">
+                    <template slot-scope="{row}">
+                      <el-tag size="mini" :type="row.type === 'boss' ? 'danger' : 'info'" effect="plain">{{ row.type === 'boss' ? 'Boss' : '题集' }}</el-tag>
+                      <span class="recent-title">{{ row.title }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="得分" width="80">
+                    <template slot-scope="{row}">{{ row.score != null ? row.score : '-' }}</template>
+                  </el-table-column>
+                  <el-table-column label="状态" width="90">
+                    <template slot-scope="{row}">
+                      <el-tag size="mini" :type="row.status === 'graded' ? 'success' : 'warning'">{{ statusText(row.status) }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="时间" min-width="140">
+                    <template slot-scope="{row}">{{ row.created | localtime }}</template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+
+            <div v-if="stats && !stats.summary.total_submissions" class="stats-empty">
+              <i class="el-icon-tickets"></i>
+              <p>暂无提交数据，待学生开始作答后将自动统计</p>
+            </div>
+          </div>
+        </template>
+
         <!-- ===== 题集管理 ===== -->
-        <template v-if="section === 'sets'">
+        <template v-else-if="section === 'sets'">
           <!-- 列表视图 -->
           <div v-if="!editingSet" class="set-list-view">
             <div class="content-toolbar">
@@ -114,7 +250,7 @@
                   <div class="questions-editor">
                     <div class="qe-toolbar">
                       <el-button type="primary" plain size="small" icon="el-icon-plus" @click="addQuestion(setForm.questions)">添加题目</el-button>
-                      <el-button type="warning" plain size="small" icon="el-icon-magic-stick" @click="openAiDialog">AI 一键生成</el-button>
+                      <el-button type="warning" plain size="small" icon="el-icon-edit" @click="openAiDialog">AI 一键生成</el-button>
                     </div>
                     <div class="qe-item" v-for="(q, qi) in setForm.questions" :key="qi">
                       <div class="qe-head">
@@ -165,6 +301,49 @@
               </template>
             </el-table-column>
           </el-table>
+        </template>
+
+        <!-- ===== 代码查重 ===== -->
+        <template v-else-if="section === 'check'">
+          <div class="content-toolbar">
+            <h2 class="content-title">代码查重</h2>
+          </div>
+          <div class="check-toolbar">
+            <el-input v-model="checkProblemId" placeholder="输入题目 ID" style="width: 200px" clearable></el-input>
+            <el-button type="primary" size="small" icon="el-icon-search" @click="runCodeCheck" :loading="checkLoading">开始查重</el-button>
+            <span class="check-hint">对比该题目所有 AC 提交的代码相似度（阈值 60%）</span>
+          </div>
+          <div v-loading="checkLoading">
+            <div v-if="checkResults !== null" class="check-summary">
+              <span>共检测 {{ checkChecked }} 份提交，发现 <b style="color:#ef4444">{{ checkResults.length }}</b> 组相似代码</span>
+            </div>
+            <el-table :data="checkResults" stripe style="width: 100%" empty-text="暂无相似代码或未检测">
+              <el-table-column type="index" label="#" width="50"></el-table-column>
+              <el-table-column label="用户 A" width="120">
+                <template slot-scope="{row}">{{ row.user_a }}</template>
+              </el-table-column>
+              <el-table-column label="用户 B" width="120">
+                <template slot-scope="{row}">{{ row.user_b }}</template>
+              </el-table-column>
+              <el-table-column label="相似度" width="120">
+                <template slot-scope="{row}">
+                  <el-tag size="mini" :type="row.similarity >= 85 ? 'danger' : (row.similarity >= 70 ? 'warning' : 'info')">{{ row.similarity }}%</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="language" label="语言" width="100"></el-table-column>
+              <el-table-column label="提交时间 A" width="150">
+                <template slot-scope="{row}">{{ row.create_time_a }}</template>
+              </el-table-column>
+              <el-table-column label="提交时间 B" width="150">
+                <template slot-scope="{row}">{{ row.create_time_b }}</template>
+              </el-table-column>
+              <el-table-column label="操作" width="100">
+                <template slot-scope="{row}">
+                  <el-button size="mini" type="primary" plain @click="viewCodePair(row)">对比代码</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </template>
       </main>
     </div>
@@ -232,7 +411,7 @@
             <div class="sr-item"><span class="sr-num">{{ studentReport.avg_score != null ? studentReport.avg_score : '-' }}</span><span class="sr-label">平均分</span></div>
           </div>
           <div class="sr-ai-section">
-            <el-button type="primary" plain size="small" icon="el-icon-magic-stick" :loading="aiAnalysisLoading" @click="loadAiAnalysis(currentStudentId)">AI 学习分析</el-button>
+            <el-button type="primary" plain size="small" icon="el-icon-edit" :loading="aiAnalysisLoading" @click="loadAiAnalysis(currentStudentId)">AI 学习分析</el-button>
             <div v-if="aiAnalysisLoading" class="ai-analysis-loading">
               <i class="el-icon-loading"></i> AI 正在分析...
             </div>
@@ -249,20 +428,49 @@
       </div>
       <div slot="footer"><el-button @click="studentDialogVisible = false">关闭</el-button></div>
     </el-dialog>
+
+    <!-- ============ 代码对比弹窗 ============ -->
+    <el-dialog :title="codePairTitle" :visible.sync="codePairVisible" width="90%" top="20px" custom-class="dash-dialog code-compare-dialog">
+      <div class="code-compare">
+        <div class="code-side">
+          <div class="code-side-header">
+            <span>{{ currentPair.user_a }}</span>
+            <span class="code-side-time">{{ currentPair.create_time_a }}</span>
+          </div>
+          <pre class="code-block">{{ currentPair.code_a }}</pre>
+        </div>
+        <div class="code-side">
+          <div class="code-side-header">
+            <span>{{ currentPair.user_b }}</span>
+            <span class="code-side-time">{{ currentPair.create_time_b }}</span>
+          </div>
+          <pre class="code-block">{{ currentPair.code_b }}</pre>
+        </div>
+      </div>
+      <div slot="footer">
+        <el-tag :type="currentPair.similarity >= 85 ? 'danger' : (currentPair.similarity >= 70 ? 'warning' : 'info')" size="medium">相似度: {{ currentPair.similarity }}%</el-tag>
+        <el-button @click="codePairVisible = false" style="margin-left: 12px">关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import api from '@oj/api'
+import * as echarts from 'echarts'
 
 export default {
   name: 'TeacherDashboard',
   data () {
     return {
-      activeSection: 'sets',
-      section: 'sets',
+      activeSection: 'stats',
+      section: 'stats',
       editingSet: false,
       topics: [],
+      // 学情统计
+      stats: null,
+      statsLoading: false,
+      chartInstances: {},
       // 题集
       sets: [],
       setsLoading: false,
@@ -286,16 +494,146 @@ export default {
       // AI 生成
       aiDialogVisible: false,
       aiGenerating: false,
-      aiForm: this.emptyAiForm()
+      aiForm: this.emptyAiForm(),
+      // 代码查重
+      checkProblemId: '',
+      checkLoading: false,
+      checkResults: null,
+      checkChecked: 0,
+      codePairVisible: false,
+      currentPair: {},
+      codePairTitle: '代码对比'
     }
   },
   mounted () {
     this.loadTopics()
     this.loadSets()
+    this.loadStats()
+    window.addEventListener('resize', this.handleResize)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.handleResize)
+    this.disposeCharts()
   },
   computed: {
     canAccess () {
       return !!(this.$store.getters.isTeacher || this.$store.getters.isAdminRole)
+    },
+    trendChartOption () {
+      const s = this.stats || {}
+      const trend = s.submission_trend || []
+      return {
+        tooltip: { trigger: 'axis' },
+        grid: { left: 40, right: 20, top: 30, bottom: 30 },
+        xAxis: {
+          type: 'category',
+          data: trend.map(t => t.date.slice(5)),
+          axisLabel: { fontSize: 11, color: '#64748b' },
+          axisLine: { lineStyle: { color: '#cbd5e1' } }
+        },
+        yAxis: {
+          type: 'value',
+          minInterval: 1,
+          axisLabel: { fontSize: 11, color: '#64748b' },
+          splitLine: { lineStyle: { color: '#f1f5f9' } }
+        },
+        series: [{
+          name: '提交数',
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 7,
+          data: trend.map(t => t.count),
+          itemStyle: { color: '#1e3a8a' },
+          lineStyle: { width: 3, color: '#1e3a8a' },
+          areaStyle: {
+            color: {
+              type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(30,58,138,0.35)' },
+                { offset: 1, color: 'rgba(30,58,138,0.02)' }
+              ]
+            }
+          }
+        }]
+      }
+    },
+    scoreDistChartOption () {
+      const s = this.stats || {}
+      const dist = s.score_distribution || []
+      const colors = ['#ef4444', '#f59e0b', '#facc15', '#22c55e', '#1e3a8a']
+      return {
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        grid: { left: 40, right: 20, top: 20, bottom: 30 },
+        xAxis: {
+          type: 'category',
+          data: dist.map(d => d.label),
+          axisLabel: { fontSize: 11, color: '#64748b' },
+          axisLine: { lineStyle: { color: '#cbd5e1' } }
+        },
+        yAxis: {
+          type: 'value',
+          minInterval: 1,
+          axisLabel: { fontSize: 11, color: '#64748b' },
+          splitLine: { lineStyle: { color: '#f1f5f9' } }
+        },
+        series: [{
+          type: 'bar',
+          barWidth: '55%',
+          data: dist.map((d, i) => ({ value: d.value, itemStyle: { color: colors[i % colors.length], borderRadius: [4, 4, 0, 0] } }))
+        }]
+      }
+    },
+    topicChartOption () {
+      const s = this.stats || {}
+      const dist = s.topic_distribution || []
+      const top = dist.slice(0, 8)
+      return {
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        grid: { left: 80, right: 20, top: 20, bottom: 30 },
+        xAxis: {
+          type: 'value',
+          minInterval: 1,
+          axisLabel: { fontSize: 11, color: '#64748b' },
+          splitLine: { lineStyle: { color: '#f1f5f9' } }
+        },
+        yAxis: {
+          type: 'category',
+          data: top.map(t => t.topic).reverse(),
+          axisLabel: { fontSize: 11, color: '#475569' },
+          axisLine: { lineStyle: { color: '#cbd5e1' } }
+        },
+        series: [{
+          type: 'bar',
+          barWidth: '55%',
+          data: top.map(t => t.set_count).reverse().map(v => ({ value: v, itemStyle: { color: '#2d8cf0', borderRadius: [0, 4, 4, 0] } }))
+        }]
+      }
+    },
+    difficultyChartOption () {
+      const s = this.stats || {}
+      const dist = s.difficulty_distribution || []
+      const colors = { Low: '#22c55e', Mid: '#f59e0b', High: '#ef4444' }
+      return {
+        tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+        legend: { bottom: 0, textStyle: { fontSize: 12, color: '#64748b' } },
+        series: [{
+          type: 'pie',
+          radius: ['40%', '68%'],
+          center: ['50%', '45%'],
+          avoidLabelOverlap: true,
+          label: { show: true, formatter: '{b}\n{c}', fontSize: 12 },
+          labelLine: { length: 8, length2: 6 },
+          data: dist.map(d => ({ value: d.value, name: d.label, itemStyle: { color: colors[d.key] || '#2d8cf0' } }))
+        }]
+      }
+    }
+  },
+  watch: {
+    stats () {
+      if (this.section === 'stats' && this.stats) {
+        this.renderCharts()
+      }
     }
   },
   methods: {
@@ -305,6 +643,10 @@ export default {
       this.activeSection = s
       if (s === 'students' && !this.students.length) this.loadStudents()
       if (s === 'sets' && !this.sets.length) this.loadSets()
+      if (s === 'stats') {
+        if (this.stats) this.renderCharts()
+        else this.loadStats()
+      }
     },
     loadTopics () {
       api.getTeacherTopics().then(res => {
@@ -313,6 +655,7 @@ export default {
     },
     diffTag (d) { return { Low: 'success', Mid: 'warning', High: 'danger' }[d] || 'info' },
     diffText (d) { return { Low: '简单', Mid: '中等', High: '困难' }[d] || d || '-' },
+    statusText (st) { return { in_progress: '作答中', submitted: '待评分', graded: '已评分' }[st] || st || '-' },
     renderMarkdown (text) {
       if (!text) return ''
       let html = String(text)
@@ -466,6 +809,45 @@ export default {
       }).catch(() => { this.$message.error('加载学生列表失败') })
         .finally(() => { this.studentsLoading = false })
     },
+    // ---------- 学情统计 ----------
+    loadStats () {
+      this.statsLoading = true
+      api.getTeacherStats().then(res => {
+        this.stats = res.data.data || res.data || null
+      }).catch(() => { this.$message.error('加载学情统计失败') })
+        .finally(() => { this.statsLoading = false })
+    },
+    renderCharts () {
+      this.$nextTick(() => {
+        this._renderChart('trendChart', this.trendChartOption)
+        this._renderChart('scoreDistChart', this.scoreDistChartOption)
+        this._renderChart('topicChart', this.topicChartOption)
+        this._renderChart('diffChart', this.difficultyChartOption)
+      })
+    },
+    _renderChart (refName, option) {
+      const el = this.$refs[refName]
+      if (!el) return
+      if (this.chartInstances[refName]) {
+        this.chartInstances[refName].dispose()
+      }
+      const inst = echarts.init(el)
+      inst.setOption(option || {})
+      this.chartInstances[refName] = inst
+    },
+    disposeCharts () {
+      Object.values(this.chartInstances).forEach(c => { try { c.dispose() } catch (e) {} })
+      this.chartInstances = {}
+    },
+    handleResize () {
+      Object.values(this.chartInstances).forEach(c => { try { c.resize() } catch (e) {} })
+    },
+    jumpStudentReport (row) {
+      this.switchSection('students')
+      this.$nextTick(() => {
+        if (row && (row.id || row.user_id)) this.viewStudentReport(row)
+      })
+    },
     viewStudentReport (row) {
       this.studentDialogVisible = true
       this.studentReportLoading = true
@@ -489,6 +871,35 @@ export default {
         this.aiAnalysis = d.analysis || ''
       }).catch(() => { this.$message.error('AI分析失败') })
         .finally(() => { this.aiAnalysisLoading = false })
+    },
+
+    // ---------- 代码查重 ----------
+    runCodeCheck () {
+      if (!this.checkProblemId || !this.checkProblemId.trim()) {
+        this.$message.warning('请输入题目 ID')
+        return
+      }
+      this.checkLoading = true
+      this.checkResults = null
+      api.teacherCodeCheck({ problem_id: this.checkProblemId.trim() }).then(res => {
+        const d = res.data || {}
+        this.checkResults = d.data || []
+        this.checkChecked = d.checked || 0
+        if (this.checkResults.length === 0) {
+          this.$message.success('未发现相似代码')
+        } else {
+          this.$message.warning(`发现 ${this.checkResults.length} 组相似代码`)
+        }
+      }).catch(err => {
+        const resp = (err && err.response) || err
+        const msg = (resp && resp.data && resp.data.error) || '查重失败'
+        this.$message.error(msg)
+      }).finally(() => { this.checkLoading = false })
+    },
+    viewCodePair (row) {
+      this.currentPair = row
+      this.codePairTitle = `代码对比: ${row.user_a} vs ${row.user_b} (${row.similarity}%)`
+      this.codePairVisible = true
     },
 
     // ---------- 题目编辑器 ----------
@@ -837,5 +1248,177 @@ export default {
 .teacher-dashboard /deep/ .el-switch.is-checked .el-switch__core {
   background-color: #1e3a8a;
   border-color: #1e3a8a;
+}
+
+/* ============ 学情统计 ============ */
+.stats-wrap {
+  min-height: 200px;
+}
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  right: -18px;
+  top: -18px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+}
+.stat-card > i {
+  font-size: 36px;
+  opacity: 0.95;
+  z-index: 1;
+}
+.stat-card .sc-body {
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+.stat-card .sc-num {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.stat-card .sc-label {
+  font-size: 13px;
+  opacity: 0.92;
+  margin-top: 2px;
+}
+.sc-blue { background: linear-gradient(135deg, #1e3a8a, #2950b3); }
+.sc-cyan { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
+.sc-orange { background: linear-gradient(135deg, #f97316, #fb923c); }
+.sc-green { background: linear-gradient(135deg, #16a34a, #22c55e); }
+.sc-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+.sc-red { background: linear-gradient(135deg, #dc2626, #ef4444); }
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.chart-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f0f2f5;
+}
+.chart-card-table {
+  overflow-x: auto;
+}
+.chart-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin: 0 0 12px;
+  padding-left: 8px;
+  border-left: 3px solid #1e3a8a;
+}
+.chart-box {
+  width: 100%;
+  height: 280px;
+}
+.chart-box /deep/ .echarts {
+  width: 100% !important;
+  height: 100% !important;
+}
+.recent-title {
+  margin-left: 6px;
+  color: #475569;
+}
+.stats-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #c0c4cc;
+}
+.stats-empty i {
+  font-size: 56px;
+}
+.stats-empty p {
+  font-size: 15px;
+  margin-top: 14px;
+}
+
+/* ============ 代码查重 ============ */
+.check-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.check-hint {
+  font-size: 13px;
+  color: #909399;
+}
+.check-summary {
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: #606266;
+}
+.code-compare {
+  display: flex;
+  gap: 16px;
+}
+.code-side {
+  flex: 1;
+  min-width: 0;
+}
+.code-side-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #1e3a8a;
+  color: #fff;
+  border-radius: 6px 6px 0 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+.code-side-time {
+  font-weight: 400;
+  font-size: 12px;
+  opacity: 0.8;
+}
+.code-block {
+  margin: 0;
+  padding: 12px;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: 0 0 6px 6px;
+  overflow: auto;
+  max-height: 70vh;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.code-compare-dialog /deep/ .el-dialog__body {
+  padding: 16px;
+}
+
+@media (max-width: 1024px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

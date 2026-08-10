@@ -235,6 +235,19 @@ export default [
     meta: { requiresAuth: true, title: '试题练习' },
     component: () => import('@/pages/oj/views/recommend/ExerciseDetail.vue')
   },
+  // boss exams
+  {
+    path: '/boss-exam',
+    name: 'boss-exam-list',
+    meta: { requiresAuth: true, title: 'Boss 挑战' },
+    component: () => import('@/pages/oj/views/recommend/BossExams.vue')
+  },
+  {
+    path: '/boss-exam/:id',
+    name: 'boss-exam-detail',
+    meta: { requiresAuth: true, title: 'Boss 战' },
+    component: () => import('@/pages/oj/views/recommend/BossExamDetail.vue')
+  },
   // teacher dashboard
   {
     path: '/teacher',
@@ -293,6 +306,27 @@ export default [
     name: 'forum',
     meta: {title: '论坛'},
     component: () => import('@/pages/oj/views/forum/ForumList.vue')
+  },
+  // 算法可视化实验室
+  {
+    path: '/algorithm-viz',
+    name: 'algorithm-viz',
+    meta: {title: '算法可视化实验室'},
+    component: () => import('@/pages/oj/views/algorithm/AlgorithmVisualizer.vue')
+  },
+  // 代码执行可视化
+  {
+    path: '/code-visualizer',
+    name: 'code-visualizer',
+    meta: {title: '代码执行可视化'},
+    component: () => import('@/pages/oj/views/code/CodeVisualizer.vue')
+  },
+  // AI 代码审查报告
+  {
+    path: '/code-review',
+    name: 'code-review',
+    meta: {title: 'AI 代码审查'},
+    component: () => import('@/pages/oj/views/code/CodeReviewReport.vue')
   },
   {
     path: '/agreement',

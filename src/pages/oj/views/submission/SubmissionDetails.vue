@@ -65,6 +65,7 @@
         btnText="智能分析错误"
         btnType="error"
         :fetchFn="fetchErrorAnalysis"
+        :streamFn="fetchErrorAnalysisStream"
       />
 
       <!-- 智能代码审查 -->
@@ -76,7 +77,16 @@
         btnText="智能审查代码"
         btnType="success"
         :fetchFn="fetchCodeReview"
+        :streamFn="fetchCodeReviewStream"
       />
+
+      <!-- AI 深度审查报告入口 -->
+      <div v-if="isAccepted" class="deep-review-entry">
+        <Button type="warning" size="large" long @click="goDeepReview">
+          <Icon type="ios-pulse-strong"></Icon>
+          AI 深度审查报告（复杂度/评分/雷达图）
+        </Button>
+      </div>
     </div>
   </div>
 </template>
@@ -151,6 +161,11 @@
       onCopy () {
         this.$success(this.$i18n.t('m.Code_Copied'))
       },
+      goDeepReview () {
+        if (this.submission && this.submission.id) {
+          this.$router.push('/code-review?submission_id=' + this.submission.id)
+        }
+      },
       copyCode () {
         const code = this.submission.code || ''
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -197,8 +212,14 @@
       fetchErrorAnalysis () {
         return api.analyzeError({ message: '帮我分析这条提交为什么出错', submission_id: this.submission.id, agent_type: 'ErrorAnalysisAgent' })
       },
+      fetchErrorAnalysisStream () {
+        return { url: '/api/spark/analyze-error/stream/', body: { submission_id: this.submission.id } }
+      },
       fetchCodeReview () {
         return api.codeReview({ submission_id: this.submission.id })
+      },
+      fetchCodeReviewStream () {
+        return { url: '/api/spark/code-review/stream/', body: { submission_id: this.submission.id } }
       },
       getSubmission () {
         this.loading = true
@@ -437,5 +458,8 @@
   justify-content: flex-end;
   padding-top: 20px;
   border-top: 1px solid #f1f5f9;
+}
+.deep-review-entry {
+  padding-top: 16px;
 }
 </style>

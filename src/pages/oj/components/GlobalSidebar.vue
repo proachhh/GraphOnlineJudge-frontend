@@ -246,6 +246,7 @@ export default {
       sideDragPending: false,
       sideDragStart: { x: 0, y: 0, barX: 0, barY: 0 },
       sideDragTimer: null,
+      sideDragOccurred: false,
       sidebarSnapped: 'right',
 
       chatState,
@@ -347,6 +348,9 @@ export default {
   },
   mounted () {
     this.sidebarPos.y = window.innerHeight * 0.5 - 80
+    // 默认显示在右边
+    const sidebarWidth = this.isCollapsed ? 48 : 160
+    this.sidebarPos.x = window.innerWidth - sidebarWidth - 16
     this.snapToEdge()
     window.addEventListener('resize', this.onWindowResize)
     this.$root.$on('open-ai-chat', this.openAIChat)
@@ -375,6 +379,11 @@ export default {
     },
 
     toggleSidebarLocal () {
+      // 拖动后浏览器会派发 click 事件，此处拦截避免误展开
+      if (this.sideDragOccurred) {
+        this.sideDragOccurred = false
+        return
+      }
       this.isCollapsed = !this.isCollapsed
       if (this.isCollapsed) {
         this.showAIChat = false
@@ -428,8 +437,8 @@ export default {
       if (this.sidebarDragging) {
         this.sidebarDragging = false
         this.snapToEdge()
-      } else if (this.isCollapsed) {
-        this.toggleSidebarLocal()
+        // 标记发生过拖动，拦截随后派发的 click 事件，防止误展开
+        this.sideDragOccurred = true
       }
       this.sideDragPending = false
     },

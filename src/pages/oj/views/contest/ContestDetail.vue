@@ -50,7 +50,7 @@
         <Table
           v-if="contestProblems.length > 0"
           :columns="problemColumns"
-          :data="contestProblems"
+          :data="pagedContestProblems"
           @on-row-click="goContestProblem"
           :no-data-text="$t('m.No_Problems')"
           disabled-hover
@@ -58,6 +58,15 @@
         />
         <div v-else class="empty-tip">
           <p>{{ $t('m.No_Problems') }}</p>
+        </div>
+        <div class="pagination-wrapper" v-if="contestProblems.length > problemPageLimit">
+          <Page
+            :total="contestProblems.length"
+            :page-size="problemPageLimit"
+            :current.sync="problemCurrentPage"
+            size="small"
+            @on-change="onProblemPageChange">
+          </Page>
         </div>
       </div>
     </div>
@@ -122,7 +131,7 @@ export default {
         {
           title: '#',
           key: '_id',
-          width: 80,
+          minWidth: 80,
           align: 'center',
           sortType: 'asc',
           render: (h, p) => h('span', {
@@ -140,12 +149,12 @@ export default {
         {
           title: this.$i18n.t('m.Total'),
           key: 'submission_number',
-          width: 100,
+          minWidth: 100,
           align: 'center'
         },
         {
           title: this.$i18n.t('m.AC_Rate'),
-          width: 120,
+          minWidth: 120,
           align: 'center',
           render: (h, p) => {
             return h('span', this.getACRate(p.row.accepted_number, p.row.submission_number))
@@ -156,7 +165,7 @@ export default {
         {
           title: '#',
           key: '_id',
-          width: 80,
+          minWidth: 80,
           align: 'center',
           render: (h, p) => h('span', {
             style: { fontWeight: 600, color: '#1e3a8a', whiteSpace: 'nowrap' }
@@ -170,7 +179,9 @@ export default {
             style: { fontWeight: 500, color: '#1e3a8a' }
           }, p.row.title)
         }
-      ]
+      ],
+      problemCurrentPage: 1,
+      problemPageLimit: 10
     }
   },
   mounted () {
@@ -216,9 +227,19 @@ export default {
           } else if (this.OIContestRealTimePermission) {
             this.addStatusColumn(this.acmProblemColumns, res.data.data)
           }
+          // addStatusColumn 添加的列带固定 width，会导致 table-layout: fixed
+          // 将所有 width 转为 minWidth，保持 auto 布局，防止 ID 被截断
+          const cols = this.acmProblemColumns
+          for (let i = 0; i < cols.length; i++) {
+            if (cols[i].width) {
+              this.$set(cols[i], 'minWidth', cols[i].width)
+              this.$delete(cols[i], 'width')
+            }
+          }
         }
       })
     },
+    onProblemPageChange () {},
     goContestProblem (row) {
       this.$router.push({
         name: 'contest-problem-details',
@@ -245,6 +266,10 @@ export default {
         return this.acmProblemColumns
       }
       return this.oiProblemColumns
+    },
+    pagedContestProblems () {
+      const start = (this.problemCurrentPage - 1) * this.problemPageLimit
+      return (this.contestProblems || []).slice(start, start + this.problemPageLimit)
     },
     countdownColor () {
       if (this.contestStatus) {
@@ -389,6 +414,16 @@ export default {
 .problems-table {
   font-size: 14px;
 
+  /deep/ .ivu-table {
+    table-layout: auto !important;
+  }
+
+  /deep/ .ivu-table-cell {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
   /deep/ .ivu-table-row {
     cursor: pointer;
   }
@@ -410,6 +445,13 @@ export default {
   /deep/ .ivu-table-row:hover td {
     background: #f0f9ff;
   }
+}
+
+.pagination-wrapper {
+  padding: 12px 24px;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid #f1f5f9;
 }
 
 .empty-tip {

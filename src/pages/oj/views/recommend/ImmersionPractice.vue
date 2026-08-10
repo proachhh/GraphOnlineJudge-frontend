@@ -118,6 +118,7 @@
           btnText="获取提示"
           btnType="warning"
           :fetchFn="fetchHint"
+          :streamFn="fetchHintStream"
         />
 
         <Card :padding="20" id="submit-code" dis-hover>
@@ -615,6 +616,11 @@ export default {
         problem_id: problemId,
         message: `题目《${p.title || ''}》(ID: ${p._id || p.id}) 怎么做？请给我解题提示。`
       })
+    },
+    fetchHintStream () {
+      const p = this.currentProblem
+      const problemId = (p && (p._id || p.id)) || ''
+      return { url: '/api/spark/problem-hint/stream/', body: { problem_id: problemId, hint_level: 1 } }
     },
     runSelfTest () {
       if (this.code.trim() === '') {

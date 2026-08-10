@@ -19,7 +19,27 @@
             <Icon type="ios-list" size="14" />
           </Radio>
         </RadioGroup>
+        <Button type="primary" icon="ios-create" @click="openAiDialog" class="ai-btn">
+          <Icon type="ios-bulb" /> AI 生成教案
+        </Button>
       </div>
+
+    <!-- AI 生成教案对话框 -->
+    <Modal v-model="showAiDialog" title="AI 生成教案" :width="520" :footer-hide="true" class="ai-gen-modal">
+      <Form :label-width="70">
+        <FormItem label="主题">
+          <Input v-model="aiTopic" placeholder="例如：动态规划、KMP 算法、最短路" @on-enter="runAiGenerate" />
+        </FormItem>
+      </Form>
+      <div v-if="aiGenerating" class="ai-gen-loading">
+        <Spin size="large" fix></Spin>
+        <p class="ai-gen-hint"><Icon type="ios-loading" class="spin-icon" /> AI 正在生成教案，包含讲解、例题分析、易错点，并自动匹配相关题目，请稍候...</p>
+      </div>
+      <div v-else class="ai-gen-footer">
+        <Button @click="showAiDialog = false">取消</Button>
+        <Button type="primary" @click="runAiGenerate" :disabled="!aiTopic.trim()">开始生成</Button>
+      </div>
+    </Modal>
 
       <div class="content-row">
         <div class="alpha-sidebar">
@@ -110,7 +130,10 @@ export default {
       activeLetter: '',
       activeLetters: [],
       alphabetIndex: {},
-      searchTimer: null
+      searchTimer: null,
+      showAiDialog: false,
+      aiTopic: '',
+      aiGenerating: false
     }
   },
   computed: {
@@ -218,6 +241,27 @@ export default {
     },
     goToLessonPlan (id) {
       this.$router.push({ name: 'lesson-plan-details', params: { id } })
+    },
+    openAiDialog () {
+      this.aiTopic = ''
+      this.showAiDialog = true
+    },
+    async runAiGenerate () {
+      const topic = this.aiTopic.trim()
+      if (!topic) return
+      this.aiGenerating = true
+      try {
+        const res = await api.aiGenerateLessonPlan({ topic })
+        const data = res.data.data
+        this.$Message.success(`生成成功，已匹配 ${data.problems_count} 道相关题目`)
+        this.showAiDialog = false
+        this.aiGenerating = false
+        this.$router.push({ name: 'lesson-plan-details', params: { id: data.id } })
+      } catch (e) {
+        this.aiGenerating = false
+        const msg = (e.response && e.response.data && e.response.data.error) || (e.data && e.data.error) || '生成失败'
+        this.$Message.error(msg)
+      }
     }
   }
 }
@@ -299,7 +343,36 @@ export default {
     flex-shrink: 0;
     margin-left: auto;
   }
+
+  .ai-btn {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #1e3a8a, #2d8cf0);
+    border: none;
+    font-weight: 500;
+    &:hover { opacity: 0.9; }
+  }
 }
+
+.ai-gen-modal {
+  .ai-gen-loading {
+    position: relative;
+    min-height: 120px;
+    padding: 20px 10px;
+  }
+  .ai-gen-hint {
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 30px;
+    .spin-icon { animation: rotate 1.2s linear infinite; margin-right: 6px; }
+  }
+  .ai-gen-footer {
+    text-align: right;
+    padding-top: 10px;
+    button { margin-left: 8px; }
+  }
+}
+@keyframes rotate { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
 .lesson-plan-panel {
   background: #fff;

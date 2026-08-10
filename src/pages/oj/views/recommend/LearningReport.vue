@@ -4,14 +4,14 @@
     <!-- 画像引导入口 -->
     <div v-if="!profileComplete" class="onboarding-banner">
       <div class="banner-icon">
-        <Icon type="ios-person-add" size="48" />
+        <Icon type="ios-people" size="48" />
       </div>
       <div class="banner-body">
         <h2>完善学习画像，获得更精准的推荐</h2>
         <p>{{ $t('m.Smart_Profile_Invite') }}</p>
       </div>
       <Button type="warning" size="large" @click="startOnboarding" :loading="onboardingLoading">
-        <Icon type="ios-create" /> 开始建立学习画像
+        <Icon type="ios-color-wand" /> 开始建立学习画像
       </Button>
     </div>
 
@@ -55,7 +55,7 @@
             </div>
             <div class="chart-mini-card">
               <div class="cmc-header">
-                <Icon type="ios-trending-up" size="14" color="#f90" />
+                <Icon type="ios-arrow-up" size="14" color="#f90" />
                 <span>{{ $t('m.Learning_Trend') }}</span>
               </div>
               <div id="trend-chart" class="chart-mini-box"></div>
@@ -67,7 +67,7 @@
           <div v-if="profileComplete && profileData" class="profile-tags-wrap">
             <!-- 强项知识点标签云 -->
             <div class="tag-block">
-              <h4><Icon type="ios-thumbs-up" color="#2d8cf0" size="16" /> 强项</h4>
+              <h4><Icon type="ios-star" color="#2d8cf0" size="16" /> 强项</h4>
               <div class="tag-cloud" v-if="strengthTopics.length">
                 <span v-for="(t, i) in strengthTopics" :key="t"
                   class="lc-tag"
@@ -77,7 +77,7 @@
                 </span>
               </div>
               <div v-else class="dim-empty">
-                <Icon type="ios-information-circle-outline" size="14" />
+                <Icon type="ios-information-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </div>
@@ -95,7 +95,7 @@
                 </span>
               </div>
               <div v-else class="dim-empty">
-                <Icon type="ios-information-circle-outline" size="14" />
+                <Icon type="ios-information-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </div>
@@ -104,7 +104,7 @@
             <!-- 文字卡片：整体掌握度 -->
             <div class="text-card" v-if="profileData.knowledge_mastery">
               <div class="tc-head">
-                <Icon type="ios-school" color="#2d8cf0" size="16" />
+                <Icon type="ios-bookmarks" color="#2d8cf0" size="16" />
                 <span>整体掌握度</span>
                 <span class="tc-score">{{ profileScores.knowledge_mastery || 3.5 }} / 5</span>
               </div>
@@ -112,11 +112,11 @@
             </div>
             <div v-else class="text-card text-card-empty">
               <div class="tc-head">
-                <Icon type="ios-school" color="#c5c8ce" size="16" />
+                <Icon type="ios-bookmarks" color="#c5c8ce" size="16" />
                 <span>整体掌握度</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-circle-outline" size="14" />
+                <Icon type="ios-information-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
@@ -125,7 +125,7 @@
             <!-- 文字卡片：编码风格 -->
             <div class="text-card" v-if="profileData.coding_style || profileData.preferred_style">
               <div class="tc-head">
-                <Icon type="ios-code-working" color="#19be6b" size="16" />
+                <Icon type="code-working" color="#19be6b" size="16" />
                 <span>编码风格</span>
                 <span class="tc-score">{{ profileScores.coding_style || 3 }} / 5</span>
               </div>
@@ -133,11 +133,11 @@
             </div>
             <div v-else class="text-card text-card-empty">
               <div class="tc-head">
-                <Icon type="ios-code-working" color="#c5c8ce" size="16" />
+                <Icon type="code-working" color="#c5c8ce" size="16" />
                 <span>编码风格</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-circle-outline" size="14" />
+                <Icon type="ios-information-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
@@ -158,7 +158,7 @@
                 <span>学习节奏</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-circle-outline" size="14" />
+                <Icon type="ios-information-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
@@ -167,7 +167,7 @@
             <!-- 文字卡片：建议重点提升方向 -->
             <div class="text-card" v-if="profileData.recommended_focus">
               <div class="tc-head">
-                <Icon type="ios-compass" color="#9c27b0" size="16" />
+                <Icon type="compass" color="#9c27b0" size="16" />
                 <span>建议重点方向</span>
                 <span class="tc-score">{{ profileScores.recommended_focus || 4 }} / 5</span>
               </div>
@@ -175,11 +175,11 @@
             </div>
             <div v-else class="text-card text-card-empty">
               <div class="tc-head">
-                <Icon type="ios-compass" color="#c5c8ce" size="16" />
+                <Icon type="compass" color="#c5c8ce" size="16" />
                 <span>建议重点方向</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-circle-outline" size="14" />
+                <Icon type="ios-information-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
@@ -199,18 +199,18 @@
                 <span>学习目标</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-circle-outline" size="14" />
+                <Icon type="ios-information-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
             </div>
           </div>
           <div v-else class="profile-empty-cta">
-            <Icon type="ios-person-add" size="36" color="#c5c8ce" />
+            <Icon type="ios-people" size="36" color="#c5c8ce" />
             <h3>尚未建立学习画像</h3>
             <p>{{ $t('m.Smart_Profile_CTA') }}</p>
             <Button type="primary" size="small" @click="startOnboarding" :loading="onboardingLoading">
-              <Icon type="ios-create" /> 开始建立学习画像
+              <Icon type="ios-color-wand" /> 开始建立学习画像
             </Button>
           </div>
         </Col>
@@ -244,11 +244,12 @@
     <!-- 智能学习建议 -->
     <AICard
       :title="$t('m.Smart_Personalized_Advice')"
-      icon="ios-school"
+      icon="ios-bookmarks"
       iconColor="#9c27b0"
       :btnText="$t('m.Smart_Gen_Advice')"
       btnType="primary"
       :fetchFn="fetchLearningAdvice"
+      :streamFn="fetchLearningAdviceStream"
       class="ai-section"
     />
 
@@ -353,6 +354,9 @@ export default {
       return total <= 3 ? 'medium' : idx < total / 2 ? 'large' : 'medium'
     },
     fetchLearningAdvice () { return api.getLearningAdvice() },
+    fetchLearningAdviceStream () {
+      return { url: '/api/spark/learning-advice/stream/', body: {} }
+    },
     translateTag (tagName) {
       if (!tagName) return ''
       const key = `m.tag.${tagName}`

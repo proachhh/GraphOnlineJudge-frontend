@@ -22,6 +22,10 @@
           <Icon type="ios-analytics"></Icon>
           图谱
         </Menu-item>
+        <Menu-item name="/algorithm-viz">
+          <Icon type="ios-flask"></Icon>
+          算法
+        </Menu-item>
         <Menu-item name="/exercise">
           <Icon type="ios-copy"></Icon>
           题集
@@ -88,7 +92,7 @@
               <Dropdown-item name="/profile-onboarding"><span class="drop-icon"><Icon type="ios-person" size="18"/></span>{{$t('m.Profile_Onboarding')}}</Dropdown-item>
               <Dropdown-item name="/status?myself=1"><span class="drop-icon"><Icon type="ios-paper" size="18"/></span>{{$t('m.MySubmissions')}}</Dropdown-item>
               <Dropdown-item name="/setting/profile"><span class="drop-icon"><Icon type="ios-settings" size="18"/></span>{{$t('m.Settings')}}</Dropdown-item>
-              <Dropdown-item v-if="isTeacher || isAdminRole" name="/teacher"><span class="drop-icon"><Icon type="md-school" size="18"/></span>教师管理</Dropdown-item>
+              <Dropdown-item v-if="isTeacher || isAdminRole" name="/teacher"><span class="drop-icon"><Icon type="ios-people" size="18"/></span>教师</Dropdown-item>
               <Dropdown-item v-if="isAdminRole" name="/admin"><span class="drop-icon"><Icon type="ios-cog" size="18"/></span>{{$t('m.Management')}}</Dropdown-item>
               <Dropdown-item divided name="/logout"><span class="drop-icon"><Icon type="ios-log-out" size="18"/></span>{{$t('m.Logout')}}</Dropdown-item>
             </Dropdown-menu>
@@ -153,6 +157,7 @@
         if (path.startsWith('/contest')) return '/contest'
         if (path.startsWith('/status') && this.$route.query.problemID) return '/problem'
         if (path.startsWith('/knowledge-universe')) return '/knowledge-universe'
+        if (path.startsWith('/algorithm-viz')) return '/algorithm-viz'
         if (path.startsWith('/exercise')) return '/exercise'
         if (path.startsWith('/immersion')) return '/immersion'
         if (path.startsWith('/forum')) return '/forum'

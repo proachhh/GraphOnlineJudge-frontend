@@ -25,6 +25,27 @@
       </div>
     </div>
 
+    <!-- Boss 战斗 HP 条 -->
+    <div class="boss-hp-section" v-if="totalCount > 0">
+      <div class="boss-avatar" :class="{ hit: bossHitAnim, defeated: bossDefeated }">
+        <span class="boss-emoji">{{ bossEmoji }}</span>
+        <div class="boss-aura"></div>
+      </div>
+      <div class="boss-hp-wrap">
+        <div class="boss-hp-info">
+          <span class="boss-hp-name">{{ exam.boss_topic || exam.title || 'Boss' }}</span>
+          <span class="boss-hp-text">HP {{ bossHpDisplay }} / {{ bossMaxHp }}</span>
+        </div>
+        <div class="boss-hp-bar">
+          <div class="boss-hp-fill" :class="{ low: bossHpPercent < 30, crit: bossHpPercent < 15 }" :style="{ width: bossHpPercent + '%' }">
+            <span class="boss-hp-shine"></span>
+          </div>
+          <span v-for="d in floatDamages" :key="d.id" class="float-damage" :class="{ crit: d.crit }" :style="{ left: d.x + '%' }">-{{ d.val }}</span>
+        </div>
+        <div class="boss-hp-hint" v-if="phase === 'answering'">每答一题对 Boss 造成伤害，击败 Boss 即通关</div>
+      </div>
+    </div>
+
     <!-- Boss 知识点 + 描述 -->
     <div class="boss-info-box" v-if="exam.boss_topic || exam.description || exam.topic_area">
       <div class="boss-topic-row" v-if="exam.boss_topic">
@@ -167,6 +188,29 @@
       <i class="el-icon-warning-outline"></i>
       <p>未找到试卷内容</p>
     </div>
+
+    <!-- 通关庆祝全屏动画 -->
+    <div class="victory-overlay" v-if="showVictory" @click="onVictoryClick">
+      <canvas ref="victoryCanvas" class="victory-canvas"></canvas>
+      <div class="victory-flash"></div>
+      <div class="victory-text">
+        <div class="vt-main">
+          <span>V</span><span>I</span><span>C</span><span>T</span><span>O</span><span>R</span><span>Y</span>
+        </div>
+        <div class="vt-sub">Boss 已被击败</div>
+        <div class="vt-score">最终得分 {{ currentScore }} / {{ bossMaxHp }}</div>
+        <div class="vt-hint">点击任意处继续</div>
+      </div>
+    </div>
+
+    <!-- 通关失败动画 -->
+    <div class="defeat-overlay" v-if="showDefeat" @click="showDefeat = false">
+      <div class="defeat-text">
+        <div class="dt-main">DEFEATED</div>
+        <div class="dt-sub">Boss 仍剩 {{ bossMaxHp - currentScore }} HP</div>
+        <div class="dt-hint">点击任意处继续</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -192,7 +236,16 @@ export default {
       report: null,
       timerActive: false,
       remainSeconds: 0,
-      _timer: null
+      _timer: null,
+      // gamification
+      bossHitAnim: false,
+      bossDefeated: false,
+      showVictory: false,
+      showDefeat: false,
+      floatDamages: [],
+      _dmgId: 0,
+      _victoryAnim: null,
+      _lastAnsweredCount: 0
     }
   },
   computed: {
@@ -219,6 +272,31 @@ export default {
       const m = Math.floor(this.remainSeconds / 60)
       const s = this.remainSeconds % 60
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+    },
+    bossMaxHp () {
+      if (this.exam && this.exam.max_score) return this.exam.max_score
+      return this.questions.reduce((sum, q) => sum + (q.score || 0), 0) || 100
+    },
+    bossHpPercent () {
+      if (!this.bossMaxHp) return 100
+      // 报告阶段：按得分扣血（得分越高血越少）
+      if (this.phase === 'done' || this.phase === 'submitted' || this.phase === 'grading') {
+        const lost = Math.min(this.currentScore, this.bossMaxHp)
+        return Math.max(0, Math.round((1 - lost / this.bossMaxHp) * 100))
+      }
+      // 答题阶段：按答题进度蓄力（Boss 慢慢受伤，给玩家进度反馈）
+      if (!this.totalCount) return 100
+      const progress = this.answeredCount / this.totalCount
+      return Math.max(20, Math.round((1 - progress * 0.6) * 100))
+    },
+    bossHpDisplay () {
+      return Math.round(this.bossMaxHp * this.bossHpPercent / 100)
+    },
+    bossEmoji () {
+      const d = this.exam && this.exam.difficulty
+      if (d === 'High') return '🐉'
+      if (d === 'Mid') return '👹'
+      return '👺'
     }
   },
   mounted () {
@@ -226,8 +304,131 @@ export default {
   },
   beforeDestroy () {
     this.clearTimer()
+    this.clearVictory()
+  },
+  watch: {
+    answeredCount (n, old) {
+      // 答题阶段每多答一题，Boss 受击一次
+      if (this.phase === 'answering' && n > (old || 0)) {
+        this.triggerBossHit()
+      }
+    }
   },
   methods: {
+    // ===== Boss gamification =====
+    triggerBossHit () {
+      this.bossHitAnim = true
+      setTimeout(() => { this.bossHitAnim = false }, 400)
+      // 飘字伤害
+      const val = Math.max(1, Math.round(this.bossMaxHp * 0.08))
+      this.spawnFloatDamage(val, false)
+    },
+    spawnFloatDamage (val, crit) {
+      const id = ++this._dmgId
+      const x = 40 + Math.random() * 40
+      this.floatDamages.push({ id, val, x, crit })
+      setTimeout(() => {
+        this.floatDamages = this.floatDamages.filter(d => d.id !== id)
+      }, 1100)
+    },
+    judgeBossResult () {
+      if (this.passed === true) {
+        this.bossDefeated = true
+        this.startVictory()
+      } else if (this.passed === false) {
+        this.showDefeat = true
+      }
+    },
+    startVictory () {
+      this.showVictory = true
+      this.$nextTick(() => this.runVictoryParticles())
+    },
+    runVictoryParticles () {
+      const canvas = this.$refs.victoryCanvas
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      const W = canvas.width, H = canvas.height
+      const colors = ['#ff4757', '#ffa502', '#ffdd59', '#2ed573', '#1e90ff', '#a55eea', '#ff6b81']
+      const particles = []
+      // 中心爆炸
+      for (let i = 0; i < 180; i++) {
+        const angle = Math.random() * Math.PI * 2
+        const speed = 3 + Math.random() * 9
+        particles.push({
+          x: W / 2, y: H / 2,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 2,
+          size: 2 + Math.random() * 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 1,
+          decay: 0.008 + Math.random() * 0.012,
+          gravity: 0.12 + Math.random() * 0.08
+        })
+      }
+      // 两侧礼花
+      const burst = (ox, oy) => {
+        for (let i = 0; i < 60; i++) {
+          const angle = Math.random() * Math.PI * 2
+          const speed = 2 + Math.random() * 6
+          particles.push({
+            x: ox, y: oy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: 2 + Math.random() * 3,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            life: 1,
+            decay: 0.01 + Math.random() * 0.01,
+            gravity: 0.1
+          })
+        }
+      }
+      let frame = 0
+      const animate = () => {
+        if (!this.showVictory) return
+        ctx.clearRect(0, 0, W, H)
+        particles.forEach(p => {
+          p.x += p.vx
+          p.y += p.vy
+          p.vy += p.gravity
+          p.life -= p.decay
+          if (p.life > 0) {
+            ctx.globalAlpha = Math.max(0, p.life)
+            ctx.fillStyle = p.color
+            ctx.beginPath()
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+            ctx.fill()
+          }
+        })
+        ctx.globalAlpha = 1
+        // 两侧补礼花
+        if (frame === 30) burst(W * 0.2, H * 0.4)
+        if (frame === 60) burst(W * 0.8, H * 0.4)
+        if (frame === 100) burst(W * 0.5, H * 0.3)
+        // 清理死亡粒子
+        for (let i = particles.length - 1; i >= 0; i--) {
+          if (particles[i].life <= 0) particles.splice(i, 1)
+        }
+        frame++
+        if (particles.length > 0 && frame < 400) {
+          this._victoryAnim = requestAnimationFrame(animate)
+        }
+      }
+      animate()
+    },
+    clearVictory () {
+      this.showVictory = false
+      this.showDefeat = false
+      if (this._victoryAnim) {
+        cancelAnimationFrame(this._victoryAnim)
+        this._victoryAnim = null
+      }
+    },
+    onVictoryClick () {
+      this.clearVictory()
+    },
+
     loadDetail () {
       this.loading = true
       const id = this.$route.params.id
@@ -370,6 +571,12 @@ export default {
         if (d.total_score != null) this.currentScore = d.total_score
         if (d.passed != null) this.passed = d.passed
         this.phase = 'done'
+        // 提交瞬间的大伤害飘字
+        if (this.currentScore > 0) {
+          this.spawnFloatDamage(this.currentScore, this.passed)
+        }
+        // 延迟一点触发胜利/失败动画，让飘字先显示
+        setTimeout(() => this.judgeBossResult(), 600)
       }).catch(() => {
         this.$message.error('加载报告失败')
         this.phase = 'done'
@@ -698,4 +905,305 @@ export default {
 }
 .empty-hint i { font-size: 56px; }
 .empty-hint p { font-size: 16px; margin-top: 16px; }
+
+/* ============ Boss 战 gamification ============ */
+.boss-hp-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #2a0a0a 0%, #4a1010 50%, #1a0505 100%);
+  border-radius: 12px;
+  padding: 18px 24px;
+  margin: 16px 0 0;
+  box-shadow: 0 4px 18px rgba(74, 16, 16, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(192, 57, 43, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+.boss-hp-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80px 50%, rgba(255, 80, 80, 0.12), transparent 60%);
+  pointer-events: none;
+}
+
+.boss-avatar {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bossBreath 2.4s ease-in-out infinite;
+  transition: filter 0.4s;
+}
+.boss-avatar.defeated {
+  filter: grayscale(1) brightness(0.5);
+  animation: none;
+}
+.boss-avatar.hit {
+  animation: bossHitShake 0.4s ease;
+}
+.boss-emoji {
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+  z-index: 2;
+}
+.boss-aura {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 71, 87, 0.35), transparent 70%);
+  animation: auraPulse 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+.boss-hp-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.boss-hp-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.boss-hp-name {
+  color: #ffdd59;
+  font-size: 17px;
+  font-weight: 700;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+.boss-hp-text {
+  color: #ff6b81;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+}
+
+.boss-hp-bar {
+  position: relative;
+  height: 22px;
+  background: linear-gradient(180deg, #1a0303 0%, #2d0808 100%);
+  border-radius: 11px;
+  border: 1px solid rgba(255, 100, 100, 0.3);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+.boss-hp-fill {
+  height: 100%;
+  border-radius: 11px;
+  background: linear-gradient(180deg, #ff4757 0%, #c0392b 50%, #8b1a1a 100%);
+  box-shadow: 0 0 12px rgba(255, 71, 87, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.boss-hp-fill.low {
+  background: linear-gradient(180deg, #ff6348 0%, #e74c3c 50%, #c0392b 100%);
+  animation: hpLowPulse 0.8s ease-in-out infinite;
+}
+.boss-hp-fill.crit {
+  background: linear-gradient(180deg, #ffa502 0%, #ff6348 50%, #ff4757 100%);
+  animation: hpCritPulse 0.4s ease-in-out infinite;
+}
+.boss-hp-shine {
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: hpShine 2.5s ease-in-out infinite;
+}
+
+.float-damage {
+  position: absolute;
+  top: 50%;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffdd59;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 221, 89, 0.6);
+  animation: floatUp 1.1s ease-out forwards;
+  pointer-events: none;
+  font-family: 'Impact', sans-serif;
+  letter-spacing: 0.02em;
+}
+.float-damage.crit {
+  font-size: 32px;
+  color: #ff4757;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 0 16px rgba(255, 71, 87, 0.8);
+}
+
+.boss-hp-hint {
+  color: rgba(255, 200, 200, 0.5);
+  font-size: 12px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+@keyframes bossBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+@keyframes bossHitShake {
+  0% { transform: translateX(0) scale(1); }
+  15% { transform: translateX(-8px) scale(1.05) rotate(-3deg); filter: brightness(1.8); }
+  30% { transform: translateX(7px) scale(1.08) rotate(3deg); }
+  45% { transform: translateX(-5px) scale(1.04) rotate(-2deg); }
+  60% { transform: translateX(4px) scale(1.02); filter: brightness(1.4); }
+  100% { transform: translateX(0) scale(1); filter: brightness(1); }
+}
+@keyframes auraPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+@keyframes hpLowPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(255, 99, 72, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+  50% { box-shadow: 0 0 24px rgba(255, 99, 72, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+}
+@keyframes hpCritPulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(255, 165, 2, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+  50% { box-shadow: 0 0 32px rgba(255, 71, 87, 1), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
+}
+@keyframes hpShine {
+  0% { left: -40%; }
+  60%, 100% { left: 100%; }
+}
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  20% { transform: translateY(-10px) scale(1.3); opacity: 1; }
+  100% { transform: translateY(-50px) scale(1); opacity: 0; }
+}
+
+/* ============ 胜利全屏动画 ============ */
+.victory-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: radial-gradient(circle at center, rgba(20, 5, 5, 0.85), rgba(0, 0, 0, 0.95));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: overlayFade 0.3s ease;
+}
+.victory-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.victory-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  animation: flashFade 0.6s ease-out forwards;
+  pointer-events: none;
+}
+.victory-text {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  animation: victoryPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+.vt-main {
+  font-size: 84px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  font-family: 'Impact', 'Arial Black', sans-serif;
+}
+.vt-main span {
+  display: inline-block;
+  background: linear-gradient(180deg, #ffdd59 0%, #ffa502 50%, #ff4757 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(255, 165, 2, 0.6);
+  animation: letterDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.vt-main span:nth-child(1) { animation-delay: 0.3s; }
+.vt-main span:nth-child(2) { animation-delay: 0.4s; }
+.vt-main span:nth-child(3) { animation-delay: 0.5s; }
+.vt-main span:nth-child(4) { animation-delay: 0.6s; }
+.vt-main span:nth-child(5) { animation-delay: 0.7s; }
+.vt-main span:nth-child(6) { animation-delay: 0.8s; }
+.vt-main span:nth-child(7) { animation-delay: 0.9s; }
+.vt-sub {
+  color: #ffdd59;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+.vt-score {
+  color: #fff;
+  font-size: 18px;
+  opacity: 0.85;
+  margin-bottom: 32px;
+}
+.vt-hint {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  animation: hintBlink 1.5s ease-in-out infinite;
+}
+
+@keyframes overlayFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes flashFade { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+@keyframes victoryPop {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes letterDrop {
+  from { opacity: 0; transform: translateY(-40px) rotate(-15deg); }
+  to { opacity: 1; transform: translateY(0) rotate(0); }
+}
+@keyframes hintBlink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* ============ 失败动画 ============ */
+.defeat-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: radial-gradient(circle at center, rgba(20, 5, 5, 0.8), rgba(0, 0, 0, 0.95));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: overlayFade 0.4s ease;
+}
+.defeat-text {
+  text-align: center;
+  animation: victoryPop 0.6s ease 0.2s both;
+}
+.dt-main {
+  font-size: 72px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: #5a5a5a;
+  text-shadow: 0 0 30px rgba(100, 100, 100, 0.4);
+  margin-bottom: 16px;
+  font-family: 'Impact', 'Arial Black', sans-serif;
+}
+.dt-sub {
+  color: #ff6b81;
+  font-size: 20px;
+  margin-bottom: 32px;
+}
+.dt-hint {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 14px;
+}
 </style>

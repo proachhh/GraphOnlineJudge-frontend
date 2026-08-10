@@ -1,128 +1,263 @@
 <template>
   <div class="contest-list-elegant">
 
-    <div class="contest-panel">
-      <!-- 筛选栏 -->
-      <div class="filter-bar">
-        <div class="filter-left">
-          <Dropdown @on-click="onRuleChange" class="filter-dropdown">
-            <div class="filter-btn">
-              <Icon type="ios-funnel" />
-              <span>{{ query.rule_type === '' ? $t('m.Rule') : query.rule_type }}</span>
-              <Icon type="ios-arrow-down" />
-            </div>
-            <Dropdown-menu slot="list">
-              <Dropdown-item name="">{{ $t('m.All') }}</Dropdown-item>
-              <Dropdown-item name="OI">
-                <Tag color="blue" size="small">OI</Tag>
-              </Dropdown-item>
-              <Dropdown-item name="ACM">
-                <Tag color="green" size="small">ACM</Tag>
-              </Dropdown-item>
-            </Dropdown-menu>
-          </Dropdown>
-
-          <Dropdown @on-click="onStatusChange" class="filter-dropdown">
-            <div class="filter-btn">
-              <Icon type="ios-time" />
-              <span>{{ query.status === '' ? $t('m.Status') : $t('m.' + CONTEST_STATUS_REVERSE[query.status].name.replace(/ /g, '_')) }}</span>
-              <Icon type="ios-arrow-down" />
-            </div>
-            <Dropdown-menu slot="list">
-              <Dropdown-item name="">{{ $t('m.All') }}</Dropdown-item>
-              <Dropdown-item name="0">
-                <Tag color="green" size="small">{{ $t('m.Underway') }}</Tag>
-              </Dropdown-item>
-              <Dropdown-item name="1">
-                <Tag color="blue" size="small">{{ $t('m.Not_Started') }}</Tag>
-              </Dropdown-item>
-              <Dropdown-item name="-1">
-                <Tag color="default" size="small">{{ $t('m.Ended') }}</Tag>
-              </Dropdown-item>
-            </Dropdown-menu>
-          </Dropdown>
-        </div>
-
-        <div class="filter-right">
-          <RadioGroup v-model="viewMode" type="button" size="small" class="view-toggle">
-            <Radio label="card">
-              <Icon type="ios-apps" size="14" />
-            </Radio>
-            <Radio label="list">
-              <Icon type="ios-list" size="14" />
-            </Radio>
-          </RadioGroup>
-          <div class="search-box">
-            <Input v-model="query.keyword"
-                   @on-enter="changeRoute"
-                   :placeholder="$t('m.Search')"
-                   class="search-input">
-              <Icon type="ios-search" slot="prefix" />
-            </Input>
-          </div>
-        </div>
+    <!-- 页头横幅 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h2 class="header-title"><Icon type="trophy"></Icon> 竞赛大厅</h2>
       </div>
-
-      <!-- 比赛列表 -->
-      <div class="contest-list-container">
-        <div v-if="contests.length === 0" class="no-contest">
-          <Icon type="ios-infinite" size="48" style="color: #cbd5e1; margin-bottom: 16px;" />
-          <p>{{ $t('m.No_contest') }}</p>
+      <div class="header-stats">
+        <div class="hs-item">
+          <span class="hs-num">{{ total }}</span>
+          <span class="hs-label">竞赛总数</span>
         </div>
-
-        <div v-else-if="viewMode === 'card'" class="contest-cards">
-          <div v-for="contest in contests" :key="contest.id" class="contest-card-item" @click="goContest(contest)">
-            <div class="card-cover" v-if="getCoverImage(contest)">
-              <img :src="getCoverImage(contest)" :alt="contest.title" />
-              <div class="cover-status">
-                <Tag :color="CONTEST_STATUS_REVERSE[contest.status].color" size="small">
-                  {{ $t('m.' + CONTEST_STATUS_REVERSE[contest.status].name.replace(/ /g, '_')) }}
-                </Tag>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="card-top">
-                <span class="card-title">{{ contest.title }}</span>
-                <Tag v-if="!getCoverImage(contest)" :color="CONTEST_STATUS_REVERSE[contest.status].color" size="small">
-                  {{ $t('m.' + CONTEST_STATUS_REVERSE[contest.status].name.replace(/ /g, '_')) }}
-                </Tag>
-              </div>
-              <div class="card-tags">
-                <span class="rule-badge" :class="contest.rule_type.toLowerCase()">{{ contest.rule_type }}</span>
-                <Tag v-if="contest.contest_type !== 'Public'" color="warning" size="small">
-                  <Icon type="ios-lock" size="12" /> 密码保护
-                </Tag>
-              </div>
-              <div class="card-meta">
-                <span class="meta-item"><Icon type="ios-calendar" /> {{ contest.start_time | localtime('YYYY-M-D HH:mm') }}</span>
-                <span class="meta-item"><Icon type="ios-time" /> {{ getDuration(contest.start_time, contest.end_time) }}</span>
-              </div>
-              <div class="card-action">
-                <span class="enter-btn">{{ $t('m.Enter') }} <Icon type="ios-arrow-forward" /></span>
-              </div>
-            </div>
-          </div>
+        <div class="hs-divider"></div>
+        <div class="hs-item">
+          <span class="hs-num ongoing-num">{{ ongoingCount }}</span>
+          <span class="hs-label">进行中</span>
         </div>
-
-        <div v-else class="table-wrap">
-          <Table :data="contests" :columns="listColumns" class="contest-table" disabled-hover
-            @on-row-click="(row) => goContest(row)">
-          </Table>
+        <div class="hs-divider"></div>
+        <div class="hs-item">
+          <span class="hs-num">{{ upcomingCount }}</span>
+          <span class="hs-label">即将开始</span>
         </div>
-      </div>
-
-      <!-- 分页 -->
-      <div class="pagination-wrapper">
-        <Pagination
-          :total="total"
-          :page-size.sync="limit"
-          @on-change="changeRoute"
-          :current.sync="page"
-          :show-sizer="true"
-          @on-page-size-change="changeRoute">
-        </Pagination>
+        <div class="hs-divider"></div>
+        <div class="hs-item">
+          <span class="hs-num">{{ endedCount }}</span>
+          <span class="hs-label">已结束</span>
+        </div>
       </div>
     </div>
+
+    <Row :gutter="20">
+      <!-- 左侧：竞赛列表 -->
+      <Col :lg="18" :md="24">
+        <div class="contest-panel">
+          <!-- 筛选栏 -->
+          <div class="filter-bar">
+            <div class="filter-left">
+              <Dropdown @on-click="onRuleChange" class="filter-dropdown">
+                <div class="filter-btn">
+                  <Icon type="ios-funnel" />
+                  <span>{{ query.rule_type === '' ? $t('m.Rule') : query.rule_type }}</span>
+                  <Icon type="ios-arrow-down" />
+                </div>
+                <Dropdown-menu slot="list">
+                  <Dropdown-item name="">{{ $t('m.All') }}</Dropdown-item>
+                  <Dropdown-item name="OI">
+                    <Tag color="blue" size="small">OI</Tag>
+                  </Dropdown-item>
+                  <Dropdown-item name="ACM">
+                    <Tag color="green" size="small">ACM</Tag>
+                  </Dropdown-item>
+                </Dropdown-menu>
+              </Dropdown>
+
+              <Dropdown @on-click="onStatusChange" class="filter-dropdown">
+                <div class="filter-btn">
+                  <Icon type="ios-time" />
+                  <span>{{ query.status === '' ? $t('m.Status') : $t('m.' + CONTEST_STATUS_REVERSE[query.status].name.replace(/ /g, '_')) }}</span>
+                  <Icon type="ios-arrow-down" />
+                </div>
+                <Dropdown-menu slot="list">
+                  <Dropdown-item name="">{{ $t('m.All') }}</Dropdown-item>
+                  <Dropdown-item name="0">
+                    <Tag color="green" size="small">{{ $t('m.Underway') }}</Tag>
+                  </Dropdown-item>
+                  <Dropdown-item name="1">
+                    <Tag color="blue" size="small">{{ $t('m.Not_Started') }}</Tag>
+                  </Dropdown-item>
+                  <Dropdown-item name="-1">
+                    <Tag color="default" size="small">{{ $t('m.Ended') }}</Tag>
+                  </Dropdown-item>
+                </Dropdown-menu>
+              </Dropdown>
+            </div>
+
+            <div class="filter-right">
+              <RadioGroup v-model="viewMode" type="button" size="small" class="view-toggle">
+                <Radio label="card">
+                  <Icon type="ios-apps" size="14" />
+                </Radio>
+                <Radio label="list">
+                  <Icon type="ios-list" size="14" />
+                </Radio>
+              </RadioGroup>
+              <div class="search-box">
+                <Input v-model="query.keyword"
+                       @on-enter="changeRoute"
+                       :placeholder="$t('m.Search')"
+                       class="search-input">
+                  <Icon type="ios-search" slot="prefix" />
+                </Input>
+              </div>
+            </div>
+          </div>
+
+          <!-- 比赛列表 -->
+          <div class="contest-list-container">
+            <div v-if="contests.length === 0" class="no-contest">
+              <Icon type="ios-infinite" size="48" style="color: #cbd5e1; margin-bottom: 16px;" />
+              <p>{{ $t('m.No_contest') }}</p>
+            </div>
+
+            <div v-else-if="viewMode === 'card'" class="contest-cards">
+              <div v-for="contest in contests" :key="contest.id" class="contest-card-item" @click="goContest(contest)">
+                <div class="card-cover" v-if="getCoverImage(contest)">
+                  <img :src="getCoverImage(contest)" :alt="contest.title" />
+                  <div class="cover-status">
+                    <Tag :color="CONTEST_STATUS_REVERSE[contest.status].color" size="small">
+                      {{ $t('m.' + CONTEST_STATUS_REVERSE[contest.status].name.replace(/ /g, '_')) }}
+                    </Tag>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="card-top">
+                    <span class="card-title">{{ contest.title }}</span>
+                    <Tag v-if="!getCoverImage(contest)" :color="CONTEST_STATUS_REVERSE[contest.status].color" size="small">
+                      {{ $t('m.' + CONTEST_STATUS_REVERSE[contest.status].name.replace(/ /g, '_')) }}
+                    </Tag>
+                  </div>
+                  <div class="card-tags">
+                    <span class="rule-badge" :class="contest.rule_type.toLowerCase()">{{ contest.rule_type }}</span>
+                    <Tag v-if="contest.contest_type !== 'Public'" color="warning" size="small">
+                      <Icon type="ios-lock" size="12" /> 密码保护
+                    </Tag>
+                  </div>
+                  <div class="card-meta">
+                    <span class="meta-item"><Icon type="ios-calendar" /> {{ contest.start_time | localtime('YYYY-M-D HH:mm') }}</span>
+                    <span class="meta-item"><Icon type="ios-time" /> {{ getDuration(contest.start_time, contest.end_time) }}</span>
+                  </div>
+                  <div class="card-action">
+                    <span class="enter-btn">{{ $t('m.Enter') }} <Icon type="ios-arrow-forward" /></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="table-wrap">
+              <Table :data="contests" :columns="listColumns" class="contest-table" disabled-hover
+                @on-row-click="(row) => goContest(row)">
+              </Table>
+            </div>
+          </div>
+
+          <!-- 分页 -->
+          <div class="pagination-wrapper">
+            <Pagination
+              :total="total"
+              :page-size.sync="limit"
+              @on-change="changeRoute"
+              :current.sync="page"
+              :show-sizer="true"
+              @on-page-size-change="changeRoute">
+            </Pagination>
+          </div>
+        </div>
+      </Col>
+
+      <!-- 右侧边栏 -->
+      <Col :lg="6" :md="24">
+        <!-- 进行中的竞赛 -->
+        <div class="side-card ongoing-card" v-if="ongoingContests.length">
+          <div class="side-title">
+            <Icon type="ios-pulse-strong" class="title-icon-pulse"></Icon>
+            正在进行
+          </div>
+          <div class="ongoing-list">
+            <div
+              v-for="c in ongoingContests"
+              :key="c.id"
+              class="ongoing-item"
+              @click="goContest(c)"
+            >
+              <div class="ongoing-dot"></div>
+              <div class="ongoing-info">
+                <span class="ongoing-name">{{ c.title }}</span>
+                <span class="ongoing-meta">
+                  <span class="rule-badge-sm" :class="c.rule_type.toLowerCase()">{{ c.rule_type }}</span>
+                  {{ getDuration(c.start_time, c.end_time) }}
+                </span>
+              </div>
+              <Icon type="ios-arrow-forward" class="ongoing-arrow"></Icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- 即将开始 -->
+        <div class="side-card" v-if="upcomingContests.length">
+          <div class="side-title">
+            <Icon type="ios-clock"></Icon>
+            即将开始
+          </div>
+          <div class="upcoming-list">
+            <div
+              v-for="c in upcomingContests"
+              :key="c.id"
+              class="upcoming-item"
+              @click="goContest(c)"
+            >
+              <span class="upcoming-name">{{ c.title }}</span>
+              <span class="upcoming-time">{{ c.start_time | localtime('M月D日 HH:mm') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 竞赛规则 -->
+        <div class="side-card">
+          <div class="side-title">
+            <Icon type="information-circled"></Icon>
+            赛制说明
+          </div>
+          <div class="rule-guide">
+            <div class="rule-item">
+              <div class="rule-header">
+                <span class="rule-badge" style="background: rgba(103, 194, 58, 0.15); color: #67c23a;">ACM</span>
+                <span class="rule-name">ACM 赛制</span>
+              </div>
+              <p class="rule-desc">实时反馈，提交即知对错。错误提交会有罚时（20分钟），最终排名按通过题数和总用时排列</p>
+            </div>
+            <div class="rule-item">
+              <div class="rule-header">
+                <span class="rule-badge" style="background: rgba(64, 158, 255, 0.15); color: #409eff;">OI</span>
+                <span class="rule-name">OI 赛制</span>
+              </div>
+              <p class="rule-desc">比赛期间不反馈结果，赛后统一评测。按各题得分总和排名，适合考察算法优化能力</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="side-card">
+          <div class="side-title">
+            <Icon type="ios-apps"></Icon>
+            快捷入口
+          </div>
+          <div class="quick-links">
+            <div class="ql-item" @click="$router.push('/problem')">
+              <Icon type="ios-keypad" class="ql-icon"></Icon>
+              <span>题目列表</span>
+              <Icon type="ios-arrow-forward" class="ql-arrow"></Icon>
+            </div>
+            <div class="ql-item" @click="$router.push('/exercise')">
+              <Icon type="ios-copy" class="ql-icon"></Icon>
+              <span>题集练习</span>
+              <Icon type="ios-arrow-forward" class="ql-arrow"></Icon>
+            </div>
+            <div class="ql-item" @click="$router.push('/immersion')">
+              <Icon type="flash" class="ql-icon"></Icon>
+              <span>沉浸式练习</span>
+              <Icon type="ios-arrow-forward" class="ql-arrow"></Icon>
+            </div>
+            <div class="ql-item" @click="$router.push('/status')">
+              <Icon type="ios-paper" class="ql-icon"></Icon>
+              <span>提交记录</span>
+              <Icon type="ios-arrow-forward" class="ql-arrow"></Icon>
+            </div>
+          </div>
+        </div>
+      </Col>
+    </Row>
   </div>
 </template>
 
@@ -228,6 +363,21 @@ export default {
   },
   computed: {
     ...mapGetters(['isAuthenticated', 'user']),
+    ongoingContests () {
+      return this.contests.filter(c => c.status === 0).slice(0, 5)
+    },
+    upcomingContests () {
+      return this.contests.filter(c => c.status === 1).slice(0, 5)
+    },
+    ongoingCount () {
+      return this.contests.filter(c => c.status === 0).length
+    },
+    upcomingCount () {
+      return this.contests.filter(c => c.status === 1).length
+    },
+    endedCount () {
+      return this.contests.filter(c => c.status === -1).length
+    },
     listColumns () {
       return [
         {
@@ -305,40 +455,56 @@ export default {
 
 <style lang="less" scoped>
 .contest-list-elegant {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
 }
 
-/* 页面标题 */
+/* 页头横幅 */
 .page-header {
-  text-align: center;
-  margin-bottom: 30px;
-
-  .page-title {
-    font-size: 1.8rem;
-    font-weight: 300;
-    color: #1a1a2e;
-    letter-spacing: 0.15em;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  border-radius: 12px;
+  padding: 24px 28px;
+  color: #fff;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(30, 58, 138, 0.25);
+}
+.header-left {
+  .header-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 6px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 8px;
-
-    .title-line {
-      width: 50px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, #1e3a8a, transparent);
-    }
+    gap: 8px;
   }
-
-  .page-subtitle {
-    font-size: 0.8rem;
-    color: #64748b;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+  .header-title i { font-size: 26px; }
+  .header-sub {
+    font-size: 14px;
+    opacity: 0.85;
+    margin: 0;
   }
+}
+.header-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.hs-item { text-align: center; }
+.hs-num {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+}
+.ongoing-num { color: #4ade80; }
+.hs-label { font-size: 13px; opacity: 0.8; }
+.hs-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* 主面板 */
@@ -347,6 +513,7 @@ export default {
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  margin-bottom: 20px;
 }
 
 /* 筛选栏 */
@@ -614,5 +781,202 @@ export default {
   border-top: 1px solid #f1f5f9;
   display: flex;
   justify-content: center;
+}
+
+/* ============ 右侧边栏 ============ */
+.side-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+.side-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.side-title i { font-size: 18px; }
+.title-icon-pulse {
+  color: #19be6b;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* 进行中竞赛 */
+.ongoing-card {
+  border: 1px solid rgba(25, 190, 107, 0.2);
+}
+.ongoing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ongoing-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ongoing-item:hover { background: #f0fdf4; }
+.ongoing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #19be6b;
+  flex-shrink: 0;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+.ongoing-info { flex: 1; min-width: 0; }
+.ongoing-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ongoing-meta {
+  font-size: 12px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+.ongoing-arrow { color: #cbd5e1; font-size: 12px; }
+
+.rule-badge-sm {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.rule-badge-sm.oi { background: rgba(64, 158, 255, 0.15); color: #409eff; }
+.rule-badge-sm.acm { background: rgba(103, 194, 58, 0.15); color: #67c23a; }
+
+/* 即将开始 */
+.upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.upcoming-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.upcoming-item:hover { background: #eff6ff; }
+.upcoming-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  margin-right: 8px;
+}
+.upcoming-time {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 赛制说明 */
+.rule-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rule-item {
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.rule-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.rule-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.rule-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+.rule-desc {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 快捷入口 */
+.quick-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ql-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  color: #475569;
+  transition: all 0.2s;
+}
+.ql-item:hover {
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+.ql-icon { font-size: 18px; color: #1e3a8a; }
+.ql-arrow {
+  margin-left: auto;
+  font-size: 12px;
+  color: #cbd5e1;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.ql-item:hover .ql-arrow { opacity: 1; }
+
+@media (max-width: 992px) {
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .header-stats {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>
