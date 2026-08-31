@@ -202,12 +202,12 @@ export default {
             label: { opacity: 0.2 },
             lineStyle: { opacity: 0.1 }
           },
-          force: { 
+          force: {
             repulsion: 800,
             edgeLength: 200,
             gravity: 0.08,
-            friction: 0.1,
-            layoutAnimation: true
+            friction: 0.6,
+            layoutAnimation: false
           },
           lineStyle: { color: '#4A7A9E', width: 2, curveness: 0.2, opacity: 0.5 },
           itemStyle: { color: '#2E6A99', borderColor: '#8BB8D0', borderWidth: 2 },

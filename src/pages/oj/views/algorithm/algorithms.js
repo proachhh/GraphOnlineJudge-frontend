@@ -559,21 +559,24 @@ export function countingSort (arr) {
   const a = [...arr]
   const n = a.length
   const max = Math.max(...a)
-  const count = new Array(max + 1).fill(0)
+  const min = Math.min(...a)
+  // 统一偏移到 0 起，支持负数（正数同样需要偏移）
+  const offset = -min
+  const count = new Array(max - min + 1).fill(0)
   const output = new Array(n)
   let accesses = 0
-  steps.push({ array: [...a], highlight: { sorted: [] }, codeLine: 1, desc: `开始计数排序，max=${max}`, stats: { accesses } })
+  steps.push({ array: [...a], highlight: { sorted: [] }, codeLine: 1, desc: `开始计数排序，范围 [${min}, ${max}]`, stats: { accesses } })
   for (let i = 0; i < n; i++) {
-    count[a[i]]++
+    count[a[i] + offset]++
     accesses++
-    steps.push({ array: [...a], highlight: { current: i }, codeLine: 3, desc: `统计 a[${i}]=${a[i]}，count[${a[i]}]=${count[a[i]]}`, stats: { accesses } })
+    steps.push({ array: [...a], highlight: { current: i }, codeLine: 3, desc: `统计 a[${i}]=${a[i]}，count[${a[i] + offset}]=${count[a[i] + offset]}`, stats: { accesses } })
   }
-  for (let i = 1; i <= max; i++) count[i] += count[i - 1]
+  for (let i = 1; i < count.length; i++) count[i] += count[i - 1]
   steps.push({ array: [...a], highlight: {}, codeLine: 4, desc: '前缀和累加完成', stats: { accesses } })
   const display = new Array(n).fill(0)
   for (let i = n - 1; i >= 0; i--) {
-    count[a[i]]--
-    const pos = count[a[i]]
+    count[a[i] + offset]--
+    const pos = count[a[i] + offset]
     output[pos] = a[i]
     display[pos] = a[i]
     accesses++
@@ -592,6 +595,14 @@ export function interpolationSearch (arr, target) {
   steps.push({ array: [...a], highlight: { left: low, right: high, target }, codeLine: 1, desc: `插值查找 ${target}（按值估算位置）`, stats: { comparisons } })
   while (low <= high && target >= a[low] && target <= a[high]) {
     comparisons++
+    // 区间内值全相同（含重复元素），直接判断避免除零
+    if (a[low] === a[high]) {
+      if (a[low] === target) {
+        steps.push({ array: [...a], highlight: { found: low, target }, codeLine: 4, desc: `命中！${target} 位于索引 ${low}`, stats: { comparisons } })
+        return steps
+      }
+      break
+    }
     const pos = low + Math.floor(((target - a[low]) * (high - low)) / (a[high] - a[low]))
     steps.push({ array: [...a], highlight: { left: low, right: high, mid: pos, target }, codeLine: 3, desc: `估算位置=${pos}，a[${pos}]=${a[pos]}`, stats: { comparisons } })
     if (a[pos] === target) {

@@ -36,5 +36,7 @@ rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
     console.log(chalk.yellow(
       ' You can now check the onlinejudge in http://YouIP/'
     ))
+    // 构建已完成且产物已写出；显式退出，避免环境注入的句柄（如沙箱 socket）使进程挂起
+    process.exit(0)
   })
 })

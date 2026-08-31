@@ -982,7 +982,8 @@
       },
       layoutLeftStyle () {
         if (this.layoutMode !== 'horizontal') return {}
-        return { width: this.leftWidth + '%', flexShrink: '0' }
+        // 使用内联 flex 简写覆盖 CSS 中的 flex:1，否则 flex-basis:0 会使 width 失效导致拖动无效
+        return { width: this.leftWidth + '%', flex: `0 0 ${this.leftWidth}%` }
       },
       resultHeaderClass () {
         const r = this.submissionDetail.result
@@ -1471,9 +1472,8 @@
         border: 2px solid #e2e8f0;
         border-radius: 10px;
         padding: 16px;
-        font-family: 'Courier New', monospace;
-        font-size: 13px;
-        line-height: 1.6;
+        font-size: 14px;
+        line-height: 1.7;
         max-height: 180px;
         overflow: auto;
         white-space: pre-wrap;
