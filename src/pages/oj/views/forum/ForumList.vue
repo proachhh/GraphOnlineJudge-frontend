@@ -2,10 +2,10 @@
   <div class="forum-page">
     <div class="forum-container">
       <aside class="forum-sidebar">
-        <div class="sidebar-title">版块导航</div>
+        <div class="sidebar-title">{{ $t('m.Forum_Category_Nav') }}</div>
         <div class="cat-item" :class="{active: currentCategory === 'all'}" @click="switchCategory('all')">
           <Icon type="ios-list" size="18" />
-          <span>全部</span>
+          <span>{{ $t('m.Forum_All') }}</span>
         </div>
         <div v-for="c in realCategories" :key="c.id" class="cat-item" :class="{active: currentCategory === c.id}" @click="switchCategory(c.id)">
           <Icon :type="c.icon || 'ios-chatbubbles'" size="18" />
@@ -15,50 +15,50 @@
       <div class="forum-main">
       <div class="forum-header-bar">
         <div class="header-left">
-          <span class="forum-title">社区</span>
-          <span class="post-count">{{ totalPosts }} 条动态</span>
+          <span class="forum-title">{{ $t('m.Forum_Title') }}</span>
+          <span class="post-count">{{ $t('m.Forum_Posts_Count', { n: totalPosts }) }}</span>
         </div>
         <div class="header-actions">
-          <Input v-model="searchKeyword" placeholder="搜索..." class="search-input" @on-enter="doSearch" search />
-          <Button v-if="!muteInfo.muted" type="primary" @click="openCreate"><Icon type="ios-create-outline" size="16"/> 发动态</Button>
-          <span v-else class="mute-badge">🔇 禁言{{ muteInfo.remain }}</span>
+          <Input v-model="searchKeyword" :placeholder="$t('m.Forum_Search')" class="search-input" @on-enter="doSearch" search />
+          <Button v-if="!muteInfo.muted" type="primary" @click="openCreate"><Icon type="ios-create-outline" size="16"/> {{ $t('m.Forum_New_Post') }}</Button>
+          <span v-else class="mute-badge">🔇 {{ $t('m.Forum_Muted') }}{{ muteInfo.remain }}</span>
         </div>
       </div>
 
       <!-- 筛选标签 -->
       <div class="filter-tabs">
-        <span class="f-tab" :class="{ active: currentFilter === 'all' }" @click="switchFilter('all')">全部</span>
-        <span class="f-tab" :class="{ active: currentFilter === 'mine' }" @click="switchFilter('mine')">我发布的</span>
-        <span class="f-tab" :class="{ active: currentFilter === 'bookmark' }" @click="switchFilter('bookmark')">已收藏</span>
-        <span v-if="currentFilter !== 'all'" class="f-tab clear" @click="switchFilter('all')">清空筛选</span>
+        <span class="f-tab" :class="{ active: currentFilter === 'all' }" @click="switchFilter('all')">{{ $t('m.Forum_All') }}</span>
+        <span class="f-tab" :class="{ active: currentFilter === 'mine' }" @click="switchFilter('mine')">{{ $t('m.Forum_Filter_Mine') }}</span>
+        <span class="f-tab" :class="{ active: currentFilter === 'bookmark' }" @click="switchFilter('bookmark')">{{ $t('m.Forum_Filter_Bookmark') }}</span>
+        <span v-if="currentFilter !== 'all'" class="f-tab clear" @click="switchFilter('all')">{{ $t('m.Forum_Filter_Clear') }}</span>
       </div>
 
       <div v-if="loading" class="loading-box"><Spin size="large" fix></Spin></div>
-      <div v-else-if="posts.length === 0" class="empty-box">暂无动态</div>
+      <div v-else-if="posts.length === 0" class="empty-box">{{ $t('m.Forum_Empty') }}</div>
       <div v-else class="post-feed">
         <Card v-for="post in posts" :key="post.id" class="post-card">
           <div class="post-header">
             <img :src="headUrl(post.author)" class="post-avatar" />
             <div class="post-author-info">
-              <span class="author-name">{{ post.author ? post.author.username : '未知' }}</span>
+              <span class="author-name">{{ post.author ? post.author.username : $t('m.Forum_Unknown_User') }}</span>
               <span class="post-time">{{ post.create_time | timeFormat }}</span>
             </div>
             <div v-if="isOwnPost(post)" class="post-own-actions">
-              <a class="own-btn" @click="startEdit(post)">编辑</a>
-              <a class="own-btn del-btn" @click="confirmDelete(post)">删除</a>
+              <a class="own-btn" @click="startEdit(post)">{{ $t('m.Forum_Edit') }}</a>
+              <a class="own-btn del-btn" @click="confirmDelete(post)">{{ $t('m.Forum_Delete') }}</a>
             </div>
           </div>
           <h3 v-if="post.title && post.title !== '无标题'" class="post-title">{{ post.title }}</h3>
           <div class="post-body markdown-body" v-katex v-html="renderContent(post.content)"></div>
           <div class="post-actions">
-            <span class="action-item comment-toggle" @click="toggleComments(post)">回复 {{ post.comment_count || 0 }}</span>
+            <span class="action-item comment-toggle" @click="toggleComments(post)">{{ $t('m.Forum_Comment_Count', { n: post.comment_count || 0 }) }}</span>
             <span class="action-item" :class="{ active: likedPosts[post.id] }" @click="toggleLike(post)">
               <Icon :type="likedPosts[post.id] ? 'ios-heart' : 'ios-heart-outline'" size="16"/> {{ post.like_count || 0 }}
             </span>
             <span class="action-item" :class="{ active: bookmarkedPosts[post.id] }" @click="toggleBookmark(post)">
               <Icon :type="bookmarkedPosts[post.id] ? 'ios-star' : 'ios-star-outline'" size="16"/> {{ post.bookmark_count || 0 }}
             </span>
-            <span class="action-item report-btn" @click="openReport('post', post.id)">举报</span>
+            <span class="action-item report-btn" @click="openReport('post', post.id)">{{ $t('m.Forum_Report') }}</span>
           </div>
 
           <!-- 评论区 -->
@@ -68,14 +68,14 @@
                 <img :src="headUrl(c.author)" class="comment-avatar" />
                 <div class="comment-body">
                   <div class="comment-head">
-                    <strong>{{ c.author ? c.author.username : '未知' }}</strong>
+                    <strong>{{ c.author ? c.author.username : $t('m.Forum_Unknown_User') }}</strong>
                     <span class="comment-time">{{ c.create_time | timeFormat }}</span>
                     <span class="comment-like" :class="{ liked: c._liked }" @click="toggleCommentLike(post, c)">
                       <Icon :type="c._liked ? 'ios-heart' : 'ios-heart-outline'" size="13"/> {{ c.like_count || 0 }}
                     </span>
-                    <a class="reply-link" @click="onReplyClick(post, c)"><b>↩</b> 回复</a>
+                    <a class="reply-link" @click="onReplyClick(post, c)"><b>↩</b> {{ $t('m.Forum_Reply') }}</a>
                     <a v-if="isOwnComment(c)" class="del-cmt" @click="deleteComment(post, c.id)"><Icon type="ios-trash" size="13"/></a>
-                    <a class="report-cmt" @click="openReport('comment', c.id)">举报</a>
+                    <a class="report-cmt" @click="openReport('comment', c.id)">{{ $t('m.Forum_Report') }}</a>
                   </div>
                   <div class="comment-text">{{ c.content }}</div>
                   <div v-if="c.replies && c.replies.length" class="comment-replies">
@@ -83,7 +83,7 @@
                       <img :src="headUrl(r.author)" class="comment-avatar sm" />
                       <div class="comment-body">
                         <div class="comment-head">
-                          <strong>{{ r.author ? r.author.username : '未知' }}</strong>
+                          <strong>{{ r.author ? r.author.username : $t('m.Forum_Unknown_User') }}</strong>
                           <span class="comment-time">{{ r.create_time | timeFormat }}</span>
                           <span class="comment-like" :class="{ liked: r._liked }" @click="toggleCommentLike(post, r)">
                             <Icon :type="r._liked ? 'ios-heart' : 'ios-heart-outline'" size="13"/> {{ r.like_count || 0 }}
@@ -97,7 +97,7 @@
                 </div>
               </div>
             </div>
-            <div v-else class="empty-comment">暂无回复</div>
+            <div v-else class="empty-comment">{{ $t('m.Forum_No_Replies') }}</div>
             <!-- 评论分页 -->
             <div v-if="post._commentTotal > post._commentLimit" class="cmt-pager">
               <Page simple :total="post._commentTotal" :page-size="post._commentLimit" :current="post._commentPage" @on-change="p => changeCommentPage(post, p)" />
@@ -105,11 +105,11 @@
             <!-- 回复框 -->
             <div class="reply-box">
               <p v-if="replyTarget && replyPostId === post.id" class="reply-hint">
-                回复 <strong>{{ replyTarget.author.username }}</strong> <a @click="cancelReply">取消</a>
+                {{ $t('m.Forum_Reply_To') }} <strong>{{ replyTarget.author.username }}</strong> <a @click="cancelReply">{{ $t('m.Forum_Cancel') }}</a>
               </p>
               <div class="reply-input-row">
-                <Input v-model="replyContents[post.id]" placeholder="写下你的回复..." @on-enter="submitComment(post)"/>
-                <Button type="primary" size="small" @click="submitComment(post)" :loading="submittingMap[post.id]">回复</Button>
+                <Input v-model="replyContents[post.id]" :placeholder="$t('m.Forum_Reply_Placeholder')" @on-enter="submitComment(post)"/>
+                <Button type="primary" size="small" @click="submitComment(post)" :loading="submittingMap[post.id]">{{ $t('m.Forum_Reply') }}</Button>
               </div>
             </div>
           </div>
@@ -119,43 +119,43 @@
       </div>
     </div>
 
-    <Modal v-model="showEditor" :title="editingPost ? '编辑' : '发动态'" :width="800" :footer-hide="true"
+    <Modal v-model="showEditor" :title="editingPost ? $t('m.Forum_Edit') : $t('m.Forum_New_Post')" :width="800" :footer-hide="true"
       @on-cancel="showEditor = false" class="forum-editor-modal">
       <Form :label-width="60">
-        <FormItem label="版块" required v-if="!editingPost">
-          <Select v-model="createCategoryId" placeholder="选择版块">
+        <FormItem :label="$t('m.Forum_Category')" required v-if="!editingPost">
+          <Select v-model="createCategoryId" :placeholder="$t('m.Forum_Select_Category')">
             <Option v-for="c in realCategories" :key="c.id" :value="c.id" :label="c.name"></Option>
           </Select>
         </FormItem>
-        <FormItem label="标题"><Input v-model="createTitle" placeholder="标题（可选）" maxlength="256"/></FormItem>
-        <FormItem label="内容" required><Simditor v-model="createContent"></Simditor></FormItem>
+        <FormItem :label="$t('m.Forum_Title_Label')"><Input v-model="createTitle" :placeholder="$t('m.Forum_Title_Placeholder')" maxlength="256"/></FormItem>
+        <FormItem :label="$t('m.Forum_Content')" required><Simditor v-model="createContent"></Simditor></FormItem>
       </Form>
       <div class="modal-footer">
-        <Button @click="showEditor = false">取消</Button>
-        <Button type="primary" :loading="posting" @click.native="submitPost">发布</Button>
+        <Button @click="showEditor = false">{{ $t('m.Forum_Cancel') }}</Button>
+        <Button type="primary" :loading="posting" @click.native="submitPost">{{ $t('m.Forum_Publish') }}</Button>
       </div>
     </Modal>
 
     <!-- 举报 Modal -->
-    <Modal v-model="reportVisible" title="举报" :width="420" @on-ok="submitReport" ok-text="提交">
+    <Modal v-model="reportVisible" :title="$t('m.Forum_Report')" :width="420" @on-ok="submitReport" :ok-text="$t('m.Forum_Submit')">
       <Form :label-width="80">
-        <FormItem label="举报类型">
+        <FormItem :label="$t('m.Forum_Report_Type')">
           <Select v-model="reportReason">
-            <Option value="spam">垃圾信息</Option>
-            <Option value="attack">人身攻击</Option>
-            <Option value="ad">广告推广</Option>
-            <Option value="illegal">违规内容</Option>
-            <Option value="other">其他</Option>
+            <Option value="spam">{{ $t('m.Forum_Report_Spam') }}</Option>
+            <Option value="attack">{{ $t('m.Forum_Report_Attack') }}</Option>
+            <Option value="ad">{{ $t('m.Forum_Report_Ad') }}</Option>
+            <Option value="illegal">{{ $t('m.Forum_Report_Illegal') }}</Option>
+            <Option value="other">{{ $t('m.Forum_Report_Other') }}</Option>
           </Select>
         </FormItem>
-        <FormItem label="补充说明">
-          <Input v-model="reportDetail" type="textarea" :rows="3" placeholder="选填" maxlength="500"/>
+        <FormItem :label="$t('m.Forum_Report_Detail_Label')">
+          <Input v-model="reportDetail" type="textarea" :rows="3" :placeholder="$t('m.Forum_Optional')" maxlength="500"/>
         </FormItem>
       </Form>
     </Modal>
 
     <!-- 图片预览 -->
-    <Modal v-model="imgPreviewVisible" title="图片预览" :width="800" footer-hide>
+    <Modal v-model="imgPreviewVisible" :title="$t('m.Forum_Image_Preview')" :width="800" footer-hide>
       <img :src="imgPreviewSrc" style="width:100%;border-radius:8px" />
     </Modal>
   </div>
@@ -217,7 +217,7 @@ export default {
     api.getMuteStatus().then(res => {
       if (res.data.data && res.data.data.muted) {
         this.muteInfo.muted = true
-        this.muteInfo.remain = ' (剩余' + res.data.data.remain + ')'
+        this.muteInfo.remain = this.$t('m.Forum_Mute_Remain', { n: res.data.data.remain })
         this.muteInfo.reason = res.data.data.reason
       }
     }).catch(() => {})
@@ -328,21 +328,21 @@ export default {
     startEdit (post) { this.editingPost = post; this.createTitle = post.title; this.createContent = post.content; this.createCategoryId = (post.category && post.category.id) || ''; this.showEditor = true },
     async submitPost () {
       const content = this.createContent.trim()
-      if (!content) { this.$Message.warning('请输入内容'); return }
+      if (!content) { this.$Message.warning(this.$t('m.Forum_Content_Required')); return }
       this.posting = true
       try {
         if (this.editingPost) {
           await api.editForumPost(this.editingPost.id, { title: this.createTitle.trim() || '无标题', content })
           this.editingPost.title = this.createTitle.trim() || '无标题'; this.editingPost.content = content
-          this.$Message.success('修改成功')
+          this.$Message.success(this.$t('m.Forum_Edit_Success'))
           this.$nextTick(() => {
             this.$el.querySelectorAll('.post-body').forEach(body => { this.layoutImages(body) })
           })
         } else {
           const catId = this.createCategoryId || (this.realCategories.length ? this.realCategories[0].id : '')
-          if (!catId) { this.$Message.warning('请选择版块'); this.posting = false; return }
+          if (!catId) { this.$Message.warning(this.$t('m.Forum_Category_Required')); this.posting = false; return }
           await api.createForumPost({ title: this.createTitle.trim() || '无标题', content, category_id: catId })
-          this.$Message.success('发布成功'); this.page = 1; this.fetchData()
+          this.$Message.success(this.$t('m.Forum_Publish_Success')); this.page = 1; this.fetchData()
         }
         this.showEditor = false; this.editingPost = null
       } catch (e) {
@@ -356,8 +356,8 @@ export default {
       this.posting = false
     },
     confirmDelete (post) {
-      this.$Modal.confirm({ title: '确认删除', content: '删除后无法恢复', onOk: async () => {
-        await api.deleteForumPost(post.id); this.posts = this.posts.filter(p => p.id !== post.id); this.totalPosts--; this.$Message.success('已删除')
+      this.$Modal.confirm({ title: this.$t('m.Forum_Delete_Confirm_Title'), content: this.$t('m.Forum_Delete_Confirm_Content'), onOk: async () => {
+        await api.deleteForumPost(post.id); this.posts = this.posts.filter(p => p.id !== post.id); this.totalPosts--; this.$Message.success(this.$t('m.Forum_Deleted'))
       }})
     },
     async submitComment (post) {
@@ -367,12 +367,12 @@ export default {
       await api.createForumComment({ post_id: post.id, content, parent_id: this.replyTarget && this.replyPostId === post.id ? this.replyTarget.id : null })
       this.replyContents[post.id] = ''; this.replyTarget = null; this.replyPostId = null
       this.$set(this.submittingMap, post.id, false)
-      this.$Message.success('回复成功')
+      this.$Message.success(this.$t('m.Forum_Reply_Success'))
       await this.loadMoreComments(post, 1)
     },
     async deleteComment (post, commentId) {
       await api.deleteForumComment({ comment_id: commentId })
-      this.$Message.success('已删除')
+      this.$Message.success(this.$t('m.Forum_Deleted'))
       await this.loadMoreComments(post, post._commentPage)
     },
     async toggleLike (post) {
@@ -393,7 +393,7 @@ export default {
     async submitReport () {
       if (!this.reportTargetId) return
       await api.forumReport({ target_type: this.reportType, target_id: this.reportTargetId, reason: this.reportReason, detail: this.reportDetail })
-      this.$Message.success('举报已提交')
+      this.$Message.success(this.$t('m.Forum_Report_Submitted'))
       this.reportVisible = false
     }
   }

@@ -105,7 +105,7 @@
                   <span v-if="problem.difficulty" class="info-inline-item"><b>{{$t('m.Level')}}</b> {{$t('m.' + problem.difficulty)}}</span>
                   <span v-if="problem.total_score" class="info-inline-item"><b>{{$t('m.Score')}}</b> {{problem.total_score}}</span>
                   <span class="info-inline-item"><b>{{$t('m.Tags')}}</b>
-                    <Tag v-for="tag in problem.tags" :key="tag" size="small">{{ m.tag[tag] || tag }}</Tag>
+                    <Tag v-for="tag in problem.tags" :key="tag" size="small">{{ tagDisplayName(tag) }}</Tag>
                   </span>
                 </div>
               </div>
@@ -288,7 +288,7 @@
               <Poptip trigger="hover" placement="top" transfer word-wrap width="260">
                 <a>{{$t('m.Show')}}</a>
                 <div slot="content" style="display: flex; flex-wrap: wrap; gap: 4px">
-                  <Tag v-for="tag in problem.tags" :key="tag">{{ m.tag[tag] || tag }}</Tag>
+                  <Tag v-for="tag in problem.tags" :key="tag">{{ tagDisplayName(tag) }}</Tag>
                 </div>
               </Poptip>
             </p>
@@ -401,7 +401,7 @@
   import api from '@oj/api'
   import {pie, largePie} from './chartData'
   import * as echarts from 'echarts'
-  import { m } from '@/i18n/oj/zh-CN.js'
+  import { tagDisplayName } from '@/i18n'
   import {renderElement} from '@/plugins/katex'
 
   // 只显示这些状态的图形占用
@@ -497,6 +497,7 @@
     },
     methods: {
       ...mapActions(['changeDomTitle']),
+      tagDisplayName,
       cleanTitle (title) {
         if (!title) return title
         // 去除「...」前缀（如「一本通 1.1 例 1」），只保留实际标题

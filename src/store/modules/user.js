@@ -1,7 +1,7 @@
 import types from '../types'
 import api from '@oj/api'
 import storage from '@/utils/storage'
-import i18n from '@/i18n'
+import i18n, {saveLanguage} from '@/i18n'
 import { STORAGE_KEY, USER_TYPE, PROBLEM_PERMISSION } from '@/utils/constants'
 
 const state = {
@@ -34,6 +34,8 @@ const mutations = {
     state.profile = profile
     if (profile.language) {
       i18n.locale = profile.language
+      // 同步本地记忆，退出登录后未登录状态也能保持所选语言
+      saveLanguage(profile.language)
     }
     storage.set(STORAGE_KEY.AUTHED, !!profile.user)
   }

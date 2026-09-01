@@ -98,7 +98,7 @@
                 <span class="info-inline-item"><b>{{ $t('m.IOMode') }}</b> {{ currentProblemIO }}</span>
                 <span v-if="currentProblem.difficulty" class="info-inline-item"><b>{{ $t('m.Level') }}</b> {{ difficultyText }}</span>
                 <span class="info-inline-item"><b>{{ $t('m.Tags') }}</b>
-                  <Tag v-for="tag in currentProblem.tags" :key="tag" size="small">{{ m.tag[tag] || tag }}</Tag>
+                  <Tag v-for="tag in currentProblem.tags" :key="tag" size="small">{{ tagDisplayName(tag) }}</Tag>
                 </span>
               </div>
             </div>
@@ -226,7 +226,7 @@
                 <Poptip trigger="hover" placement="top" transfer word-wrap width="260">
                   <a>{{ $t('m.Show') }}</a>
                   <div slot="content" style="display: flex; flex-wrap: wrap; gap: 4px">
-                    <Tag v-for="tag in currentProblem.tags" :key="tag">{{ m.tag[tag] || tag }}</Tag>
+                    <Tag v-for="tag in currentProblem.tags" :key="tag">{{ tagDisplayName(tag) }}</Tag>
                   </div>
                 </Poptip>
               </p>
@@ -330,7 +330,7 @@ import CodeMirror from '@oj/components/CodeMirror.vue'
 import AICard from '@oj/components/AICard.vue'
 import { pie, largePie } from '../problem/chartData'
 import * as echarts from 'echarts'
-import { m } from '@/i18n/oj/zh-CN.js'
+import { tagDisplayName } from '@/i18n'
 
 const IMMERSION_PREFS_KEY = 'immersion_practice_prefs'
 
@@ -493,6 +493,7 @@ export default {
     window.removeEventListener('mouseup', this.stopResize)
   },
   methods: {
+    tagDisplayName,
     _restorePrefs () {
       const saved = storage.get(IMMERSION_PREFS_KEY)
       if (saved) {

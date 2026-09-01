@@ -107,7 +107,7 @@
                   v-for="tag in problem.tags.slice(0, 2)"
                   :key="tag"
                   class="card-tag-item"
-                >{{ m.tag[tag] || tag }}</span>
+                >{{ tagDisplayName(tag) }}</span>
                 <Poptip
                   v-if="problem.tags.length > 2"
                   trigger="hover"
@@ -122,7 +122,7 @@
                       v-for="tag in problem.tags"
                       :key="tag"
                       class="card-tag-item"
-                    >{{ m.tag[tag] || tag }}</span>
+                    >{{ tagDisplayName(tag) }}</span>
                   </div>
                 </Poptip>
               </div>
@@ -173,7 +173,7 @@
                  :key="tag.name"
                  @click="filterByTag(tag.name)"
                  :class="['tag-item', { active: query.tag === tag.name }]">
-              {{ m.tag[tag.name] || tag.name }}
+              {{ tagDisplayName(tag.name) }}
             </div>
             <div v-if="pagedTagList.length === 0 && !loadings.tag" class="no-tags">
               {{ $t('m.No_Tags') }}
@@ -206,7 +206,7 @@ import api from '@oj/api'
 import utils from '@/utils/utils'
 import { ProblemMixin } from '@oj/components/mixins'
 import Pagination from '@oj/components/Pagination'
-import { m } from '@/i18n/oj/zh-CN.js'
+import { tagDisplayName } from '@/i18n'
 
 export default {
   name: 'ProblemList',
@@ -336,6 +336,7 @@ export default {
     })
   },
   methods: {
+    tagDisplayName,
     cleanTitle (title) {
       if (!title) return title
       return title.replace(/^「[^」]*」\s*/, '')
@@ -434,7 +435,7 @@ export default {
                   fontSize: '13px',
                   whiteSpace: 'nowrap'
                 }
-              }, this.m.tag[tag] || tag)
+              }, tagDisplayName(tag))
             })
             if (hasMore) {
               tagEls.push(h('span', {
@@ -474,7 +475,7 @@ export default {
                   fontSize: '13px',
                   whiteSpace: 'nowrap'
                 }
-              }, this.m.tag[tag] || tag)
+              }, tagDisplayName(tag))
             })
             const tooltipContent = h('div', {
               style: {
@@ -522,7 +523,7 @@ export default {
       if (!this.tagKeyword) return this.tagList
       const keyword = this.tagKeyword.toLowerCase()
       return this.tagList.filter(tag => {
-        const displayName = this.m.tag[tag.name] || tag.name
+        const displayName = tagDisplayName(tag.name)
         return displayName.toLowerCase().includes(keyword) || tag.name.toLowerCase().includes(keyword)
       })
     },
