@@ -6,22 +6,22 @@
         <!-- 页面标题 -->
         <div class="page-header">
           <div class="header-left">
-            <h2 class="page-title"><i class="el-icon-reading"></i> 题集练习</h2>
+            <h2 class="page-title"><i class="el-icon-reading"></i> {{ $t('m.ES_Title') }}</h2>
           </div>
           <div class="header-stats">
             <div class="hs-item">
               <span class="hs-num">{{ sets.length }}</span>
-              <span class="hs-label">题集总数</span>
+              <span class="hs-label">{{ $t('m.ES_Total_Sets') }}</span>
             </div>
             <div class="hs-divider"></div>
             <div class="hs-item">
               <span class="hs-num">{{ totalQuestions }}</span>
-              <span class="hs-label">题目总数</span>
+              <span class="hs-label">{{ $t('m.ES_Total_Questions') }}</span>
             </div>
             <div class="hs-divider"></div>
             <div class="hs-item">
               <span class="hs-num">{{ submittedCount }}</span>
-              <span class="hs-label">已练习</span>
+              <span class="hs-label">{{ $t('m.ES_Submitted') }}</span>
             </div>
           </div>
         </div>
@@ -29,22 +29,22 @@
         <!-- 筛选栏 -->
         <div class="filter-bar">
           <div class="filter-item">
-            <span class="filter-label">知识点</span>
-            <el-select v-model="filterTopic" placeholder="全部知识点" clearable size="small" style="width: 180px">
+            <span class="filter-label">{{ $t('m.ES_Filter_Topic') }}</span>
+            <el-select v-model="filterTopic" :placeholder="$t('m.ES_All_Topics')" clearable size="small" style="width: 180px">
               <el-option v-for="t in topics" :key="t" :label="t" :value="t"></el-option>
             </el-select>
           </div>
           <div class="filter-item">
-            <span class="filter-label">难度</span>
-            <el-select v-model="filterDifficulty" placeholder="全部难度" clearable size="small" style="width: 140px">
-              <el-option label="简单" value="Low"></el-option>
-              <el-option label="中等" value="Mid"></el-option>
-              <el-option label="困难" value="High"></el-option>
+            <span class="filter-label">{{ $t('m.ES_Filter_Difficulty') }}</span>
+            <el-select v-model="filterDifficulty" :placeholder="$t('m.ES_All_Difficulty')" clearable size="small" style="width: 140px">
+              <el-option :label="$t('m.ES_Diff_Low')" value="Low"></el-option>
+              <el-option :label="$t('m.ES_Diff_Mid')" value="Mid"></el-option>
+              <el-option :label="$t('m.ES_Diff_High')" value="High"></el-option>
             </el-select>
           </div>
-          <el-input v-model="searchKeyword" placeholder="搜索题集标题..." size="small" style="width: 200px" prefix-icon="el-icon-search" @input="filterBySearch" clearable></el-input>
-          <el-button type="primary" size="small" icon="el-icon-search" @click="loadSets">筛选</el-button>
-          <el-button size="small" icon="el-icon-refresh" @click="resetFilter">重置</el-button>
+          <el-input v-model="searchKeyword" :placeholder="$t('m.ES_Search_Placeholder')" size="small" style="width: 200px" prefix-icon="el-icon-search" @input="filterBySearch" clearable></el-input>
+          <el-button type="primary" size="small" icon="el-icon-search" @click="loadSets">{{ $t('m.ES_Filter') }}</el-button>
+          <el-button size="small" icon="el-icon-refresh" @click="resetFilter">{{ $t('m.ES_Reset') }}</el-button>
         </div>
 
         <!-- 题集卡片 -->
@@ -60,22 +60,22 @@
                   </div>
                   <div class="card-tags">
                     <span class="card-topic" v-if="s.topic"><i class="el-icon-collection-tag"></i> {{ s.topic }}</span>
-                    <span class="card-submitted" v-if="s.has_submitted"><i class="el-icon-circle-check"></i> 已提交</span>
+                    <span class="card-submitted" v-if="s.has_submitted"><i class="el-icon-circle-check"></i> {{ $t('m.ES_Submitted_Badge') }}</span>
                   </div>
                   <div class="card-meta">
                     <div class="meta-line">
-                      <span class="meta-item"><i class="el-icon-document-copy"></i><b>{{ s.question_count || 0 }}</b> 题</span>
-                      <span class="meta-item"><i class="el-icon-user"></i><b>{{ s.submission_count || 0 }}</b> 人</span>
+                      <span class="meta-item"><i class="el-icon-document-copy"></i><b>{{ s.question_count || 0 }}</b> {{ $t('m.ES_Question_Unit') }}</span>
+                      <span class="meta-item"><i class="el-icon-user"></i><b>{{ s.submission_count || 0 }}</b> {{ $t('m.ES_People_Unit') }}</span>
                     </div>
                     <div class="meta-line">
-                      <span class="meta-item" v-if="s.time_limit"><i class="el-icon-time"></i>{{ s.time_limit }} 分钟</span>
-                      <span class="meta-item" v-else><i class="el-icon-time"></i>不限时</span>
-                      <span class="meta-item" v-if="s.max_attempts"><i class="el-icon-edit-outline"></i>限 {{ s.max_attempts }} 次</span>
-                      <span class="meta-item" v-else><i class="el-icon-edit-outline"></i>不限次</span>
+                      <span class="meta-item" v-if="s.time_limit"><i class="el-icon-time"></i>{{ s.time_limit }} {{ $t('m.ES_Minutes') }}</span>
+                      <span class="meta-item" v-else><i class="el-icon-time"></i>{{ $t('m.ES_No_Time_Limit') }}</span>
+                      <span class="meta-item" v-if="s.max_attempts"><i class="el-icon-edit-outline"></i>{{ $t('m.ES_Limit_Attempts', {n: s.max_attempts}) }}</span>
+                      <span class="meta-item" v-else><i class="el-icon-edit-outline"></i>{{ $t('m.ES_Unlimited_Attempts') }}</span>
                     </div>
                   </div>
                   <div class="card-action">
-                    <span class="action-btn">开始练习 <i class="el-icon-arrow-right"></i></span>
+                    <span class="action-btn">{{ $t('m.ES_Start_Practice') }} <i class="el-icon-arrow-right"></i></span>
                   </div>
                 </div>
               </div>
@@ -83,7 +83,7 @@
           </el-row>
           <div v-else-if="!loading" class="empty-hint">
             <i class="el-icon-folder-opened"></i>
-            <p>暂无可用的题集</p>
+            <p>{{ $t('m.ES_Empty') }}</p>
           </div>
         </div>
       </el-col>
@@ -92,25 +92,25 @@
       <el-col :xs="24" :lg="6">
         <!-- 我的练习进度 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-data-line"></i> 我的练习</div>
+          <div class="side-title"><i class="el-icon-data-line"></i> {{ $t('m.ES_My_Practice') }}</div>
           <div class="progress-ring-wrap">
             <el-progress type="circle" :percentage="practiceProgress" :width="100" :stroke-width="8" :color="'#1e3a8a'"></el-progress>
             <div class="progress-text">
               <span class="progress-num">{{ submittedCount }} / {{ sets.length }}</span>
-              <span class="progress-label">已完成题集</span>
+              <span class="progress-label">{{ $t('m.ES_Completed_Sets') }}</span>
             </div>
           </div>
           <div class="progress-stats">
             <div class="ps-row">
-              <span class="ps-label"><i class="el-icon-circle-check" style="color:#19be6b"></i> 已完成</span>
+              <span class="ps-label"><i class="el-icon-circle-check" style="color:#19be6b"></i> {{ $t('m.ES_Completed') }}</span>
               <span class="ps-val">{{ submittedCount }}</span>
             </div>
             <div class="ps-row">
-              <span class="ps-label"><i class="el-icon-time" style="color:#f90"></i> 进行中</span>
+              <span class="ps-label"><i class="el-icon-time" style="color:#f90"></i> {{ $t('m.ES_In_Progress') }}</span>
               <span class="ps-val">0</span>
             </div>
             <div class="ps-row">
-              <span class="ps-label"><i class="el-icon-document" style="color:#94a3b8"></i> 未开始</span>
+              <span class="ps-label"><i class="el-icon-document" style="color:#94a3b8"></i> {{ $t('m.ES_Not_Started') }}</span>
               <span class="ps-val">{{ sets.length - submittedCount }}</span>
             </div>
           </div>
@@ -118,7 +118,7 @@
 
         <!-- 难度分布 -->
         <div class="side-card" v-if="sets.length">
-          <div class="side-title"><i class="el-icon-pie-chart"></i> 难度分布</div>
+          <div class="side-title"><i class="el-icon-pie-chart"></i> {{ $t('m.ES_Diff_Dist') }}</div>
           <div class="diff-stat" v-for="d in difficultyDist" :key="d.key">
             <span class="diff-dot" :style="{ background: d.color }"></span>
             <span class="diff-name">{{ d.label }}</span>
@@ -131,7 +131,7 @@
 
         <!-- 热门题集 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-star-on"></i> 热门题集</div>
+          <div class="side-title"><i class="el-icon-star-on"></i> {{ $t('m.ES_Hot_Sets') }}</div>
           <div class="hot-list">
             <div
               v-for="(s, idx) in hotSets"
@@ -142,7 +142,7 @@
               <span class="hot-rank" :class="'rank-' + (idx + 1)">{{ idx + 1 }}</span>
               <div class="hot-info">
                 <span class="hot-name">{{ s.title }}</span>
-                <span class="hot-meta">{{ s.submission_count || 0 }} 人参与 · {{ diffText(s.difficulty) }}</span>
+                <span class="hot-meta">{{ $t('m.ES_People_Joined', {n: s.submission_count || 0}) }} · {{ diffText(s.difficulty) }}</span>
               </div>
               <i class="el-icon-arrow-right hot-arrow"></i>
             </div>
@@ -151,23 +151,23 @@
 
         <!-- 快捷入口 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-s-grid"></i> 快捷入口</div>
+          <div class="side-title"><i class="el-icon-s-grid"></i> {{ $t('m.ES_Quick_Links') }}</div>
           <div class="quick-links">
             <div class="ql-item" @click="$router.push('/problem')">
               <i class="el-icon-document-copy"></i>
-              <span>题目列表</span>
+              <span>{{ $t('m.ES_Ql_Problems') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/immersion')">
               <i class="el-icon-magic-stick"></i>
-              <span>沉浸式练习</span>
+              <span>{{ $t('m.ES_Ql_Immersion') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/boss-exam')">
               <i class="el-icon-trophy"></i>
-              <span>Boss 挑战</span>
+              <span>{{ $t('m.ES_Ql_Boss') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/algorithm-viz')">
               <i class="el-icon-discover"></i>
-              <span>算法可视化</span>
+              <span>{{ $t('m.ES_Ql_Viz') }}</span>
             </div>
           </div>
         </div>
@@ -209,7 +209,7 @@ export default {
       api.getExerciseSets(params).then(res => {
         this.sets = res.data.data || res.data || []
       }).catch(() => {
-        this.$message.error('加载题集失败')
+        this.$message.error(this.$t('m.ES_Load_Failed'))
       }).finally(() => { this.loading = false })
     },
     resetFilter () {
@@ -228,7 +228,8 @@ export default {
       return 'diff-' + (d || 'Mid').toLowerCase()
     },
     diffText (d) {
-      return { Low: '简单', Mid: '中等', High: '困难' }[d] || d || '未知'
+      const map = { Low: this.$t('m.ES_Diff_Low'), Mid: this.$t('m.ES_Diff_Mid'), High: this.$t('m.ES_Diff_High') }
+      return map[d] || d || this.$t('m.ES_Diff_Unknown')
     }
   },
   computed: {
@@ -255,9 +256,9 @@ export default {
       })
       let total = this.sets.length || 1
       return [
-        { key: 'Low', label: '简单', count: counts.Low, percent: Math.round(counts.Low / total * 100), color: '#19be6b' },
-        { key: 'Mid', label: '中等', count: counts.Mid, percent: Math.round(counts.Mid / total * 100), color: '#f90' },
-        { key: 'High', label: '困难', count: counts.High, percent: Math.round(counts.High / total * 100), color: '#ed3f14' }
+        { key: 'Low', label: this.$t('m.ES_Diff_Low'), count: counts.Low, percent: Math.round(counts.Low / total * 100), color: '#19be6b' },
+        { key: 'Mid', label: this.$t('m.ES_Diff_Mid'), count: counts.Mid, percent: Math.round(counts.Mid / total * 100), color: '#f90' },
+        { key: 'High', label: this.$t('m.ES_Diff_High'), count: counts.High, percent: Math.round(counts.High / total * 100), color: '#ed3f14' }
       ]
     },
     hotSets () {

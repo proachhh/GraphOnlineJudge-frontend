@@ -8,25 +8,25 @@
           <div class="header-left">
             <div class="header-title">
               <i class="el-icon-trophy"></i>
-              <span>Boss 试卷</span>
+              <span>{{ $t('m.BE_Title') }}</span>
               <span class="boss-badge">BOSS</span>
             </div>
-            <div class="header-sub">挑战 Boss 试卷，检验综合知识掌握，通过即解锁下一阶段</div>
+            <div class="header-sub">{{ $t('m.BE_Sub') }}</div>
           </div>
           <div class="header-stats">
             <div class="hs-item">
               <span class="hs-num">{{ exams.length }}</span>
-              <span class="hs-label">Boss 总数</span>
+              <span class="hs-label">{{ $t('m.BE_Total_Boss') }}</span>
             </div>
             <div class="hs-divider"></div>
             <div class="hs-item">
               <span class="hs-num">{{ challengedCount }}</span>
-              <span class="hs-label">已挑战</span>
+              <span class="hs-label">{{ $t('m.BE_Challenged') }}</span>
             </div>
             <div class="hs-divider"></div>
             <div class="hs-item">
               <span class="hs-num">{{ totalChallengers }}</span>
-              <span class="hs-label">总挑战人次</span>
+              <span class="hs-label">{{ $t('m.BE_Total_Challengers') }}</span>
             </div>
           </div>
         </div>
@@ -34,22 +34,22 @@
         <!-- 筛选栏 -->
         <div class="filter-bar">
           <div class="filter-item">
-            <span class="filter-label">领域</span>
-            <el-select v-model="filterArea" placeholder="全部领域" clearable size="small" style="width: 180px">
+            <span class="filter-label">{{ $t('m.BE_Filter_Area') }}</span>
+            <el-select v-model="filterArea" :placeholder="$t('m.BE_All_Areas')" clearable size="small" style="width: 180px">
               <el-option v-for="t in topicAreas" :key="t" :label="t" :value="t"></el-option>
             </el-select>
           </div>
           <div class="filter-item">
-            <span class="filter-label">难度</span>
-            <el-select v-model="filterDifficulty" placeholder="全部难度" clearable size="small" style="width: 140px">
-              <el-option label="简单" value="Low"></el-option>
-              <el-option label="中等" value="Mid"></el-option>
-              <el-option label="困难" value="High"></el-option>
+            <span class="filter-label">{{ $t('m.ES_Filter_Difficulty') }}</span>
+            <el-select v-model="filterDifficulty" :placeholder="$t('m.ES_All_Difficulty')" clearable size="small" style="width: 140px">
+              <el-option :label="$t('m.ES_Diff_Low')" value="Low"></el-option>
+              <el-option :label="$t('m.ES_Diff_Mid')" value="Mid"></el-option>
+              <el-option :label="$t('m.ES_Diff_High')" value="High"></el-option>
             </el-select>
           </div>
-          <el-input v-model="searchKeyword" placeholder="搜索 Boss..." size="small" style="width: 180px" prefix-icon="el-icon-search" clearable></el-input>
-          <el-button type="primary" size="small" icon="el-icon-search" @click="loadExams">筛选</el-button>
-          <el-button size="small" icon="el-icon-refresh" @click="resetFilter">重置</el-button>
+          <el-input v-model="searchKeyword" :placeholder="$t('m.BE_Search_Placeholder')" size="small" style="width: 180px" prefix-icon="el-icon-search" clearable></el-input>
+          <el-button type="primary" size="small" icon="el-icon-search" @click="loadExams">{{ $t('m.ES_Filter') }}</el-button>
+          <el-button size="small" icon="el-icon-refresh" @click="resetFilter">{{ $t('m.ES_Reset') }}</el-button>
         </div>
 
         <!-- Boss 试卷卡片 -->
@@ -61,31 +61,31 @@
                   <span class="card-title">{{ e.title }}</span>
                   <el-tag size="mini" :type="diffTag(e.difficulty)" effect="dark">{{ diffText(e.difficulty) }}</el-tag>
                 </div>
-                <div class="card-desc">{{ e.description || '暂无描述' }}</div>
+                <div class="card-desc">{{ e.description || $t('m.BE_No_Desc') }}</div>
                 <div class="boss-topic-box" v-if="e.boss_topic">
                   <i class="el-icon-aim"></i>
-                  <span class="boss-topic-label">Boss 知识点：</span>
+                  <span class="boss-topic-label">{{ $t('m.BE_Topic_Label') }}</span>
                   <span class="boss-topic-name">{{ e.boss_topic }}</span>
                 </div>
                 <div class="card-tags">
                   <el-tag size="small" type="info" v-if="e.topic_area">{{ e.topic_area }}</el-tag>
-                  <el-tag size="small" type="danger" effect="plain" v-if="e.passing_score != null">及格 {{ e.passing_score }} 分</el-tag>
-                  <el-tag size="small" v-if="e.has_submitted" type="success">已挑战</el-tag>
+                  <el-tag size="small" type="danger" effect="plain" v-if="e.passing_score != null">{{ $t('m.BE_Pass_Score', {n: e.passing_score}) }}</el-tag>
+                  <el-tag size="small" v-if="e.has_submitted" type="success">{{ $t('m.BE_Challenged') }}</el-tag>
                 </div>
                 <div class="card-meta">
-                  <span class="meta-item"><i class="el-icon-document-copy"></i> {{ e.question_count || 0 }} 题</span>
-                  <span class="meta-item"><i class="el-icon-user"></i> {{ e.submission_count || 0 }} 人挑战</span>
-                  <span class="meta-item" v-if="e.time_limit"><i class="el-icon-time"></i> {{ e.time_limit }} 分钟</span>
+                  <span class="meta-item"><i class="el-icon-document-copy"></i> {{ e.question_count || 0 }} {{ $t('m.ES_Question_Unit') }}</span>
+                  <span class="meta-item"><i class="el-icon-user"></i> {{ $t('m.BE_People_Challenged', {n: e.submission_count || 0}) }}</span>
+                  <span class="meta-item" v-if="e.time_limit"><i class="el-icon-time"></i> {{ e.time_limit }} {{ $t('m.ES_Minutes') }}</span>
                 </div>
                 <div class="card-action">
-                  <el-button type="danger" size="mini" plain>接受挑战 <i class="el-icon-arrow-right"></i></el-button>
+                  <el-button type="danger" size="mini" plain>{{ $t('m.BE_Accept') }} <i class="el-icon-arrow-right"></i></el-button>
                 </div>
               </el-card>
             </el-col>
           </el-row>
           <div v-else-if="!loading" class="empty-hint">
             <i class="el-icon-trophy"></i>
-            <p>暂无可挑战的 Boss 试卷</p>
+            <p>{{ $t('m.BE_Empty') }}</p>
           </div>
         </div>
       </el-col>
@@ -94,7 +94,7 @@
       <el-col :xs="24" :lg="6">
         <!-- 我的挑战记录 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-medal"></i> 我的挑战</div>
+          <div class="side-title"><i class="el-icon-medal"></i> {{ $t('m.BE_My_Challenge') }}</div>
           <div class="challenge-summary">
             <div class="cs-ring-wrap">
               <el-progress type="circle" :percentage="passRate" :width="90" :stroke-width="7" :color="'#c0392b'"></el-progress>
@@ -105,11 +105,11 @@
             </div>
             <div class="cs-stats">
               <div class="cs-row">
-                <span class="cs-label"><i class="el-icon-circle-check" style="color:#19be6b"></i> 已挑战</span>
+                <span class="cs-label"><i class="el-icon-circle-check" style="color:#19be6b"></i> {{ $t('m.BE_Challenged') }}</span>
                 <span class="cs-val">{{ challengedCount }}</span>
               </div>
               <div class="cs-row">
-                <span class="cs-label"><i class="el-icon-close" style="color:#94a3b8"></i> 未挑战</span>
+                <span class="cs-label"><i class="el-icon-close" style="color:#94a3b8"></i> {{ $t('m.BE_Not_Challenged') }}</span>
                 <span class="cs-val">{{ exams.length - challengedCount }}</span>
               </div>
             </div>
@@ -118,7 +118,7 @@
 
         <!-- Boss 排行榜 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-data-analysis"></i> 热门 Boss</div>
+          <div class="side-title"><i class="el-icon-data-analysis"></i> {{ $t('m.BE_Hot_Boss') }}</div>
           <div class="rank-list">
             <div
               v-for="(e, idx) in hotExams"
@@ -129,7 +129,7 @@
               <span class="rank-num" :class="'rank-' + (idx + 1)">{{ idx + 1 }}</span>
               <div class="rank-info">
                 <span class="rank-name">{{ e.title }}</span>
-                <span class="rank-meta">{{ e.submission_count || 0 }} 人挑战 · {{ diffText(e.difficulty) }}</span>
+                <span class="rank-meta">{{ $t('m.BE_People_Challenged', {n: e.submission_count || 0}) }} · {{ diffText(e.difficulty) }}</span>
               </div>
               <i class="el-icon-arrow-right rank-arrow"></i>
             </div>
@@ -138,54 +138,54 @@
 
         <!-- 难度说明 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-warning-outline"></i> 难度说明</div>
+          <div class="side-title"><i class="el-icon-warning-outline"></i> {{ $t('m.BE_Diff_Guide') }}</div>
           <div class="diff-guide">
             <div class="dg-item">
               <div class="dg-header">
                 <span class="dg-dot" style="background:#19be6b"></span>
-                <span class="dg-name">简单</span>
-                <span class="dg-count">{{ diffCounts.Low }} 个</span>
+                <span class="dg-name">{{ $t('m.ES_Diff_Low') }}</span>
+                <span class="dg-count">{{ $t('m.BE_Diff_Count', {n: diffCounts.Low}) }}</span>
               </div>
-              <p class="dg-desc">适合入门选手，考察基础知识点的掌握</p>
+              <p class="dg-desc">{{ $t('m.BE_Diff_Low_Desc') }}</p>
             </div>
             <div class="dg-item">
               <div class="dg-header">
                 <span class="dg-dot" style="background:#f90"></span>
-                <span class="dg-name">中等</span>
-                <span class="dg-count">{{ diffCounts.Mid }} 个</span>
+                <span class="dg-name">{{ $t('m.ES_Diff_Mid') }}</span>
+                <span class="dg-count">{{ $t('m.BE_Diff_Count', {n: diffCounts.Mid}) }}</span>
               </div>
-              <p class="dg-desc">需要综合运用多个知识点，具备一定编程经验</p>
+              <p class="dg-desc">{{ $t('m.BE_Diff_Mid_Desc') }}</p>
             </div>
             <div class="dg-item">
               <div class="dg-header">
                 <span class="dg-dot" style="background:#ed3f14"></span>
-                <span class="dg-name">困难</span>
-                <span class="dg-count">{{ diffCounts.High }} 个</span>
+                <span class="dg-name">{{ $t('m.ES_Diff_High') }}</span>
+                <span class="dg-count">{{ $t('m.BE_Diff_Count', {n: diffCounts.High}) }}</span>
               </div>
-              <p class="dg-desc">高难度综合考察，适合冲刺高分的选手</p>
+              <p class="dg-desc">{{ $t('m.BE_Diff_High_Desc') }}</p>
             </div>
           </div>
         </div>
 
         <!-- 快捷入口 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-s-grid"></i> 快捷入口</div>
+          <div class="side-title"><i class="el-icon-s-grid"></i> {{ $t('m.ES_Quick_Links') }}</div>
           <div class="quick-links">
             <div class="ql-item" @click="$router.push('/exercise')">
               <i class="el-icon-reading"></i>
-              <span>题集练习</span>
+              <span>{{ $t('m.ES_Title') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/problem')">
               <i class="el-icon-document-copy"></i>
-              <span>题目列表</span>
+              <span>{{ $t('m.ES_Ql_Problems') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/immersion')">
               <i class="el-icon-magic-stick"></i>
-              <span>沉浸式练习</span>
+              <span>{{ $t('m.ES_Ql_Immersion') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/learning-report')">
               <i class="el-icon-data-line"></i>
-              <span>学习报告</span>
+              <span>{{ $t('m.BE_Ql_Report') }}</span>
             </div>
           </div>
         </div>
@@ -227,7 +227,7 @@ export default {
       api.getBossExams(params).then(res => {
         this.exams = res.data.data || res.data || []
       }).catch(() => {
-        this.$message.error('加载 Boss 试卷失败')
+        this.$message.error(this.$t('m.BE_Load_Failed'))
       }).finally(() => { this.loading = false })
     },
     resetFilter () {
@@ -243,7 +243,8 @@ export default {
       return { Low: 'success', Mid: 'warning', High: 'danger' }[d] || 'info'
     },
     diffText (d) {
-      return { Low: '简单', Mid: '中等', High: '困难' }[d] || d || '未知'
+      const map = { Low: this.$t('m.ES_Diff_Low'), Mid: this.$t('m.ES_Diff_Mid'), High: this.$t('m.ES_Diff_High') }
+      return map[d] || d || this.$t('m.ES_Diff_Unknown')
     }
   },
   computed: {
