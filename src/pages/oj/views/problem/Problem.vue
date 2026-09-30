@@ -470,8 +470,7 @@
         largePie: largePie,
         pieChart: null,
         largePieChart: null,
-        contestProblems: [],
-        m: m
+        contestProblems: []
       }
     },
     beforeRouteEnter (to, from, next) {

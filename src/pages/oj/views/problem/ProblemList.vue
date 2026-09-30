@@ -216,7 +216,6 @@ export default {
   },
   data () {
     return {
-      m: m,
       showTags: true,
       viewMode: 'table',
       tagList: [],

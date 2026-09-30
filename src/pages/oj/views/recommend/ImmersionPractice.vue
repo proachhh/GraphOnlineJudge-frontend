@@ -360,7 +360,6 @@ export default {
       pieChart: null,
       largePieChart: null,
       _savedPrefs: { language: '', theme: 'solarized' },
-      m: m,
       layoutMode: 'horizontal',
       leftWidth: 50,
       isResizing: false

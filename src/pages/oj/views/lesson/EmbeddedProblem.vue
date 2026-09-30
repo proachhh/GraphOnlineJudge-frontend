@@ -173,8 +173,7 @@ export default {
       result: { result: 9 },
       selfTesting: false,
       selfTestInput: '',
-      selfTestResult: null,
-      m: m
+      selfTestResult: null
     }
   },
   computed: {
