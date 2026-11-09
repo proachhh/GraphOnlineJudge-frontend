@@ -20,28 +20,28 @@
     <!-- 统计卡片 -->
     <div class="stats-grid">
       <div class="stat-card stat-blue">
-        <div class="stat-icon"><i class="el-icon-user"></i></div>
+        <div class="stat-icon"><el-icon-user/></div>
         <div class="stat-body">
           <span class="stat-value">{{ infoData.user_count }}</span>
           <span class="stat-label">总用户数</span>
         </div>
       </div>
       <div class="stat-card stat-green">
-        <div class="stat-icon"><i class="el-icon-document"></i></div>
+        <div class="stat-icon"><el-icon-document/></div>
         <div class="stat-body">
           <span class="stat-value">{{ infoData.today_submission_count }}</span>
           <span class="stat-label">今日提交</span>
         </div>
       </div>
       <div class="stat-card stat-orange">
-        <div class="stat-icon"><i class="el-icon-trophy"></i></div>
+        <div class="stat-icon"><el-icon-trophy/></div>
         <div class="stat-body">
           <span class="stat-value">{{ infoData.recent_contest_count }}</span>
           <span class="stat-label">近期竞赛</span>
         </div>
       </div>
       <div class="stat-card stat-purple" v-if="isSuperAdmin">
-        <div class="stat-icon"><i class="el-icon-cpu"></i></div>
+        <div class="stat-icon"><el-icon-cpu/></div>
         <div class="stat-body">
           <span class="stat-value">{{ infoData.judge_server_count }}</span>
           <span class="stat-label">评测机</span>
@@ -54,7 +54,7 @@
       <!-- 登录信息 -->
       <div class="info-card-wrap">
         <div class="card-header">
-          <i class="el-icon-time"></i>
+          <el-icon-time/>
           <span>最近登录</span>
         </div>
         <div class="login-info">
@@ -80,7 +80,7 @@
       <!-- 系统状态 -->
       <div class="info-card-wrap" v-if="isSuperAdmin">
         <div class="card-header">
-          <i class="el-icon-setting"></i>
+          <el-icon-setting/>
           <span>系统状态</span>
         </div>
         <div class="system-status">
@@ -107,16 +107,16 @@
     <!-- 更新日志 -->
     <div class="release-card" v-if="isSuperAdmin">
       <div class="card-header">
-        <i class="el-icon-bell"></i>
+        <el-icon-bell/>
         <span>版本更新</span>
         <el-tooltip content="升级到最新版本以享受新功能" placement="right">
-          <i class="el-icon-question release-help"></i>
+          <el-icon-question class="release-help"/>
         </el-tooltip>
       </div>
       <div class="release-body" v-loading="loadingReleases">
         <el-collapse v-model="activeNames" v-for="(release, index) of releases" :key="'release' + index">
           <el-collapse-item :name="index + 1">
-            <template slot="title">
+            <template #title>
               <span class="release-title">{{ release.title }}</span>
               <el-tag size="mini" type="success" v-if="release.new_version">新版本</el-tag>
             </template>

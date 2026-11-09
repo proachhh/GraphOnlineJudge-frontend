@@ -7,7 +7,7 @@
         <div class="page-header">
           <div class="header-left">
             <div class="header-title">
-              <i class="el-icon-trophy"></i>
+              <el-icon-trophy/>
               <span>{{ $t('m.BE_Title') }}</span>
               <span class="boss-badge">BOSS</span>
             </div>
@@ -63,7 +63,7 @@
                 </div>
                 <div class="card-desc">{{ e.description || $t('m.BE_No_Desc') }}</div>
                 <div class="boss-topic-box" v-if="e.boss_topic">
-                  <i class="el-icon-aim"></i>
+                  <el-icon-aim/>
                   <span class="boss-topic-label">{{ $t('m.BE_Topic_Label') }}</span>
                   <span class="boss-topic-name">{{ e.boss_topic }}</span>
                 </div>
@@ -73,18 +73,18 @@
                   <el-tag size="small" v-if="e.has_submitted" type="success">{{ $t('m.BE_Challenged') }}</el-tag>
                 </div>
                 <div class="card-meta">
-                  <span class="meta-item"><i class="el-icon-document-copy"></i> {{ e.question_count || 0 }} {{ $t('m.ES_Question_Unit') }}</span>
-                  <span class="meta-item"><i class="el-icon-user"></i> {{ $t('m.BE_People_Challenged', {n: e.submission_count || 0}) }}</span>
-                  <span class="meta-item" v-if="e.time_limit"><i class="el-icon-time"></i> {{ e.time_limit }} {{ $t('m.ES_Minutes') }}</span>
+                  <span class="meta-item"><el-icon-document-copy/> {{ e.question_count || 0 }} {{ $t('m.ES_Question_Unit') }}</span>
+                  <span class="meta-item"><el-icon-user/> {{ $t('m.BE_People_Challenged', {n: e.submission_count || 0}) }}</span>
+                  <span class="meta-item" v-if="e.time_limit"><el-icon-time/> {{ e.time_limit }} {{ $t('m.ES_Minutes') }}</span>
                 </div>
                 <div class="card-action">
-                  <el-button type="danger" size="mini" plain>{{ $t('m.BE_Accept') }} <i class="el-icon-arrow-right"></i></el-button>
+                  <el-button type="danger" size="mini" plain>{{ $t('m.BE_Accept') }} <el-icon-arrow-right/></el-button>
                 </div>
               </el-card>
             </el-col>
           </el-row>
           <div v-else-if="!loading" class="empty-hint">
-            <i class="el-icon-trophy"></i>
+            <el-icon-trophy/>
             <p>{{ $t('m.BE_Empty') }}</p>
           </div>
         </div>
@@ -94,7 +94,7 @@
       <el-col :xs="24" :lg="6">
         <!-- 我的挑战记录 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-medal"></i> {{ $t('m.BE_My_Challenge') }}</div>
+          <div class="side-title"><el-icon-medal/> {{ $t('m.BE_My_Challenge') }}</div>
           <div class="challenge-summary">
             <div class="cs-ring-wrap">
               <el-progress type="circle" :percentage="passRate" :width="90" :stroke-width="7" :color="'#c0392b'"></el-progress>
@@ -105,11 +105,11 @@
             </div>
             <div class="cs-stats">
               <div class="cs-row">
-                <span class="cs-label"><i class="el-icon-circle-check" style="color:#19be6b"></i> {{ $t('m.BE_Challenged') }}</span>
+                <span class="cs-label"><el-icon-circle-check style="color:#19be6b"/> {{ $t('m.BE_Challenged') }}</span>
                 <span class="cs-val">{{ challengedCount }}</span>
               </div>
               <div class="cs-row">
-                <span class="cs-label"><i class="el-icon-close" style="color:#94a3b8"></i> {{ $t('m.BE_Not_Challenged') }}</span>
+                <span class="cs-label"><el-icon-close style="color:#94a3b8"/> {{ $t('m.BE_Not_Challenged') }}</span>
                 <span class="cs-val">{{ exams.length - challengedCount }}</span>
               </div>
             </div>
@@ -118,7 +118,7 @@
 
         <!-- Boss 排行榜 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-data-analysis"></i> {{ $t('m.BE_Hot_Boss') }}</div>
+          <div class="side-title"><el-icon-data-analysis/> {{ $t('m.BE_Hot_Boss') }}</div>
           <div class="rank-list">
             <div
               v-for="(e, idx) in hotExams"
@@ -131,14 +131,14 @@
                 <span class="rank-name">{{ e.title }}</span>
                 <span class="rank-meta">{{ $t('m.BE_People_Challenged', {n: e.submission_count || 0}) }} · {{ diffText(e.difficulty) }}</span>
               </div>
-              <i class="el-icon-arrow-right rank-arrow"></i>
+              <el-icon-arrow-right class="rank-arrow"/>
             </div>
           </div>
         </div>
 
         <!-- 难度说明 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-warning-outline"></i> {{ $t('m.BE_Diff_Guide') }}</div>
+          <div class="side-title"><el-icon-warning-outline/> {{ $t('m.BE_Diff_Guide') }}</div>
           <div class="diff-guide">
             <div class="dg-item">
               <div class="dg-header">
@@ -169,22 +169,22 @@
 
         <!-- 快捷入口 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-s-grid"></i> {{ $t('m.ES_Quick_Links') }}</div>
+          <div class="side-title"><el-icon-s-grid/> {{ $t('m.ES_Quick_Links') }}</div>
           <div class="quick-links">
             <div class="ql-item" @click="$router.push('/exercise')">
-              <i class="el-icon-reading"></i>
+              <el-icon-reading/>
               <span>{{ $t('m.ES_Title') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/problem')">
-              <i class="el-icon-document-copy"></i>
+              <el-icon-document-copy/>
               <span>{{ $t('m.ES_Ql_Problems') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/immersion')">
-              <i class="el-icon-magic-stick"></i>
+              <el-icon-magic-stick/>
               <span>{{ $t('m.ES_Ql_Immersion') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/learning-report')">
-              <i class="el-icon-data-line"></i>
+              <el-icon-data-line/>
               <span>{{ $t('m.BE_Ql_Report') }}</span>
             </div>
           </div>
@@ -360,11 +360,11 @@ export default {
 }
 .filter-item { display: flex; align-items: center; gap: 8px; }
 .filter-label { font-size: 14px; color: #606266; }
-.filter-bar /deep/ .el-button--primary {
+.filter-bar :deep(.el-button--primary){
   background: #c0392b;
   border-color: #c0392b;
 }
-.filter-bar /deep/ .el-button--primary:hover {
+.filter-bar :deep(.el-button--primary:hover){
   background: #d04438;
   border-color: #d04438;
 }
@@ -383,7 +383,7 @@ export default {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(192, 57, 43, 0.18);
 }
-.boss-card /deep/ .el-card__body { padding: 18px; }
+.boss-card :deep(.el-card__body){ padding: 18px; }
 
 .card-top {
   display: flex;
@@ -442,12 +442,12 @@ export default {
 .meta-item { display: flex; align-items: center; gap: 4px; }
 .meta-item i { color: #c0392b; }
 .card-action { margin-top: 12px; }
-.card-action /deep/ .el-button--danger {
+.card-action :deep(.el-button--danger){
   color: #c0392b;
   background: rgba(192, 57, 43, 0.08);
   border-color: rgba(192, 57, 43, 0.3);
 }
-.card-action /deep/ .el-button--danger:hover {
+.card-action :deep(.el-button--danger:hover){
   background: #c0392b;
   color: #fff;
 }

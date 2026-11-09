@@ -40,6 +40,7 @@
   </div>
 </template>
 <script>
+import { Tag, Button } from 'view-ui-plus'
   import { mapState, mapActions } from 'vuex'
   import { types } from '../../../../../store'
   import moment from 'moment'
@@ -71,10 +72,8 @@
             align: 'center',
             render: (h, {row}) => {
               if (row.ac_info.is_first_ac) {
-                return h('Tag', {
-                  props: {
-                    color: 'red'
-                  }
+                return h(Tag, {
+                  color: 'red'
                 }, this.$i18n.t('m.First_Blood'))
               } else {
                 return h('span', '----')
@@ -90,13 +89,11 @@
                   display: 'inline-block',
                   'max-width': '150px'
                 },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'contest-submission-list',
-                      query: {username: row.username}
-                    })
-                  }
+                onClick: () => {
+                  this.$router.push({
+                    name: 'contest-submission-list',
+                    query: {username: row.username}
+                  })
                 }
               }, row.username)
             }
@@ -117,10 +114,8 @@
             title: this.$i18n.t('m.Status'),
             align: 'center',
             render: (h, {row}) => {
-              return h('Tag', {
-                props: {
-                  color: row.checked ? 'green' : 'yellow'
-                }
+              return h(Tag, {
+                color: row.checked ? 'green' : 'yellow'
               }, row.checked ? this.$i18n.t('m.Checked') : this.$i18n.t('m.Not_Checked'))
             }
           },
@@ -130,17 +125,13 @@
             align: 'center',
             width: 100,
             render: (h, {row}) => {
-              return h('Button', {
-                props: {
-                  type: 'ghost',
-                  size: 'small',
-                  icon: 'checkmark',
-                  disabled: row.checked
-                },
-                on: {
-                  click: () => {
-                    this.updateCheckedStatus(row)
-                  }
+              return h(Button, {
+                type: 'ghost',
+                size: 'small',
+                icon: 'ios-checkmark',
+                disabled: row.checked,
+                onClick: () => {
+                  this.updateCheckedStatus(row)
                 }
               }, this.$i18n.t('m.Check_It'))
             }
@@ -242,7 +233,7 @@
         }
       }
     },
-    beforeDestroy () {
+    beforeUnmount () {
       clearInterval(this.refreshFunc)
     }
   }

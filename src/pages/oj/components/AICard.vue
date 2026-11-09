@@ -194,7 +194,7 @@ export default {
       color: #17233d;
     }
 
-    /deep/ .ivu-spin-fix {
+    :deep(.ivu-spin-fix){
       position: static;
       background: none;
       margin-left: 8px;
@@ -230,19 +230,19 @@ export default {
     line-height: 1.8;
     color: #515a6e;
 
-    /deep/ strong {
+    :deep(strong){
       color: #17233d;
       font-weight: 600;
     }
 
-    /deep/ pre code, /deep/ .md-code-block code {
+    :deep(pre code), :deep(.md-code-block code){
       background: transparent !important;
       color: inherit !important;
       padding: 0 !important;
       font-size: inherit !important;
     }
 
-    /deep/ code {
+    :deep(code){
       background: #f0f2f5;
       padding: 2px 6px;
       border-radius: 4px;
@@ -251,23 +251,23 @@ export default {
       color: #ed4014;
     }
 
-    /deep/ h2, /deep/ h3, /deep/ h4 {
+    :deep(h2), :deep(h3), :deep(h4){
       margin-top: 16px;
       margin-bottom: 8px;
       font-weight: 600;
       color: #17233d;
     }
 
-    /deep/ h2 { font-size: 18px; }
-    /deep/ h3 { font-size: 16px; }
-    /deep/ h4 { font-size: 14px; }
+    :deep(h2){ font-size: 18px; }
+    :deep(h3){ font-size: 16px; }
+    :deep(h4){ font-size: 14px; }
 
-    /deep/ ul, /deep/ ol {
+    :deep(ul), :deep(ol){
       padding-left: 20px;
       margin: 8px 0;
     }
 
-    /deep/ blockquote {
+    :deep(blockquote){
       border-left: 3px solid #bbbec4;
       padding: 6px 12px;
       margin: 8px 0;

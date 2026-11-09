@@ -36,7 +36,7 @@
                   <span>{{ query.difficulty === '' ? $t('m.Difficulty') : $t('m.' + query.difficulty) }}</span>
                   <Icon type="ios-arrow-down" />
                 </div>
-                <Dropdown-menu slot="list">
+                <template #list><Dropdown-menu>
                   <Dropdown-item name="">{{ $t('m.All') }}</Dropdown-item>
                   <Dropdown-item name="Low">
                     <Tag color="green" size="small">{{ $t('m.Low') }}</Tag>
@@ -47,7 +47,7 @@
                   <Dropdown-item name="High">
                     <Tag color="orange" size="small">{{ $t('m.High') }}</Tag>
                   </Dropdown-item>
-                </Dropdown-menu>
+                </Dropdown-menu></template>
               </Dropdown>
 
               <div class="filter-switch">
@@ -70,7 +70,7 @@
                        @on-enter="filterByKeyword"
                        :placeholder="$t('m.Search')"
                        class="search-input">
-                  <Icon type="ios-search" slot="prefix" />
+                  <template #prefix><Icon type="ios-search" /></template>
                 </Input>
               </div>
               <Button type="primary" class="reset-btn" @click="onReset">
@@ -117,13 +117,13 @@
                   width="260"
                 >
                   <span class="card-tag-more">...</span>
-                  <div slot="content" class="card-tag-tooltip">
+                  <template #content><div class="card-tag-tooltip">
                     <span
                       v-for="tag in problem.tags"
                       :key="tag"
                       class="card-tag-item"
                     >{{ tagDisplayName(tag) }}</span>
-                  </div>
+                  </div></template>
                 </Poptip>
               </div>
               <div class="card-stats">
@@ -201,6 +201,7 @@
 </template>
 
 <script>
+import { Poptip, Tag } from 'view-ui-plus'
 import { mapGetters } from 'vuex'
 import api from '@oj/api'
 import utils from '@/utils/utils'
@@ -231,10 +232,8 @@ export default {
           render: (h, params) => {
             return h('div', {
               style: { 'white-space': 'nowrap', 'font-weight': '600', 'color': '#1e3a8a', 'cursor': 'pointer' },
-              on: {
-                click: () => {
-                  this.$router.push({ name: 'problem-details', params: { problemID: params.row._id } })
-                }
+              onClick: () => {
+                this.$router.push({ name: 'problem-details', params: { problemID: params.row._id } })
               }
             }, params.row._id)
           }
@@ -245,19 +244,18 @@ export default {
           render: (h, params) => {
             const titleEl = h('div', {
               class: 'problem-title',
-              on: {
-                click: () => {
-                  this.$router.push({ name: 'problem-details', params: { problemID: params.row._id } })
-                }
+              onClick: () => {
+                this.$router.push({ name: 'problem-details', params: { problemID: params.row._id } })
               }
             }, this.cleanTitle(params.row.title))
-            return h('Poptip', {
-              props: {
-                trigger: 'hover',
-                placement: 'top',
-                transfer: true
-              }
-            }, [titleEl, h('div', { slot: 'content' }, this.cleanTitle(params.row.title))])
+            return h(Poptip, {
+              trigger: 'hover',
+              placement: 'top',
+              transfer: true
+            }, {
+              default: () => titleEl,
+              content: () => this.cleanTitle(params.row.title)
+            })
           }
         },
         {
@@ -275,8 +273,8 @@ export default {
               color = 'orange'
               className = 'level-high'
             }
-            return h('Tag', {
-              props: { color: color },
+            return h(Tag, {
+              color: color,
               class: ['level-tag', className]
             }, this.$i18n.t('m.' + params.row.difficulty))
           }
@@ -486,15 +484,16 @@ export default {
               }
             }, allTagEls)
 
-            return h('Poptip', {
-              props: {
-                trigger: 'hover',
-                placement: 'top',
-                transfer: true,
-                wordWrap: true,
-                width: 280
-              }
-            }, [inner, h('div', { slot: 'content' }, [tooltipContent])])
+            return h(Poptip, {
+              trigger: 'hover',
+              placement: 'top',
+              transfer: true,
+              wordWrap: true,
+              width: 280
+            }, {
+              default: () => inner,
+              content: () => [tooltipContent]
+            })
           }
         })
       } else {
@@ -756,7 +755,7 @@ export default {
 
   // 表格样式
   .problem-table {
-    /deep/ .ivu-table {
+    :deep(.ivu-table){
       font-size: 16px;
 
       th {

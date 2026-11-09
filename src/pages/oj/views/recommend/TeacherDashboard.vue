@@ -1,7 +1,7 @@
 <template>
   <div class="teacher-dashboard">
     <div v-if="!canAccess" class="no-access">
-      <i class="el-icon-warning"></i>
+      <el-icon-warning/>
       <p>仅教师可访问此页面</p>
     </div>
 
@@ -9,24 +9,24 @@
       <!-- ============ 左侧侧边栏 ============ -->
       <aside class="td-sidebar">
         <div class="sidebar-title">
-          <i class="el-icon-setting"></i>
+          <el-icon-setting/>
           <span>教师管理</span>
         </div>
         <nav class="sidebar-nav">
           <div class="nav-item" :class="{ active: activeSection === 'stats' }" @click="switchSection('stats')">
-            <i class="el-icon-menu"></i>
+            <el-icon-menu/>
             <span>学情统计</span>
           </div>
           <div class="nav-item" :class="{ active: activeSection === 'sets' }" @click="switchSection('sets')">
-            <i class="el-icon-document"></i>
+            <el-icon-document/>
             <span>题集管理</span>
           </div>
           <div class="nav-item" :class="{ active: activeSection === 'students' }" @click="switchSection('students')">
-            <i class="el-icon-news"></i>
+            <el-icon-news/>
             <span>学生报告</span>
           </div>
           <div class="nav-item" :class="{ active: activeSection === 'check' }" @click="switchSection('check')">
-            <i class="el-icon-search"></i>
+            <el-icon-search/>
             <span>代码查重</span>
           </div>
         </nav>
@@ -45,42 +45,42 @@
             <!-- 汇总卡片 -->
             <div class="stat-cards" v-if="stats">
               <div class="stat-card sc-blue">
-                <i class="el-icon-news"></i>
+                <el-icon-news/>
                 <div class="sc-body">
                   <span class="sc-num">{{ stats.summary.total_students }}</span>
                   <span class="sc-label">学生总数</span>
                 </div>
               </div>
               <div class="stat-card sc-cyan">
-                <i class="el-icon-document"></i>
+                <el-icon-document/>
                 <div class="sc-body">
                   <span class="sc-num">{{ stats.summary.total_sets }}</span>
                   <span class="sc-label">题集数 / 已发布 {{ stats.summary.published_sets }}</span>
                 </div>
               </div>
               <div class="stat-card sc-orange">
-                <i class="el-icon-star-on"></i>
+                <el-icon-star-on/>
                 <div class="sc-body">
                   <span class="sc-num">{{ stats.summary.total_boss }}</span>
                   <span class="sc-label">Boss 挑战数</span>
                 </div>
               </div>
               <div class="stat-card sc-green">
-                <i class="el-icon-edit-outline"></i>
+                <el-icon-edit-outline/>
                 <div class="sc-body">
                   <span class="sc-num">{{ stats.summary.total_submissions }}</span>
                   <span class="sc-label">总提交数 / 已评 {{ stats.summary.graded_submissions }}</span>
                 </div>
               </div>
               <div class="stat-card sc-purple">
-                <i class="el-icon-rank"></i>
+                <el-icon-rank/>
                 <div class="sc-body">
                   <span class="sc-num">{{ stats.summary.avg_score }}</span>
                   <span class="sc-label">平均分</span>
                 </div>
               </div>
               <div class="stat-card sc-red">
-                <i class="el-icon-circle-check"></i>
+                <el-icon-circle-check/>
                 <div class="sc-body">
                   <span class="sc-num">{{ stats.summary.pass_rate }}%</span>
                   <span class="sc-label">及格率</span>
@@ -119,12 +119,12 @@
                   <el-table-column prop="username" label="学生" min-width="120"></el-table-column>
                   <el-table-column prop="sub_count" label="提交数" width="90"></el-table-column>
                   <el-table-column label="平均分" width="100">
-                    <template slot-scope="{row}">
+                    <template #default="{row}">
                       <el-tag size="mini" :type="row.avg_score >= 80 ? 'success' : (row.avg_score >= 60 ? 'warning' : 'danger')">{{ row.avg_score }}</el-tag>
                     </template>
                   </el-table-column>
                   <el-table-column label="操作" width="100">
-                    <template slot-scope="{row}">
+                    <template #default="{row}">
                       <el-button size="mini" type="primary" plain @click="jumpStudentReport(row)">查看</el-button>
                     </template>
                   </el-table-column>
@@ -135,28 +135,28 @@
                 <el-table :data="stats.recent_submissions" size="small" empty-text="暂无数据">
                   <el-table-column prop="username" label="学生" width="110"></el-table-column>
                   <el-table-column label="题目" min-width="140">
-                    <template slot-scope="{row}">
+                    <template #default="{row}">
                       <el-tag size="mini" :type="row.type === 'boss' ? 'danger' : 'info'" effect="plain">{{ row.type === 'boss' ? 'Boss' : '题集' }}</el-tag>
                       <span class="recent-title">{{ row.title }}</span>
                     </template>
                   </el-table-column>
                   <el-table-column label="得分" width="80">
-                    <template slot-scope="{row}">{{ row.score != null ? row.score : '-' }}</template>
+                    <template #default="{row}">{{ row.score != null ? row.score : '-' }}</template>
                   </el-table-column>
                   <el-table-column label="状态" width="90">
-                    <template slot-scope="{row}">
+                    <template #default="{row}">
                       <el-tag size="mini" :type="row.status === 'graded' ? 'success' : 'warning'">{{ statusText(row.status) }}</el-tag>
                     </template>
                   </el-table-column>
                   <el-table-column label="时间" min-width="140">
-                    <template slot-scope="{row}">{{ row.created | localtime }}</template>
+                    <template #default="{row}">{{ row.created | localtime }}</template>
                   </el-table-column>
                 </el-table>
               </div>
             </div>
 
             <div v-if="stats && !stats.summary.total_submissions" class="stats-empty">
-              <i class="el-icon-tickets"></i>
+              <el-icon-tickets/>
               <p>暂无提交数据，待学生开始作答后将自动统计</p>
             </div>
           </div>
@@ -173,24 +173,24 @@
             <el-table :data="sets" v-loading="setsLoading" stripe style="width: 100%">
               <el-table-column prop="title" label="标题" min-width="160"></el-table-column>
               <el-table-column prop="topic" label="知识点" width="120">
-                <template slot-scope="{row}"><el-tag size="mini" type="info" v-if="row.topic">{{ row.topic }}</el-tag></template>
+                <template #default="{row}"><el-tag size="mini" type="info" v-if="row.topic">{{ row.topic }}</el-tag></template>
               </el-table-column>
               <el-table-column label="难度" width="80">
-                <template slot-scope="{row}"><el-tag size="mini" :type="diffTag(row.difficulty)">{{ diffText(row.difficulty) }}</el-tag></template>
+                <template #default="{row}"><el-tag size="mini" :type="diffTag(row.difficulty)">{{ diffText(row.difficulty) }}</el-tag></template>
               </el-table-column>
               <el-table-column prop="question_count" label="题目数" width="80"></el-table-column>
               <el-table-column prop="submission_count" label="提交数" width="80">
-                <template slot-scope="{row}">
+                <template #default="{row}">
                   <el-link type="primary" :underline="false" @click="viewSetSubmissions(row)">{{ row.submission_count || 0 }}</el-link>
                 </template>
               </el-table-column>
               <el-table-column label="已发布" width="90">
-                <template slot-scope="{row}">
+                <template #default="{row}">
                   <el-switch :value="!!row.is_published" @change="toggleSetPublish(row)"></el-switch>
                 </template>
               </el-table-column>
               <el-table-column label="操作" width="200" fixed="right">
-                <template slot-scope="{row}">
+                <template #default="{row}">
                   <el-button size="mini" type="primary" plain @click="openSetDialog(row)">编辑</el-button>
                   <el-button size="mini" type="danger" plain @click="deleteSet(row)">删除</el-button>
                 </template>
@@ -293,10 +293,10 @@
             <el-table-column prop="username" label="用户名" min-width="140"></el-table-column>
             <el-table-column prop="exercise_count" label="题集提交" width="130"></el-table-column>
             <el-table-column prop="avg_score" label="平均分" width="100">
-              <template slot-scope="{row}">{{ row.avg_score != null ? row.avg_score : '-' }}</template>
+              <template #default="{row}">{{ row.avg_score != null ? row.avg_score : '-' }}</template>
             </el-table-column>
             <el-table-column label="操作" width="120">
-              <template slot-scope="{row}">
+              <template #default="{row}">
                 <el-button size="mini" type="primary" plain @click="viewStudentReport(row)">查看报告</el-button>
               </template>
             </el-table-column>
@@ -320,25 +320,25 @@
             <el-table :data="checkResults" stripe style="width: 100%" empty-text="暂无相似代码或未检测">
               <el-table-column type="index" label="#" width="50"></el-table-column>
               <el-table-column label="用户 A" width="120">
-                <template slot-scope="{row}">{{ row.user_a }}</template>
+                <template #default="{row}">{{ row.user_a }}</template>
               </el-table-column>
               <el-table-column label="用户 B" width="120">
-                <template slot-scope="{row}">{{ row.user_b }}</template>
+                <template #default="{row}">{{ row.user_b }}</template>
               </el-table-column>
               <el-table-column label="相似度" width="120">
-                <template slot-scope="{row}">
+                <template #default="{row}">
                   <el-tag size="mini" :type="row.similarity >= 85 ? 'danger' : (row.similarity >= 70 ? 'warning' : 'info')">{{ row.similarity }}%</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="language" label="语言" width="100"></el-table-column>
               <el-table-column label="提交时间 A" width="150">
-                <template slot-scope="{row}">{{ row.create_time_a }}</template>
+                <template #default="{row}">{{ row.create_time_a }}</template>
               </el-table-column>
               <el-table-column label="提交时间 B" width="150">
-                <template slot-scope="{row}">{{ row.create_time_b }}</template>
+                <template #default="{row}">{{ row.create_time_b }}</template>
               </el-table-column>
               <el-table-column label="操作" width="100">
-                <template slot-scope="{row}">
+                <template #default="{row}">
                   <el-button size="mini" type="primary" plain @click="viewCodePair(row)">对比代码</el-button>
                 </template>
               </el-table-column>
@@ -380,13 +380,13 @@
           <span class="form-hint">最多 10 题</span>
         </el-form-item>
         <div v-if="aiGenerating" class="ai-loading">
-          <i class="el-icon-loading"></i> AI 正在生成题目，请稍候...
+          <el-icon-loading/> AI 正在生成题目，请稍候...
         </div>
       </el-form>
-      <div slot="footer">
+      <template #footer><div>
         <el-button @click="aiDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="runAiGenerate" :loading="aiGenerating">生成并填入</el-button>
-      </div>
+      </div></template>
     </el-dialog>
 
     <!-- ============ 提交记录弹窗 ============ -->
@@ -395,11 +395,11 @@
         <el-table-column prop="username" label="学生" width="120"></el-table-column>
         <el-table-column prop="total_score" label="得分" width="80"></el-table-column>
         <el-table-column prop="status" label="状态" width="100">
-          <template slot-scope="{row}"><el-tag size="mini" :type="row.status === 'graded' ? 'success' : 'warning'">{{ row.status || '-' }}</el-tag></template>
+          <template #default="{row}"><el-tag size="mini" :type="row.status === 'graded' ? 'success' : 'warning'">{{ row.status || '-' }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="created" label="提交时间" min-width="160"></el-table-column>
       </el-table>
-      <div slot="footer"><el-button @click="subDialogVisible = false">关闭</el-button></div>
+      <template #footer><div><el-button @click="subDialogVisible = false">关闭</el-button></div></template>
     </el-dialog>
 
     <!-- ============ 学生报告弹窗 ============ -->
@@ -413,7 +413,7 @@
           <div class="sr-ai-section">
             <el-button type="primary" plain size="small" icon="el-icon-edit" :loading="aiAnalysisLoading" @click="loadAiAnalysis(currentStudentId)">AI 学习分析</el-button>
             <div v-if="aiAnalysisLoading" class="ai-analysis-loading">
-              <i class="el-icon-loading"></i> AI 正在分析...
+              <el-icon-loading/> AI 正在分析...
             </div>
             <div v-else-if="aiAnalysis" class="markdown-body ai-analysis-content" v-html="renderMarkdown(aiAnalysis)"></div>
           </div>
@@ -426,7 +426,7 @@
           </el-table>
         </div>
       </div>
-      <div slot="footer"><el-button @click="studentDialogVisible = false">关闭</el-button></div>
+      <template #footer><div><el-button @click="studentDialogVisible = false">关闭</el-button></div></template>
     </el-dialog>
 
     <!-- ============ 代码对比弹窗 ============ -->
@@ -447,10 +447,10 @@
           <pre class="code-block">{{ currentPair.code_b }}</pre>
         </div>
       </div>
-      <div slot="footer">
+      <template #footer><div>
         <el-tag :type="currentPair.similarity >= 85 ? 'danger' : (currentPair.similarity >= 70 ? 'warning' : 'info')" size="medium">相似度: {{ currentPair.similarity }}%</el-tag>
         <el-button @click="codePairVisible = false" style="margin-left: 12px">关闭</el-button>
-      </div>
+      </div></template>
     </el-dialog>
   </div>
 </template>
@@ -511,7 +511,7 @@ export default {
     this.loadStats()
     window.addEventListener('resize', this.handleResize)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     window.removeEventListener('resize', this.handleResize)
     this.disposeCharts()
   },
@@ -745,7 +745,7 @@ export default {
     toggleSetPublish (row) {
       api.publishExerciseSet(row.id).then(() => {
         this.$message.success(row.is_published ? '已取消发布' : '已发布')
-        this.$set(row, 'is_published', !row.is_published)
+        row['is_published'] = !row.is_published
       }).catch(() => { this.$message.error('操作失败') })
     },
     viewSetSubmissions (row) {
@@ -1074,11 +1074,11 @@ export default {
   margin: 0;
   flex: 1;
 }
-.content-toolbar /deep/ .el-button--primary {
+.content-toolbar :deep(.el-button--primary){
   background: #1e3a8a;
   border-color: #1e3a8a;
 }
-.content-toolbar /deep/ .el-button--primary:hover {
+.content-toolbar :deep(.el-button--primary:hover){
   background: #2950b3;
   border-color: #2950b3;
 }
@@ -1098,12 +1098,12 @@ export default {
   gap: 8px;
   margin-bottom: 12px;
 }
-.qe-toolbar /deep/ .el-button--warning {
+.qe-toolbar :deep(.el-button--warning){
   background: #e6a23c;
   border-color: #e6a23c;
   color: #fff;
 }
-.qe-toolbar /deep/ .el-button--warning:hover {
+.qe-toolbar :deep(.el-button--warning:hover){
   background: #ebb563;
   border-color: #ebb563;
 }
@@ -1132,7 +1132,7 @@ export default {
   gap: 8px;
   margin-bottom: 6px;
 }
-.qe-choice /deep/ .el-radio { margin-right: 0; }
+.qe-choice :deep(.el-radio){ margin-right: 0; }
 .qe-row { margin-bottom: 8px; }
 
 .form-hint { font-size: 12px; color: #909399; margin-left: 8px; }
@@ -1178,11 +1178,11 @@ export default {
 .sr-ai-section {
   margin-bottom: 20px;
 }
-.sr-ai-section /deep/ .el-button--primary {
+.sr-ai-section :deep(.el-button--primary){
   background: #1e3a8a;
   border-color: #1e3a8a;
 }
-.sr-ai-section /deep/ .el-button--primary:hover {
+.sr-ai-section :deep(.el-button--primary:hover){
   background: #2950b3;
   border-color: #2950b3;
 }
@@ -1207,45 +1207,45 @@ export default {
   font-size: 14px;
   line-height: 1.7;
 }
-.ai-analysis-content /deep/ h2,
-.ai-analysis-content /deep/ h3,
-.ai-analysis-content /deep/ h4 {
+.ai-analysis-content :deep(h2),
+.ai-analysis-content :deep(h3),
+.ai-analysis-content :deep(h4){
   color: #1e3a8a;
   margin: 10px 0 6px;
 }
-.ai-analysis-content /deep/ h2 { font-size: 18px; }
-.ai-analysis-content /deep/ h3 { font-size: 16px; }
-.ai-analysis-content /deep/ h4 { font-size: 15px; }
-.ai-analysis-content /deep/ strong { color: #1e3a8a; }
-.ai-analysis-content /deep/ li {
+.ai-analysis-content :deep(h2){ font-size: 18px; }
+.ai-analysis-content :deep(h3){ font-size: 16px; }
+.ai-analysis-content :deep(h4){ font-size: 15px; }
+.ai-analysis-content :deep(strong){ color: #1e3a8a; }
+.ai-analysis-content :deep(li){
   margin-left: 18px;
   list-style: disc;
 }
-.ai-analysis-content /deep/ p { margin: 6px 0; }
+.ai-analysis-content :deep(p){ margin: 6px 0; }
 
 /* ============ Element UI 主题色覆盖 ============ */
-.teacher-dashboard /deep/ .el-button--primary {
+.teacher-dashboard :deep(.el-button--primary){
   background: #1e3a8a;
   border-color: #1e3a8a;
 }
-.teacher-dashboard /deep/ .el-button--primary:hover {
+.teacher-dashboard :deep(.el-button--primary:hover){
   background: #2950b3;
   border-color: #2950b3;
 }
-.teacher-dashboard /deep/ .el-button--primary.is-plain {
+.teacher-dashboard :deep(.el-button--primary.is-plain){
   color: #1e3a8a;
   background: #ecf0fb;
   border-color: #1e3a8a;
 }
-.teacher-dashboard /deep/ .el-button--primary.is-plain:hover {
+.teacher-dashboard :deep(.el-button--primary.is-plain:hover){
   background: #1e3a8a;
   border-color: #1e3a8a;
   color: #fff;
 }
-.teacher-dashboard /deep/ .el-link--primary {
+.teacher-dashboard :deep(.el-link--primary){
   color: #1e3a8a;
 }
-.teacher-dashboard /deep/ .el-switch.is-checked .el-switch__core {
+.teacher-dashboard :deep(.el-switch.is-checked .el-switch__core){
   background-color: #1e3a8a;
   border-color: #1e3a8a;
 }
@@ -1336,7 +1336,7 @@ export default {
   width: 100%;
   height: 280px;
 }
-.chart-box /deep/ .echarts {
+.chart-box :deep(.echarts){
   width: 100% !important;
   height: 100% !important;
 }
@@ -1412,7 +1412,7 @@ export default {
   white-space: pre-wrap;
   word-break: break-all;
 }
-.code-compare-dialog /deep/ .el-dialog__body {
+.code-compare-dialog :deep(.el-dialog__body){
   padding: 16px;
 }
 

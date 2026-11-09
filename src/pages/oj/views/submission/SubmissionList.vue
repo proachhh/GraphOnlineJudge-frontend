@@ -11,14 +11,14 @@
               <span>{{ status }}</span>
               <Icon type="ios-arrow-down" />
             </div>
-            <Dropdown-menu slot="list">
+            <template #list><Dropdown-menu>
               <Dropdown-item name="">{{ $t('m.All') }}</Dropdown-item>
               <Dropdown-item v-for="status in Object.keys(JUDGE_STATUS)" :key="status" :name="status">
                 <Tag :color="JUDGE_STATUS[status].color" size="small">
                   {{ $t('m.' + JUDGE_STATUS[status].name.replace(/ /g, '_')) }}
                 </Tag>
               </Dropdown-item>
-            </Dropdown-menu>
+            </Dropdown-menu></template>
           </Dropdown>
 
           <div class="filter-switch">
@@ -34,7 +34,7 @@
                    :placeholder="$t('m.Search_Author')"
                    @on-enter="handleQueryChange"
                    class="search-input">
-              <Icon type="ios-search" slot="prefix" />
+              <template #prefix><Icon type="ios-search" /></template>
             </Input>
           </div>
           <Button type="primary" class="refresh-btn" @click="getSubmissions">
@@ -67,6 +67,7 @@
 </template>
 
 <script>
+import { Tag, Button } from 'view-ui-plus'
 import { mapGetters } from 'vuex'
 import api from '@oj/api'
 import { JUDGE_STATUS, USER_TYPE } from '@/utils/constants'
@@ -121,11 +122,9 @@ export default {
           width: 120,
           align: 'center',
           render: (h, params) => {
-            return h('Tag', {
-              props: {
-                color: JUDGE_STATUS[params.row.result].color,
-                size: 'small'
-              },
+            return h(Tag, {
+              color: JUDGE_STATUS[params.row.result].color,
+              size: 'small',
               style: {
                 'font-size': '11px',
                 'font-weight': '500'
@@ -145,17 +144,15 @@ export default {
                 'font-weight': '600',
                 'font-size': '13px'
               },
-              on: {
-                click: (e) => {
-                  e.stopPropagation()
-                  if (this.contestID) {
-                    this.$router.push({
-                      name: 'contest-problem-details',
-                      params: { problemID: params.row.problem, contestID: this.contestID }
-                    })
-                  } else {
-                    this.$router.push({ name: 'problem-details', params: { problemID: params.row.problem } })
-                  }
+              onClick: (e) => {
+                e.stopPropagation()
+                if (this.contestID) {
+                  this.$router.push({
+                    name: 'contest-problem-details',
+                    params: { problemID: params.row.problem, contestID: this.contestID }
+                  })
+                } else {
+                  this.$router.push({ name: 'problem-details', params: { problemID: params.row.problem } })
                 }
               }
             }, params.row.problem)
@@ -226,14 +223,12 @@ export default {
                 'max-width': '90px',
                 'display': 'inline-block'
               },
-              on: {
-                click: (e) => {
-                  e.stopPropagation()
-                  this.$router.push({
-                    name: 'user-home',
-                    query: { username: params.row.username }
-                  })
-                }
+              onClick: (e) => {
+                e.stopPropagation()
+                this.$router.push({
+                  name: 'user-home',
+                  query: { username: params.row.username }
+                })
               }
             }, params.row.username)
           }
@@ -335,20 +330,16 @@ export default {
         align: 'center',
         width: 85,
         render: (h, params) => {
-          return h('Button', {
-            props: {
-              type: 'primary',
-              size: 'small',
-              loading: params.row.loading
-            },
+          return h(Button, {
+            type: 'primary',
+            size: 'small',
+            loading: params.row.loading,
             style: {
               'font-size': '12px',
               'padding': '0 8px'
             },
-            on: {
-              click: () => {
-                this.handleRejudge(params.row.id, params.index)
-              }
+            onClick: () => {
+              this.handleRejudge(params.row.id, params.index)
             }
           }, this.$i18n.t('m.Rejudge'))
         }
@@ -526,7 +517,7 @@ export default {
   .search-input {
     width: 200px;
 
-    /deep/ .ivu-input {
+    :deep(.ivu-input){
       border-radius: 8px;
       border: 1px solid #e2e8f0;
       padding-left: 36px;
@@ -537,7 +528,7 @@ export default {
       }
     }
 
-    /deep/ .ivu-input-prefix {
+    :deep(.ivu-input-prefix){
       left: 12px;
       color: #94a3b8;
     }
@@ -562,7 +553,7 @@ export default {
 }
 
 .submission-table {
-  /deep/ .ivu-table {
+  :deep(.ivu-table){
     font-size: 14px;
     table-layout: fixed;
 

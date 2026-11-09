@@ -1,8 +1,7 @@
-import Vue from 'vue'
+import { Message } from 'view-ui-plus'
 import store from '@/store'
 import axios from 'axios'
 
-Vue.prototype.$http = axios
 axios.defaults.baseURL = '/api'
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
@@ -505,7 +504,7 @@ function ajax (url, method, options) {
         } else if (typeof res.data.error === 'string') {
           errorMsg = res.data.error
         }
-        Vue.prototype.$error(errorMsg)
+        Message.error(errorMsg)
         reject(res)
         // 仅在 login-required 错误时跳转登录页，permission-denied 不跳转
         if (res.data.error === 'login-required') {
@@ -539,7 +538,7 @@ function ajax (url, method, options) {
       } else if (res.statusText) {
         errorMsg = res.statusText
       }
-      Vue.prototype.$error(errorMsg)
+      Message.error(errorMsg)
       if (shouldRedirect) {
         const currentPath = window.location.pathname
         if (currentPath !== '/login' && currentPath !== '/register') {

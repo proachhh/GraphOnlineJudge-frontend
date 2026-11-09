@@ -34,7 +34,7 @@
         
         <div class="input-section">
           <div class="panel-header">
-            <Icon type="ios-input"></Icon>
+            <Icon type="ios-create-outline"></Icon>
             <span>标准输入 (stdin)</span>
           </div>
           <Input v-model="stdinInput" type="textarea" :rows="3" placeholder="输入数据，每行一个值" />
@@ -130,7 +130,7 @@
           <!-- 控制台输出 -->
           <div class="console-output">
             <div class="panel-header">
-              <Icon type="ios-terminal"></Icon>
+              <Icon type="ios-code"></Icon>
               <span>控制台输出</span>
               <Button size="small" type="text" @click="copyOutput" v-if="currentOutput">
                 <Icon type="ios-copy"></Icon>
@@ -143,7 +143,7 @@
           <div class="playback-controls">
             <div class="control-group">
               <Button @click="reset" size="small" title="重置">
-                <Icon type="ios-skipbackward"></Icon>
+                <Icon type="ios-rewind"></Icon>
               </Button>
               <Button @click="stepBack" size="small" :disabled="currentStep === 0" title="上一步">
                 <Icon type="ios-arrow-back"></Icon>
@@ -158,7 +158,7 @@
                 <Icon type="ios-arrow-forward"></Icon>
               </Button>
               <Button @click="jumpToEnd" size="small" :disabled="currentStep >= totalSteps - 1" title="跳到末尾">
-                <Icon type="ios-skipforward"></Icon>
+                <Icon type="ios-fastforward"></Icon>
               </Button>
             </div>
             <div class="speed-control">
@@ -174,7 +174,6 @@
 </template>
 
 <script>
-import { codemirror } from 'vue-codemirror-lite'
 import 'codemirror/theme/material.css'
 import 'codemirror/mode/python/python.js'
 import 'codemirror/addon/edit/closebrackets.js'
@@ -182,7 +181,7 @@ import 'codemirror/addon/edit/matchbrackets.js'
 import api from '@oj/api'
 
 export default {
-  components: { codemirror },
+  components: {},
   data () {
     return {
       code: `# 示例：冒泡排序
@@ -417,7 +416,7 @@ print(f"1到{n}的和: {total}")`
       sessionStorage.removeItem('viz_code')
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     if (this.playTimer) {
       clearInterval(this.playTimer)
     }

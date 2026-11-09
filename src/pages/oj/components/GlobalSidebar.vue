@@ -15,7 +15,7 @@
       <div class="sidebar-content">
         <div class="menu-item" @click.stop="openAIChat">
           <div class="menu-icon" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
-            <Icon type="chatbubble-working" size="18" color="#fff" />
+            <Icon type="ios-chatbubbles" size="18" color="#fff" />
           </div>
           <span class="menu-text">AI Chat</span>
         </div>
@@ -47,7 +47,7 @@
       `"
     >
       <div class="panel-header" @mousedown="startDrag($event, 'ai')">
-        <Icon type="chatbubble-working" size="18" color="#3b82f6" style="margin-right: 6px;" />
+        <Icon type="ios-chatbubbles" size="18" color="#3b82f6" style="margin-right: 6px;" />
         <h3>{{ aiFullName }}</h3>
         <div class="panel-actions">
           <Select v-model="chatState.aiModel" size="small" class="model-select" @on-change="onModelChange">
@@ -215,7 +215,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { codemirror } from 'vue-codemirror-lite'
+import bus from '@/utils/eventBus.js'
 import MessageItem from '@oj/views/chat/components/MessageItem.vue'
 import { formatAgentResponse, extractAgentDisplay } from '@oj/views/chat/utils.js'
 import chatState from '@oj/views/chat/chatState.js'
@@ -233,7 +233,6 @@ import 'tar-simditor/styles/simditor.css'
 export default {
   name: 'GlobalSidebar',
   components: {
-    codemirror,
     MessageItem
   },
   data () {
@@ -353,12 +352,12 @@ export default {
     this.sidebarPos.x = window.innerWidth - sidebarWidth - 16
     this.snapToEdge()
     window.addEventListener('resize', this.onWindowResize)
-    this.$root.$on('open-ai-chat', this.openAIChat)
+    bus.on('open-ai-chat', this.openAIChat)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.clearPollingTimer()
     window.removeEventListener('resize', this.onWindowResize)
-    this.$root.$off('open-ai-chat', this.openAIChat)
+    bus.off('open-ai-chat', this.openAIChat)
   },
   methods: {
     ...mapActions(['toggleSidebar']),
@@ -795,8 +794,8 @@ export default {
               if (data.event === 'step') {
                 const steps = chatState.messages[loadingIdx].thinkingSteps || []
                 steps.push(data.text)
-                this.$set(chatState.messages[loadingIdx], 'thinkingSteps', steps)
-                this.$set(chatState.messages[loadingIdx], 'currentStepIndex', steps.length)
+                chatState.messages[loadingIdx]['thinkingSteps'] = steps
+                chatState.messages[loadingIdx]['currentStepIndex'] = steps.length
                 await this.$nextTick()
               } else if (data.event === 'done') {
                 chatState.messages[loadingIdx].allStepsDone = true
@@ -1252,7 +1251,7 @@ export default {
       .model-select {
         width: 130px;
 
-        /deep/ .ivu-select-selection {
+        :deep(.ivu-select-selection){
           background: rgba(255, 255, 255, 0.1);
           border: 1px solid rgba(255, 255, 255, 0.2);
           color: rgba(255, 255, 255, 0.9);
@@ -1266,7 +1265,7 @@ export default {
             font-size: 12px;
           }
         }
-        /deep/ .ivu-select-arrow {
+        :deep(.ivu-select-arrow){
           color: rgba(255, 255, 255, 0.7);
         }
       }
@@ -1510,7 +1509,7 @@ export default {
       }
 
       .message-text {
-        /deep/ pre {
+        :deep(pre){
           background: rgba(0, 0, 0, 0.2);
           padding: 10px;
           border-radius: 8px;
@@ -1524,7 +1523,7 @@ export default {
           }
         }
 
-        /deep/ code {
+        :deep(code){
           background: rgba(0, 0, 0, 0.2);
           padding: 2px 6px;
           border-radius: 4px;
@@ -1542,7 +1541,7 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 
-  /deep/ .ivu-input {
+  :deep(.ivu-input){
     background: rgba(255, 255, 255, 0.15) !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
     color: rgba(255, 255, 255, 0.9) !important;
@@ -1571,7 +1570,7 @@ export default {
   }
 
   .code-editor {
-    /deep/ .CodeMirror {
+    :deep(.CodeMirror){
       min-height: 280px;
       max-height: 450px;
       border-radius: 12px;
@@ -1632,7 +1631,7 @@ export default {
     margin-bottom: 4px;
     display: block;
   }
-  /deep/ .ivu-input {
+  :deep(.ivu-input){
     background: rgba(255, 255, 255, 0.15) !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
     color: rgba(255, 255, 255, 0.9) !important;
@@ -1653,7 +1652,7 @@ export default {
   }
 
   .feedback-title-input {
-    /deep/ .ivu-input {
+    :deep(.ivu-input){
       background: rgba(255, 255, 255, 0.15) !important;
       border-color: rgba(255, 255, 255, 0.2) !important;
       color: rgba(255, 255, 255, 0.9) !important;
@@ -1671,7 +1670,7 @@ export default {
     min-height: 180px;
   }
 
-  /deep/ .simditor {
+  :deep(.simditor){
      border: 1px solid rgba(255, 255, 255, 0.2) !important;
      border-radius: 8px;
      background: rgba(255, 255, 255, 0.1) !important;

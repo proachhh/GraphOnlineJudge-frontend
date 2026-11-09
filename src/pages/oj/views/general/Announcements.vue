@@ -123,7 +123,7 @@ export default {
     this.init()
     this.startAutoPlay()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.stopAutoPlay()
   },
   computed: {

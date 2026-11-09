@@ -8,10 +8,10 @@
         <h1 class="brand-title">{{ website.website_name_shortcut || 'OJ' }}</h1>
         <p class="brand-subtitle">{{ website.website_name || '在线评测系统' }}</p>
         <ul class="brand-features">
-          <li><i class="el-icon-check"></i> 智能推荐学习路径</li>
-          <li><i class="el-icon-check"></i> AI 题目批改与分析</li>
-          <li><i class="el-icon-check"></i> 个性化学习报告</li>
-          <li><i class="el-icon-check"></i> 知识图谱可视化</li>
+          <li><el-icon-check/> 智能推荐学习路径</li>
+          <li><el-icon-check/> AI 题目批改与分析</li>
+          <li><el-icon-check/> 个性化学习报告</li>
+          <li><el-icon-check/> 知识图谱可视化</li>
         </ul>
       </div>
       <div class="brand-footer">
@@ -33,17 +33,17 @@
         <Form v-if="mode === 'login'" ref="formLogin" :model="formLogin" :rules="ruleLogin" class="auth-form">
           <FormItem prop="username">
             <Input type="text" v-model="formLogin.username" :placeholder="$t('m.LoginUsername')" size="large" @on-enter="handleLogin">
-              <Icon type="ios-person-outline" slot="prepend"></Icon>
+              <template #prepend><Icon type="ios-person-outline"></Icon></template>
             </Input>
           </FormItem>
           <FormItem prop="password">
             <Input type="password" v-model="formLogin.password" :placeholder="$t('m.LoginPassword')" size="large" @on-enter="handleLogin">
-              <Icon type="ios-locked-outline" slot="prepend"></Icon>
+              <template #prepend><Icon type="ios-lock-outline"></Icon></template>
             </Input>
           </FormItem>
           <FormItem prop="tfa_code" v-if="tfaRequired">
             <Input v-model="formLogin.tfa_code" :placeholder="$t('m.TFA_Code')" size="large">
-              <Icon type="ios-lightbulb-outline" slot="prepend"></Icon>
+              <template #prepend><Icon type="ios-bulb-outline"></Icon></template>
             </Input>
           </FormItem>
           <Button type="primary" @click="handleLogin" class="submit-btn" long :loading="btnLoginLoading">
@@ -59,29 +59,29 @@
         <Form v-else ref="formRegister" :model="formRegister" :rules="ruleRegister" class="auth-form">
           <FormItem prop="username">
             <Input type="text" v-model="formRegister.username" :placeholder="$t('m.RegisterUsername')" size="large" @on-enter="handleRegister">
-              <Icon type="ios-person-outline" slot="prepend"></Icon>
+              <template #prepend><Icon type="ios-person-outline"></Icon></template>
             </Input>
           </FormItem>
           <FormItem prop="email">
             <Input v-model="formRegister.email" :placeholder="$t('m.Email_Address')" size="large" @on-enter="handleRegister">
-              <Icon type="ios-email-outline" slot="prepend"></Icon>
+              <template #prepend><Icon type="ios-mail-outline"></Icon></template>
             </Input>
           </FormItem>
           <FormItem prop="password">
             <Input type="password" v-model="formRegister.password" :placeholder="$t('m.RegisterPassword')" size="large" @on-enter="handleRegister">
-              <Icon type="ios-locked-outline" slot="prepend"></Icon>
+              <template #prepend><Icon type="ios-lock-outline"></Icon></template>
             </Input>
           </FormItem>
           <FormItem prop="passwordAgain">
             <Input type="password" v-model="formRegister.passwordAgain" :placeholder="$t('m.Password_Again')" size="large" @on-enter="handleRegister">
-              <Icon type="ios-locked-outline" slot="prepend"></Icon>
+              <template #prepend><Icon type="ios-lock-outline"></Icon></template>
             </Input>
           </FormItem>
           <FormItem prop="captcha" style="margin-bottom:10px">
             <div class="oj-captcha">
               <div class="oj-captcha-code">
                 <Input v-model="formRegister.captcha" :placeholder="$t('m.Captcha')" size="large" @on-enter="handleRegister">
-                  <Icon type="ios-lightbulb-outline" slot="prepend"></Icon>
+                  <template #prepend><Icon type="ios-bulb-outline"></Icon></template>
                 </Input>
               </div>
               <div class="oj-captcha-img">
@@ -105,7 +105,7 @@
 
         <!-- 返回首页 -->
         <div class="back-home">
-          <a @click="$router.push('/')"><i class="el-icon-back"></i> 返回首页</a>
+          <a @click="$router.push('/')"><el-icon-back/> 返回首页</a>
         </div>
       </div>
     </div>
@@ -117,6 +117,7 @@
 </template>
 
 <script>
+  import logo3 from '@/assets/logo3.png'
   import { mapGetters, mapActions } from 'vuex'
   import api from '@oj/api'
   import { FormMixin } from '@oj/components/mixins'
@@ -200,7 +201,7 @@
         return this.$route.name === 'register' ? 'register' : 'login'
       },
       logoSrc () {
-        return require('@/assets/logo3.png')
+        return logo3
       },
       year () {
         return new Date().getFullYear()
@@ -371,7 +372,7 @@
     color: #6b7280;
   }
 
-  .auth-form /deep/ .ivu-input-large {
+  .auth-form :deep(.ivu-input-large){
     height: 46px;
     border-radius: 10px;
     border: 2px solid #e5e7eb;
@@ -385,15 +386,15 @@
       background: #fff;
     }
   }
-  .auth-form /deep/ .ivu-input-group-prepend {
+  .auth-form :deep(.ivu-input-group-prepend){
     border-radius: 10px 0 0 10px;
     border: 2px solid #e5e7eb;
     border-right: none;
     background: #f3f4f6;
     .ivu-icon { color: #6b7280; }
   }
-  .auth-form /deep/ .ivu-form-item { margin-bottom: 18px; }
-  .auth-form /deep/ .ivu-form-item-error .ivu-input { border-color: #ed4014; }
+  .auth-form :deep(.ivu-form-item){ margin-bottom: 18px; }
+  .auth-form :deep(.ivu-form-item-error .ivu-input){ border-color: #ed4014; }
 
   .oj-captcha {
     display: flex;

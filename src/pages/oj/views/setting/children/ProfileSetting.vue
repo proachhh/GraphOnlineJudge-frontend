@@ -32,16 +32,16 @@
         </div>
         <ButtonGroup vertical class="cropper-btn">
           <Button @click="rotate('left')">
-            <Icon type="arrow-return-left" size="20"></Icon>
+            <Icon type="ios-arrow-back" size="20"></Icon>
           </Button>
           <Button @click="rotate('right')">
-            <Icon type="arrow-return-right" size="20"></Icon>
+            <Icon type="ios-arrow-forward" size="20"></Icon>
           </Button>
           <Button @click="reselect">
-            <Icon type="refresh" size="20"></Icon>
+            <Icon type="ios-refresh" size="20"></Icon>
           </Button>
           <Button @click="finishCrop">
-            <Icon type="checkmark-round" size="20"></Icon>
+            <Icon type="ios-checkmark-circle" size="20"></Icon>
           </Button>
         </ButtonGroup>
         <div class="cropper-preview" :style="previewStyle">
@@ -57,9 +57,9 @@
         <p class="notice">{{$t('m.Avatar_Will_Be')}}</p>
         <img :src="uploadImgSrc"/>
       </div>
-      <div slot="footer">
+      <template #footer><div>
         <Button @click="uploadAvatar" :loading="loadingUploadBtn">{{$t('m.Upload')}}</Button>
-      </div>
+      </div></template>
     </Modal>
 
     <div class="section-title">{{$t('m.Profile_Setting')}}</div>

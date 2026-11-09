@@ -1,7 +1,7 @@
 <template>
   <div class="view forum-user-manage">
     <Panel title="用户管理">
-      <div slot="header">
+      <template #header><div>
         <el-row :gutter="20">
           <el-col :span="24">
             <el-input v-model="keyword" prefix-icon="el-icon-search"
@@ -9,7 +9,7 @@
             </el-input>
           </el-col>
         </el-row>
-      </div>
+      </div></template>
 
       <el-table
         v-loading="loading"
@@ -19,25 +19,25 @@
         <el-table-column prop="id" label="ID" width="80"></el-table-column>
         <el-table-column prop="username" label="用户名" width="150"></el-table-column>
         <el-table-column label="禁言状态" width="120">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag v-if="scope.row.is_muted" type="danger" size="small">已禁言</el-tag>
             <el-tag v-else type="success" size="small">正常</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="mute_duration" label="禁言时长" width="130">
-          <template slot-scope="scope">
+          <template #default="scope">
             <span v-if="scope.row.is_muted">{{ scope.row.mute_duration || '—' }}</span>
             <span v-else>—</span>
           </template>
         </el-table-column>
         <el-table-column prop="mute_reason" label="禁言原因" min-width="180">
-          <template slot-scope="scope">
+          <template #default="scope">
             <span v-if="scope.row.is_muted">{{ scope.row.mute_reason || '—' }}</span>
             <span v-else>—</span>
           </template>
         </el-table-column>
         <el-table-column prop="mute_time" label="禁言时间" width="170">
-          <template slot-scope="scope">
+          <template #default="scope">
             <span v-if="scope.row.is_muted && scope.row.mute_time">
               {{ scope.row.mute_time | localtime }}
             </span>
@@ -45,7 +45,7 @@
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="160" align="center">
-          <template slot-scope="{row}">
+          <template #default="{row}">
             <el-button v-if="!row.is_muted" type="warning" size="mini"
                        icon="el-icon-fa-ban" @click="openMuteDialog(row)">禁言</el-button>
             <el-button v-else type="success" size="mini"
@@ -87,10 +87,10 @@
                     placeholder="请输入禁言原因（可选）"></el-input>
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <template #footer><span class="dialog-footer">
         <cancel @click.native="showMuteDialog = false">取消</cancel>
         <save @click.native="confirmMute" :loading="muting">确定禁言</save>
-      </span>
+      </span></template>
     </el-dialog>
   </div>
 </template>

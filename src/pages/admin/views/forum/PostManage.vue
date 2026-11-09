@@ -1,7 +1,7 @@
 <template>
   <div class="view forum-post-manage">
     <Panel title="帖子管理">
-      <div slot="header">
+      <template #header><div>
         <el-row :gutter="20">
           <el-col :span="6">
             <el-button v-show="selectedPosts.length"
@@ -15,7 +15,7 @@
             </el-input>
           </el-col>
         </el-row>
-      </div>
+      </div></template>
 
       <el-table
         v-loading="loading"
@@ -27,7 +27,7 @@
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column prop="id" label="ID" width="80"></el-table-column>
         <el-table-column prop="title" label="标题" min-width="180">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tooltip :content="scope.row.title" placement="top">
               <span class="post-title">{{ scope.row.title }}</span>
             </el-tooltip>
@@ -35,7 +35,7 @@
         </el-table-column>
         <el-table-column prop="author" label="作者" width="120"></el-table-column>
         <el-table-column label="内容" min-width="200">
-          <template slot-scope="scope">
+          <template #default="scope">
             <div class="post-preview" v-html="scope.row.content" @click="previewHtml=scope.row.content; previewVisible=true" style="max-height:80px;overflow:hidden;cursor:pointer"></div>
           </template>
         </el-table-column>
@@ -43,8 +43,8 @@
         <el-table-column prop="comment_count" label="评论数" width="80" align="center"></el-table-column>
         <el-table-column prop="view_count" label="浏览数" width="80" align="center"></el-table-column>
         <el-table-column fixed="right" label="操作" width="100" align="center">
-          <template slot-scope="{row}">
-            <icon-btn name="删除" icon="trash" @click.native="deletePost(row.id)"></icon-btn>
+          <template #default="{row}">
+            <icon-btn name="删除" icon="ios-trash" @click.native="deletePost(row.id)"></icon-btn>
           </template>
         </el-table-column>
       </el-table>

@@ -75,27 +75,27 @@
     <div v-show="showMenu" class="contest-sidebar">
       <VerticalMenu @on-click="handleRoute">
         <VerticalMenu-item :route="{name: 'contest-details', params: {contestID: contestID}}">
-          <Icon type="home"></Icon>
+          <Icon type="ios-home"></Icon>
           {{ $t('m.Overview') }}
         </VerticalMenu-item>
 
         <VerticalMenu-item :disabled="contestMenuDisabled"
                            :route="{name: 'contest-announcement-list', params: {contestID: contestID}}">
-          <Icon type="chatbubble-working"></Icon>
+          <Icon type="ios-chatbubbles"></Icon>
           {{ $t('m.Announcements') }}
         </VerticalMenu-item>
 
         <VerticalMenu-item v-if="OIContestRealTimePermission"
                            :disabled="contestMenuDisabled"
                            :route="{name: 'contest-submission-list'}">
-          <Icon type="navicon-round"></Icon>
+          <Icon type="ios-menu"></Icon>
           {{ $t('m.Submissions') }}
         </VerticalMenu-item>
 
         <VerticalMenu-item v-if="OIContestRealTimePermission"
                            :disabled="contestMenuDisabled"
                            :route="{name: 'contest-rank', params: {contestID: contestID}}">
-          <Icon type="stats-bars"></Icon>
+          <Icon type="ios-stats"></Icon>
           {{ $t('m.Rankings') }}
         </VerticalMenu-item>
 
@@ -232,8 +232,8 @@ export default {
           const cols = this.acmProblemColumns
           for (let i = 0; i < cols.length; i++) {
             if (cols[i].width) {
-              this.$set(cols[i], 'minWidth', cols[i].width)
-              this.$delete(cols[i], 'width')
+              cols[i]['minWidth'] = cols[i].width
+              delete cols[i]['width']
             }
           }
         }
@@ -290,7 +290,7 @@ export default {
       }
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     clearInterval(this.timer)
     this.$store.commit(types.CLEAR_CONTEST)
   }
@@ -355,8 +355,8 @@ export default {
     line-height: 1.8;
     color: #334155;
 
-    /deep/ img { max-width: 100%; border-radius: 6px; }
-    /deep/ table {
+    :deep(img){ max-width: 100%; border-radius: 6px; }
+    :deep(table){
       width: 100%;
       border-collapse: collapse;
       margin: 12px 0;
@@ -414,26 +414,26 @@ export default {
 .problems-table {
   font-size: 14px;
 
-  /deep/ .ivu-table {
+  :deep(.ivu-table){
     table-layout: auto !important;
   }
 
-  /deep/ .ivu-table-cell {
+  :deep(.ivu-table-cell){
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
   }
 
-  /deep/ .ivu-table-row {
+  :deep(.ivu-table-row){
     cursor: pointer;
   }
 
-  /deep/ td {
+  :deep(td){
     padding: 10px 8px;
     font-size: 14px;
   }
 
-  /deep/ th {
+  :deep(th){
     background: #f8fafc;
     font-weight: 600;
     color: #475569;
@@ -442,7 +442,7 @@ export default {
     font-size: 14px;
   }
 
-  /deep/ .ivu-table-row:hover td {
+  :deep(.ivu-table-row:hover td){
     background: #f0f9ff;
   }
 }
@@ -480,7 +480,7 @@ export default {
     display: none;
   }
 
-  /deep/ li {
+  :deep(li){
     border-radius: 5px;
     margin: 3px 6px;
     border-bottom: none;
@@ -494,7 +494,7 @@ export default {
     }
   }
 
-  /deep/ li:hover {
+  :deep(li:hover){
     background: #e8f0fe;
     border-left: 2px solid #1e3a8a;
     color: #1e3a8a;

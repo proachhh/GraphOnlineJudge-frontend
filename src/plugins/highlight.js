@@ -9,7 +9,7 @@ hljs.registerLanguage('java', java)
 hljs.registerLanguage('python', python)
 
 export default {
-  install (Vue, options) {
+  install (app, options) {
     function setSelectable (target) {
       function applyStyle (el) {
         const style = el.style
@@ -25,29 +25,25 @@ export default {
         applyStyle(node)
       }
     }
-    Vue.directive('highlight', {
+    function highlightCode (el, binding) {
+      el.style.userSelect = 'text'
+      el.style.webkitUserSelect = 'text'
+      Array.from(el.querySelectorAll('code')).forEach((target) => {
+        if (binding.value) {
+          target.textContent = binding.value
+        }
+        hljs.highlightBlock(target)
+        setSelectable(target)
+      })
+    }
+    // Vue 3 指令钩子：bind → beforeMount, componentUpdated → updated
+    app.directive('highlight', {
       deep: true,
-      bind: function (el, binding) {
-        el.style.userSelect = 'text'
-        el.style.webkitUserSelect = 'text'
-        Array.from(el.querySelectorAll('code')).forEach((target) => {
-          if (binding.value) {
-            target.textContent = binding.value
-          }
-          hljs.highlightBlock(target)
-          setSelectable(target)
-        })
+      beforeMount: function (el, binding) {
+        highlightCode(el, binding)
       },
-      componentUpdated: function (el, binding) {
-        el.style.userSelect = 'text'
-        el.style.webkitUserSelect = 'text'
-        Array.from(el.querySelectorAll('code')).forEach((target) => {
-          if (binding.value) {
-            target.textContent = binding.value
-          }
-          hljs.highlightBlock(target)
-          setSelectable(target)
-        })
+      updated: function (el, binding) {
+        highlightCode(el, binding)
       }
     })
   }

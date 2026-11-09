@@ -89,7 +89,7 @@ export default {
       return 'hard'
     },
     toggleSnippet (i) {
-      this.$set(this.expandedSnippets, i, !this.expandedSnippets[i])
+      this.expandedSnippets[i] = !this.expandedSnippets[i]
     },
     startLearn (node) {
       if (this.$router && node.name) {
@@ -312,15 +312,15 @@ export default {
   max-height: 260px;
   overflow-y: auto;
 
-  /deep/ h3 { font-size: 15px; font-weight: 600; margin: 8px 0 4px; color: #17233d; }
-  /deep/ h4 { font-size: 14px; font-weight: 600; margin: 6px 0 3px; color: #333; }
-  /deep/ strong { font-weight: 700; }
-  /deep/ em { font-style: italic; }
-  /deep/ ul { padding-left: 18px; margin: 4px 0; }
-  /deep/ li { margin: 2px 0; }
-  /deep/ code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 90%; }
-  /deep/ pre.md-code { background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 10px; overflow-x: auto; margin: 6px 0; font-size: 12px; line-height: 1.4; }
-  /deep/ a { color: #2d8cf0; }
+  :deep(h3){ font-size: 15px; font-weight: 600; margin: 8px 0 4px; color: #17233d; }
+  :deep(h4){ font-size: 14px; font-weight: 600; margin: 6px 0 3px; color: #333; }
+  :deep(strong){ font-weight: 700; }
+  :deep(em){ font-style: italic; }
+  :deep(ul){ padding-left: 18px; margin: 4px 0; }
+  :deep(li){ margin: 2px 0; }
+  :deep(code){ background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 90%; }
+  :deep(pre.md-code){ background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 10px; overflow-x: auto; margin: 6px 0; font-size: 12px; line-height: 1.4; }
+  :deep(a){ color: #2d8cf0; }
 }
 
 .pt-step-actions {
@@ -337,7 +337,7 @@ export default {
   padding-top: 0;
   padding-bottom: 0;
 }
-.slide-enter-to, .slide-leave {
+.slide-enter-to, .slide-leave-from {
   max-height: 200px;
   opacity: 1;
 }

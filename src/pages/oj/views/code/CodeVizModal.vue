@@ -1,10 +1,10 @@
 <template>
   <Modal v-model="showModal" :width="1200" :styles="{ top: '20px' }" :closable="true" :mask-closable="false" class-name="code-viz-modal">
-    <div slot="header" class="modal-header">
+    <template #header><div class="modal-header">
       <span class="header-title">代码执行可视化</span>
       <span class="header-badge" v-if="totalSteps > 0">{{ currentStep + 1 }} / {{ totalSteps }}</span>
       <span class="step-type-badge" v-if="currentStepData && currentStepData.type !== 'end'" :class="'badge-' + currentStepData.type">{{ stepTypeLabel }}</span>
-    </div>
+    </div></template>
     <div class="viz-body">
       <!-- 空状态 -->
       <div class="empty-state" v-if="steps.length === 0 && !loading">
@@ -80,7 +80,7 @@
           <!-- 控制台输出 -->
           <div class="console-output">
             <div class="panel-header">
-              <Icon type="ios-terminal" color="#1e3a8a"></Icon>
+              <Icon type="ios-code" color="#1e3a8a"></Icon>
               <span>控制台输出</span>
             </div>
             <pre class="console-text">{{ currentOutput || '（无输出）' }}</pre>
@@ -88,12 +88,12 @@
           <!-- 播放控制 -->
           <div class="playback-controls">
             <div class="control-group">
-              <Button @click="reset" size="small"><Icon type="ios-skipbackward"></Icon></Button>
+              <Button @click="reset" size="small"><Icon type="ios-rewind"></Icon></Button>
               <Button @click="stepBack" size="small" :disabled="currentStep === 0"><Icon type="ios-arrow-back"></Icon></Button>
               <Button @click="togglePlay" type="primary" size="small" v-if="!isPlaying"><Icon type="ios-play"></Icon></Button>
               <Button @click="togglePlay" size="small" v-else><Icon type="ios-pause"></Icon></Button>
               <Button @click="stepForward" size="small" :disabled="currentStep >= totalSteps - 1"><Icon type="ios-arrow-forward"></Icon></Button>
-              <Button @click="jumpToEnd" size="small" :disabled="currentStep >= totalSteps - 1"><Icon type="ios-skipforward"></Icon></Button>
+              <Button @click="jumpToEnd" size="small" :disabled="currentStep >= totalSteps - 1"><Icon type="ios-fastforward"></Icon></Button>
             </div>
             <div class="speed-control">
               <span class="speed-label">速度</span>
@@ -104,13 +104,13 @@
         </div>
       </template>
     </div>
-    <div slot="footer">
+    <template #footer><div>
       <Button @click="runVisualization" type="primary" :loading="loading" v-if="steps.length === 0 || currentStep >= totalSteps - 1 || codeChanged">
         <Icon type="ios-play"></Icon>
         重新可视化
       </Button>
       <Button @click="showModal = false">关闭</Button>
-    </div>
+    </div></template>
   </Modal>
 </template>
 
@@ -248,7 +248,7 @@ export default {
       }
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     if (this.playTimer) clearInterval(this.playTimer)
   }
 }

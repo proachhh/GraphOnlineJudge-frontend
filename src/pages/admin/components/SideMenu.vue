@@ -3,37 +3,37 @@
     <div class="menu-overlay" :class="{ 'is-visible': menuOpen }" @click="closeMenu"></div>
     <aside class="vertical_menu" :class="{ 'is-open': menuOpen }">
       <div class="menu-mobile-close" @click="closeMenu">
-        <i class="el-icon-close"></i>
+        <el-icon-close/>
       </div>
       <div class="logo">
         <img src="../../../assets/logo3.png" alt="oj admin"/>
       </div>
       <div class="sidebar-title">
-        <i class="el-icon-s-platform"></i>
+        <el-icon-s-platform/>
         <span>管理后台</span>
       </div>
       <nav class="sidebar-nav">
         <div class="nav-item" v-if="isAdminRole" :class="{ active: currentPath === '/data-dashboard' }" @click="go('/data-dashboard')">
-          <i class="el-icon-fa-bar-chart"></i><span>数据看板</span>
+          <el-icon-fa-bar-chart/><span>数据看板</span>
         </div>
         <div class="nav-item" v-if="isAdminRole" :class="{ active: currentPath === '/announcement' }" @click="go('/announcement')">
-          <i class="el-icon-fa-bullhorn"></i><span>{{$t('m.Announcement')}}</span>
+          <el-icon-fa-bullhorn/><span>{{$t('m.Announcement')}}</span>
         </div>
 
         <!-- 常规 -->
         <div v-if="isSuperAdmin" class="nav-group-title">常规</div>
         <template v-if="isSuperAdmin">
           <div class="nav-item" :class="{ active: currentPath === '/user' }" @click="go('/user')">
-            <i class="el-icon-fa-users"></i><span>{{$t('m.User')}}</span>
+            <el-icon-fa-users/><span>{{$t('m.User')}}</span>
           </div>
           <div class="nav-item" :class="{ active: currentPath === '/conf' }" @click="go('/conf')">
-            <i class="el-icon-fa-cog"></i><span>{{$t('m.System_Config')}}</span>
+            <el-icon-fa-cog/><span>{{$t('m.System_Config')}}</span>
           </div>
           <div class="nav-item" :class="{ active: currentPath === '/judge-server' }" @click="go('/judge-server')">
-            <i class="el-icon-fa-server"></i><span>{{$t('m.Judge_Server')}}</span>
+            <el-icon-fa-server/><span>{{$t('m.Judge_Server')}}</span>
           </div>
           <div class="nav-item" :class="{ active: currentPath === '/feedback' }" @click="go('/feedback')">
-            <i class="el-icon-fa-comment"></i><span>{{$t('m.Feedback')}}</span>
+            <el-icon-fa-comment/><span>{{$t('m.Feedback')}}</span>
           </div>
         </template>
 
@@ -41,30 +41,30 @@
         <div v-if="hasProblemPermission" class="nav-group-title">题目</div>
         <template v-if="hasProblemPermission">
           <div class="nav-item" :class="{ active: currentPath === '/problems' }" @click="go('/problems')">
-            <i class="el-icon-fa-bars"></i><span>{{$t('m.Problem_List')}}</span>
+            <el-icon-fa-bars/><span>{{$t('m.Problem_List')}}</span>
           </div>
           <div class="nav-item" :class="{ active: currentPath === '/problem/create' }" @click="go('/problem/create')">
-            <i class="el-icon-plus"></i><span>{{$t('m.Create_Problem')}}</span>
+            <el-icon-plus/><span>{{$t('m.Create_Problem')}}</span>
           </div>
           <div class="nav-item" :class="{ active: currentPath === '/problem/batch_ops' }" @click="go('/problem/batch_ops')">
-            <i class="el-icon-fa-exchange"></i><span>{{$t('m.Export_Import_Problem')}}</span>
+            <el-icon-fa-exchange/><span>{{$t('m.Export_Import_Problem')}}</span>
           </div>
         </template>
 
         <!-- 竞赛 -->
         <div class="nav-group-title">竞赛</div>
         <div class="nav-item" :class="{ active: currentPath === '/contest' }" @click="go('/contest')">
-          <i class="el-icon-fa-trophy"></i><span>{{$t('m.Contest_List')}}</span>
+          <el-icon-fa-trophy/><span>{{$t('m.Contest_List')}}</span>
         </div>
         <div class="nav-item" :class="{ active: currentPath === '/contest/create' }" @click="go('/contest/create')">
-          <i class="el-icon-plus"></i><span>{{$t('m.Create_Contest')}}</span>
+          <el-icon-plus/><span>{{$t('m.Create_Contest')}}</span>
         </div>
 
         <!-- 教案 -->
         <template v-if="isAdminRole">
           <div class="nav-group-title">教学</div>
           <div class="nav-item" :class="{ active: currentPath === '/lesson-plan' }" @click="go('/lesson-plan')">
-            <i class="el-icon-fa-book"></i><span>{{$t('m.Lesson_Plan_Management')}}</span>
+            <el-icon-fa-book/><span>{{$t('m.Lesson_Plan_Management')}}</span>
           </div>
         </template>
 
@@ -72,13 +72,13 @@
         <template v-if="isAdminRole">
           <div class="nav-group-title">论坛</div>
           <div class="nav-item" :class="{ active: currentPath === '/forum/posts' }" @click="go('/forum/posts')">
-            <i class="el-icon-document"></i><span>帖子管理</span>
+            <el-icon-document/><span>帖子管理</span>
           </div>
           <div class="nav-item" :class="{ active: currentPath === '/forum/users' }" @click="go('/forum/users')">
-            <i class="el-icon-fa-user"></i><span>用户管理</span>
+            <el-icon-fa-user/><span>用户管理</span>
           </div>
           <div class="nav-item" :class="{ active: currentPath === '/forum/reports' }" @click="go('/forum/reports')">
-            <i class="el-icon-warning"></i><span>举报处理</span>
+            <el-icon-warning/><span>举报处理</span>
           </div>
         </template>
       </nav>

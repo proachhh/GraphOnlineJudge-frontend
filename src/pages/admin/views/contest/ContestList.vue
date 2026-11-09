@@ -1,13 +1,13 @@
 <template>
   <div class="view">
     <Panel title="Contest List">
-      <div slot="header">
+      <template #header><div>
         <el-input
           v-model="keyword"
           prefix-icon="el-icon-search"
           placeholder="Keywords">
         </el-input>
-      </div>
+      </div></template>
       <el-table
         v-loading="loading"
         element-loading-text="loading"
@@ -15,7 +15,7 @@
         :data="contestList"
         style="width: 100%">
         <el-table-column type="expand">
-          <template slot-scope="props">
+          <template #default="props">
             <p>Start Time: {{props.row.start_time | localtime }}</p>
             <p>End Time: {{props.row.end_time | localtime }}</p>
             <p>Create Time: {{props.row.create_time | localtime}}</p>
@@ -34,14 +34,14 @@
         <el-table-column
           label="Rule Type"
           width="130">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag type="gray">{{scope.row.rule_type}}</el-tag>
           </template>
         </el-table-column>
         <el-table-column
           label="Contest Type"
           width="180">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag :type="scope.row.contest_type === 'Public' ? 'success' : 'primary'">
               {{ scope.row.contest_type}}
             </el-tag>
@@ -50,7 +50,7 @@
         <el-table-column
           label="Status"
           width="130">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag
               :type="scope.row.status === '-1' ? 'danger' : scope.row.status === '0' ? 'success' : 'primary'">
               {{ scope.row.status | contestStatus}}
@@ -60,7 +60,7 @@
         <el-table-column
           width="100"
           label="Visible">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-switch v-model="scope.row.visible"
                        active-text=""
                        inactive-text=""
@@ -73,13 +73,13 @@
           width="250"
           label="Operation">
           <div slot-scope="scope">
-            <icon-btn name="Edit" icon="edit" @click.native="goEdit(scope.row.id)"></icon-btn>
-            <icon-btn name="Problem" icon="list-ol" @click.native="goContestProblemList(scope.row.id)"></icon-btn>
-            <icon-btn name="Announcement" icon="info-circle"
+            <icon-btn name="Edit" icon="ios-create" @click.native="goEdit(scope.row.id)"></icon-btn>
+            <icon-btn name="Problem" icon="ios-list" @click.native="goContestProblemList(scope.row.id)"></icon-btn>
+            <icon-btn name="Announcement" icon="ios-information-circle"
                       @click.native="goContestAnnouncement(scope.row.id)"></icon-btn>
-            <icon-btn icon="download" name="Download Accepted Submissions"
+            <icon-btn icon="ios-download" name="Download Accepted Submissions"
                       @click.native="openDownloadOptions(scope.row.id)"></icon-btn>
-            <icon-btn icon="trash" name="Delete Contest"
+            <icon-btn icon="ios-trash" name="Delete Contest"
                       @click.native="deleteContest(scope.row.id)"></icon-btn>
           </div>
         </el-table-column>
@@ -98,9 +98,9 @@
                width="30%"
                :visible.sync="downloadDialogVisible">
       <el-switch v-model="excludeAdmin" active-text="Exclude admin submissions"></el-switch>
-      <span slot="footer" class="dialog-footer">
+      <template #footer><span class="dialog-footer">
         <el-button type="primary" @click="downloadSubmissions">确 定</el-button>
-      </span>
+      </span></template>
     </el-dialog>
   </div>
 </template>

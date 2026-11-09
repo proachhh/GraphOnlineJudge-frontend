@@ -10,11 +10,11 @@
         </Select>
 
         <Tooltip :content="this.$i18n.t('m.Reset_to_default_code_definition')" placement="top" style="margin-left: 10px">
-          <Button icon="refresh" @click="onResetClick"></Button>
+          <Button icon="ios-refresh" @click="onResetClick"></Button>
         </Tooltip>
 
         <Tooltip :content="this.$i18n.t('m.Upload_file')" placement="top" style="margin-left: 10px">
-          <Button icon="upload" @click="onUploadFile"></Button>
+          <Button icon="ios-cloud-upload" @click="onUploadFile"></Button>
         </Tooltip>
 
         <input type="file" id="file-uploader" style="display: none" @change="onUploadFileDone">
@@ -36,9 +36,9 @@
   </div>
 </template>
 <script>
-  import utils from '@/utils/utils'
-  import { codemirror } from 'vue-codemirror-lite'
-
+  import CodeMirror from 'codemirror'
+import utils from '@/utils/utils'
+  
   // theme
   import 'codemirror/theme/monokai.css'
   import 'codemirror/theme/solarized.css'
@@ -61,14 +61,10 @@
 
   // auto-complete / hint
   import 'codemirror/addon/hint/show-hint.css'
-  var CodeMirror = require('codemirror')
 
   export default {
     name: 'CodeMirror',
-    components: {
-      codemirror
-    },
-    props: {
+        props: {
       value: {
         type: String,
         default: ''

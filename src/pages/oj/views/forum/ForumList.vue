@@ -183,7 +183,39 @@ const ForumSimditor = {
       pasteImage: true, markdown: false,
       upload: { url: '/api/forum/upload_image/', params: null, fileKey: 'image', connectionCount: 3 }
     })
-    this.editor.on('valuechanged', () => { s.val = s.editor.getValue() }); this.editor.setValue(this.value)
+    this.editor.on('valuechanged', () => { s.val = s.editor.getValue(); s.scheduleRehost() }); this.editor.setValue(this.value)
+  },
+  beforeUnmount () {
+    clearTimeout(this._rehostTimer)
+    if (this.editor && this.editor.destroy) this.editor.destroy()
+  },
+  methods: {
+    // 粘贴外站图片时自动转存到本站，避免第三方防盗链/签名过期导致图片失效
+    scheduleRehost () {
+      clearTimeout(this._rehostTimer)
+      this._rehostTimer = setTimeout(() => this.rehostExternalImages(), 600)
+    },
+    rehostExternalImages () {
+      const body = this.editor && this.editor.body && this.editor.body[0]
+      if (!body) return
+      const csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || ''
+      body.querySelectorAll('img[src^="http"]').forEach(img => {
+        if (img.src.startsWith(location.origin) || img.dataset.rehost) return
+        img.dataset.rehost = '1'
+        fetch('/api/forum/fetch_image/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+          credentials: 'include',
+          body: JSON.stringify({ url: img.src })
+        }).then(r => r.json()).then(d => {
+          if (d.success && d.file_path) {
+            img.src = d.file_path
+            delete img.dataset.rehost
+            if (this.editor && this.editor.trigger) this.editor.trigger('valuechanged')
+          }
+        }).catch(() => { delete img.dataset.rehost })
+      })
+    }
   },
   watch: {
     value (val) { if (this.val !== val && this.editor) { this.val = val; this.editor.setValue(val) } },
@@ -237,12 +269,12 @@ export default {
       const res = await api.getForumPosts(params)
       const d = res.data.data
       this.posts = (d.results || []).map(p => {
-        this.$set(this.likedPosts, p.id, !!p.is_liked)
-        this.$set(this.bookmarkedPosts, p.id, !!p.is_bookmarked)
-        this.$set(p, '_comments', [])
-        this.$set(p, '_commentTotal', 0)
-        this.$set(p, '_commentPage', 0)
-        this.$set(p, '_commentLimit', 10)
+        this.likedPosts[p.id] = !!p.is_liked
+        this.bookmarkedPosts[p.id] = !!p.is_bookmarked
+        p['_comments'] = []
+        p['_commentTotal'] = 0
+        p['_commentPage'] = 0
+        p['_commentLimit'] = 10
         return p
       })
       this.totalPosts = d.total || 0
@@ -308,8 +340,8 @@ export default {
       const res = await api.getForumComments({ post_id: post.id, page: page || 1, limit: post._commentLimit })
       const d = res.data.data
       const newComments = (d.results || []).map(c => {
-        this.$set(c, '_liked', !!c.is_liked)
-        if (c.replies) c.replies.forEach(r => this.$set(r, '_liked', !!r.is_liked))
+        c['_liked'] = !!c.is_liked
+        if (c.replies) c.replies.forEach(r => r['_liked'] = !!r.is_liked)
         return c
       })
       post._comments = newComments
@@ -363,10 +395,10 @@ export default {
     async submitComment (post) {
       const content = (this.replyContents[post.id] || '').trim()
       if (!content) return
-      this.$set(this.submittingMap, post.id, true)
+      this.submittingMap[post.id] = true
       await api.createForumComment({ post_id: post.id, content, parent_id: this.replyTarget && this.replyPostId === post.id ? this.replyTarget.id : null })
       this.replyContents[post.id] = ''; this.replyTarget = null; this.replyPostId = null
-      this.$set(this.submittingMap, post.id, false)
+      this.submittingMap[post.id] = false
       this.$Message.success(this.$t('m.Forum_Reply_Success'))
       await this.loadMoreComments(post, 1)
     },
@@ -377,15 +409,15 @@ export default {
     },
     async toggleLike (post) {
       const res = await api.forumLike(post.id); const d = res.data.data
-      this.$set(this.likedPosts, post.id, d.liked); post.like_count = d.like_count
+      this.likedPosts[post.id] = d.liked; post.like_count = d.like_count
     },
     async toggleBookmark (post) {
       const res = await api.forumBookmark(post.id); const d = res.data.data
-      this.$set(this.bookmarkedPosts, post.id, d.bookmarked); post.bookmark_count = d.bookmark_count
+      this.bookmarkedPosts[post.id] = d.bookmarked; post.bookmark_count = d.bookmark_count
     },
     async toggleCommentLike (post, comment) {
       const res = await api.forumCommentLike(comment.id); const d = res.data.data
-      this.$set(comment, '_liked', d.liked); comment.like_count = d.like_count
+      comment['_liked'] = d.liked; comment.like_count = d.like_count
     },
     onReplyClick (post, comment) { this.replyTarget = comment; this.replyPostId = post.id },
     cancelReply () { this.replyTarget = null; this.replyPostId = null },
@@ -401,7 +433,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.forum-page { min-height: calc(100vh - 80px); background: #f5f7fa; padding: 24px 0; margin-top: 80px; }
+.forum-page { min-height: calc(100vh - 64px); background: #f5f7fa; padding: 24px 0; margin-top: 64px; }
 .forum-container { max-width: 1080px; margin: 0 auto; padding: 0 20px; display: flex; gap: 20px; align-items: flex-start; }
 .forum-sidebar {
   width: 200px; flex-shrink: 0; background: #fff; border-radius: 12px; padding: 10px;
@@ -438,7 +470,7 @@ export default {
 }
 .post-feed { display: flex; flex-direction: column; gap: 14px; }
 .post-card {
-  /deep/ .ivu-card-body { overflow: visible; }
+  :deep(.ivu-card-body){ overflow: visible; }
   .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
   .post-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #e0e5f0; }
   .post-author-info { flex: 1; .author-name { font-weight: 600; font-size: 14px; color: #1e3a8a; display: block; } .post-time { font-size: 12px; color: #808695; } }
@@ -492,7 +524,7 @@ export default {
 .loading-box, .empty-box { text-align: center; padding: 80px 0; color: #808695; }
 .forum-pagination { margin-top: 20px; text-align: center; }
 .modal-footer { text-align: right; padding-top: 12px; border-top: 1px solid #e8eaec; button { margin-left: 8px; } }
-.forum-editor-modal /deep/ .simditor .simditor-toolbar { display: flex !important; flex-wrap: wrap; }
+.forum-editor-modal :deep(.simditor .simditor-toolbar){ display: flex !important; flex-wrap: wrap; }
 @media (max-width: 768px) {
   .forum-container { flex-direction: column; }
   .forum-sidebar {

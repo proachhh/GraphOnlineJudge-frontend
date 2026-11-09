@@ -8,10 +8,10 @@
         <h1 class="brand-title">管理后台</h1>
         <p class="brand-subtitle">在线评测系统 · 管理控制台</p>
         <ul class="brand-features">
-          <li><i class="el-icon-data-board"></i> 数据看板与学情统计</li>
-          <li><i class="el-icon-document"></i> 题目与竞赛管理</li>
-          <li><i class="el-icon-chat-dot-round"></i> 公告与论坛管理</li>
-          <li><i class="el-icon-setting"></i> 系统配置与用户管理</li>
+          <li><el-icon-data-board/> 数据看板与学情统计</li>
+          <li><el-icon-document/> 题目与竞赛管理</li>
+          <li><el-icon-chat-dot-round/> 公告与论坛管理</li>
+          <li><el-icon-setting/> 系统配置与用户管理</li>
         </ul>
       </div>
       <div class="brand-footer">
@@ -57,7 +57,7 @@
         </el-form>
 
         <div class="back-home">
-          <a href="/"><i class="el-icon-back"></i> 返回前台首页</a>
+          <a href="/"><el-icon-back/> 返回前台首页</a>
         </div>
       </div>
     </div>
@@ -93,7 +93,7 @@
           this.logining = true
           api.login(this.loginForm.account, this.loginForm.password).then(() => {
             this.logining = false
-            this.$router.push({ name: 'dashboard' })
+            this.$router.push('/') // 登录后进入 admin 首页（redirect 到 /data-dashboard）
           }, () => {
             this.logining = false
           })
@@ -225,7 +225,7 @@
     color: #6b7280;
   }
 
-  .login-form /deep/ .el-input__inner {
+  .login-form :deep(.el-input__inner){
     height: 46px;
     border-radius: 10px;
     border: 2px solid #e5e7eb;
@@ -239,7 +239,7 @@
       background: #fff;
     }
   }
-  .login-form /deep/ .el-input__prefix {
+  .login-form :deep(.el-input__prefix){
     left: 10px;
     .el-input__icon {
       font-size: 18px;
@@ -247,10 +247,10 @@
       line-height: 46px;
     }
   }
-  .login-form /deep/ .el-input--prefix .el-input__inner {
+  .login-form :deep(.el-input--prefix .el-input__inner){
     padding-left: 38px;
   }
-  .login-form /deep/ .el-form-item {
+  .login-form :deep(.el-form-item){
     margin-bottom: 18px;
   }
 

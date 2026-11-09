@@ -20,14 +20,14 @@
           <el-table-column
             prop="create_time"
             label="CreateTime">
-            <template slot-scope="scope">
+            <template #default="scope">
               {{ scope.row.create_time | localtime }}
             </template>
           </el-table-column>
           <el-table-column
             prop="last_update_time"
             label="LastUpdateTime">
-            <template slot-scope="scope">
+            <template #default="scope">
               {{scope.row.last_update_time | localtime }}
             </template>
           </el-table-column>
@@ -39,7 +39,7 @@
             width="100"
             prop="visible"
             label="Visible">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-switch v-model="scope.row.visible"
                          active-text=""
                          inactive-text=""
@@ -52,8 +52,8 @@
             label="Option"
             width="200">
             <div slot-scope="scope">
-              <icon-btn name="Edit" icon="edit" @click.native="openAnnouncementDialog(scope.row.id)"></icon-btn>
-              <icon-btn name="Delete" icon="trash" @click.native="deleteAnnouncement(scope.row.id)"></icon-btn>
+              <icon-btn name="Edit" icon="ios-create" @click.native="openAnnouncementDialog(scope.row.id)"></icon-btn>
+              <icon-btn name="Delete" icon="ios-trash" @click.native="deleteAnnouncement(scope.row.id)"></icon-btn>
             </div>
           </el-table-column>
         </el-table>
@@ -92,10 +92,10 @@
           </el-switch>
         </div>
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <template #footer><span class="dialog-footer">
           <cancel @click.native="showEditAnnouncementDialog = false"></cancel>
           <save type="primary" @click.native="submitAnnouncement"></save>
-        </span>
+        </span></template>
     </el-dialog>
   </div>
 </template>

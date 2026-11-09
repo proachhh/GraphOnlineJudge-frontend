@@ -1,22 +1,23 @@
-import 'babel-polyfill'
-import Vue from 'vue'
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
-Vue.use(ElementUI)
+import { createApp } from 'vue'
+import ElementPlus from 'element-plus'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
+import 'element-plus/dist/index.css'
 import App from './App.vue'
 
-// 确保 CodeMirror 核心 + addons 在入口加载
-require('codemirror')
-require('codemirror/addon/hint/show-hint.js')
+// 确保 CodeMirror 核心 + addons 在入口加载（补全等全局功能依赖 window.CodeMirror）
+import CodeMirror from 'codemirror'
+import 'codemirror/addon/hint/show-hint.js'
+window.CodeMirror = CodeMirror
+
 import router from './router'
 import store from '@/store'
 import i18n from '@/i18n'
-import VueClipboard from 'vue-clipboard2'
-import VueAnalytics from 'vue-analytics'
-import { GOOGLE_ANALYTICS_ID } from '@/utils/constants'
-
-import iView from 'iview'
-import 'iview/dist/styles/iview.css'
+import axios from 'axios'
+import ViewUIPlus from 'view-ui-plus'
+import * as ViewUIPlusNS from 'view-ui-plus'
+import 'view-ui-plus/dist/styles/viewuiplus.css'
+import * as ElementPlusNS from 'element-plus'
+import { Message } from 'view-ui-plus'
 
 import Panel from '@oj/components/Panel.vue'
 import VerticalMenu from '@oj/components/verticalMenu/verticalMenu.vue'
@@ -25,50 +26,65 @@ import '@/styles/index.less'
 
 import highlight from '@/plugins/highlight'
 import katex from '@/plugins/katex'
+import elementIcons from '@/plugins/elementIcons.js'
 import filters from '@/utils/filters.js'
 
-import ECharts from 'vue-echarts/components/ECharts.vue'
-import 'echarts/lib/chart/bar'
-import 'echarts/lib/chart/line'
-import 'echarts/lib/chart/pie'
-import 'echarts/lib/component/title'
-import 'echarts/lib/component/grid'
-import 'echarts/lib/component/dataZoom'
-import 'echarts/lib/component/legend'
-import 'echarts/lib/component/tooltip'
-import 'echarts/lib/component/toolbox'
-import 'echarts/lib/component/markPoint'
-import 'echarts/lib/component/legendScroll'
+// 自研轻量封装（替代仅支持 Vue 2 的 vue-echarts / vue-codemirror-lite）
+import EChart from '@/components/EChart.vue'
+import Codemirror from '@/components/Codemirror.vue'
 
-// register global utility filters.
-Object.keys(filters).forEach(key => {
-  Vue.filter(key, filters[key])
+// @vue/compat 全局运行在 MODE 2（Vue 2 语义，供旧代码使用），
+// 但 element-plus / view-ui-plus 是原生 Vue 3 库（内部使用函数式 $slots 等），
+// 必须给它们的组件注入组件级 compatConfig MODE 3，否则渲染报
+// "this.$slots.default is not a function" 导致整页白屏
+const forceVue3Compat = (mod) => {
+  Object.values(mod).forEach((c) => {
+    if (c && (typeof c === 'object' || typeof c === 'function') && (c.name || c.install)) {
+      c.compatConfig = Object.assign({}, c.compatConfig, { MODE: 3 })
+    }
+  })
+}
+forceVue3Compat(ViewUIPlusNS)
+forceVue3Compat(ViewUIPlus)
+forceVue3Compat(ElementPlusNS)
+
+const app = createApp(App)
+
+app.use(store)
+app.use(i18n)
+app.use(router)
+app.use(ElementPlus, {locale: zhCn})
+app.use(highlight)
+app.use(katex)
+app.use(elementIcons)
+app.use(ViewUIPlus, {
+  i18n: (key, value) => i18n.global.t(key, value)
 })
 
-Vue.config.productionTip = false
-Vue.use(iView, {
-  i18n: (key, value) => i18n.t(key, value)
-})
+// 全局组件
+app.component('ECharts', EChart)
+app.component('codemirror', Codemirror)
+app.component(VerticalMenu.name, VerticalMenu)
+app.component(VerticalMenuItem.name, VerticalMenuItem)
+app.component(Panel.name, Panel)
 
-Vue.use(VueClipboard)
-Vue.use(highlight)
-Vue.use(katex)
-Vue.use(VueAnalytics, {
-  id: GOOGLE_ANALYTICS_ID,
-  router
-})
+// Vue 3 移除了模板 filter 管道语法，模板中统一改为 $filters.xxx(value) 调用
+app.config.globalProperties.$filters = filters
 
-Vue.component('ECharts', ECharts)
-Vue.component(VerticalMenu.name, VerticalMenu)
-Vue.component(VerticalMenuItem.name, VerticalMenuItem)
-Vue.component(Panel.name, Panel)
+// 全局 filter 注册（Vue 2 时代的 Vue.filter(key, fn) 等价物）：
+// @vue/compat 下模板 filter 管道通过组件 options.filters 解析，
+// 用 global mixin 注入即可让所有旧模板的 | localtime 等管道正常工作
+app.mixin({ filters })
 
-// 注册全局消息提示
-Vue.prototype.$Message.config({
+// 全局消息提示（兼容旧版 $Message/$error/$info/$success 用法）
+Message.config({
   duration: 2
 })
-Vue.prototype.$error = (s) => Vue.prototype.$Message.error(s)
-Vue.prototype.$info = (s) => Vue.prototype.$Message.info(s)
-Vue.prototype.$success = (s) => Vue.prototype.$Message.success(s)
+app.config.globalProperties.$Message = Message
+app.config.globalProperties.$error = (s) => Message.error(s)
+app.config.globalProperties.$info = (s) => Message.info(s)
+app.config.globalProperties.$success = (s) => Message.success(s)
+app.config.globalProperties.$http = axios
 
-new Vue(Vue.util.extend({router, store, i18n}, App)).$mount('#app')
+
+app.mount('#app')

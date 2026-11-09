@@ -121,6 +121,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import * as echarts from 'echarts'
 import api from '@oj/api'
 
@@ -196,7 +197,7 @@ export default {
         if (this.radarChartInstance) {
           this.radarChartInstance.dispose()
         }
-        this.radarChartInstance = echarts.init(this.$refs.radarChart)
+        this.radarChartInstance = markRaw(echarts.init(this.$refs.radarChart))
         const dims = this.reviewData.dimensions || {}
         this.radarChartInstance.setOption({
           tooltip: {},
@@ -238,7 +239,7 @@ export default {
       return map[sev] || sev
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     if (this.radarChartInstance) {
       this.radarChartInstance.dispose()
     }

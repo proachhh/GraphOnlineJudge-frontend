@@ -46,11 +46,11 @@
       <div class="problem-layout-wrapper" :class="layoutMode" ref="layoutWrapper">
         <div class="layout-left" :style="layoutLeftStyle" ref="layoutLeft">
           <Panel :padding="40" shadow>
-            <div slot="title" class="problem-title-header">
+            <template #title><div class="problem-title-header">
               <span class="problem-title-id">#{{problem._id}}.</span>
               <span class="problem-title-text">{{problem.title}}</span>
-            </div>
-            <div id="problem-content" class="markdown-body" v-katex>
+            </div></template>
+            <div id="problem-content" class="markdown-body">
               <p class="title">{{$t('m.Description')}}</p>
               <p class="content" v-html=problem.description></p>
               <p class="title">{{$t('m.Input')}} <span v-if="problem.io_mode.io_mode=='File IO'">({{$t('m.FromFile')}}: {{ problem.io_mode.input }})</span></p>
@@ -69,7 +69,7 @@
                          v-clipboard:copy="sample.input"
                          v-clipboard:success="onCopy"
                          v-clipboard:error="onCopyError">
-                        <Icon type="clipboard"></Icon>
+                        <Icon type="ios-clipboard"></Icon>
                       </a>
                     </p>
                     <pre>{{sample.input}}</pre>
@@ -164,7 +164,7 @@
 
         <div class="submit-row">
           <div class="submit-row-left">
-            <Button type="primary" icon="edit" :loading="submitting" @click="submitCode"
+            <Button type="primary" icon="ios-create" :loading="submitting" @click="submitCode"
                     :disabled="problemSubmitDisabled || submitted">
               <span v-if="submitting">{{$t('m.Submitting')}}</span>
               <span v-else>{{$t('m.Submit')}}</span>
@@ -177,7 +177,7 @@
               可视化执行
             </Button>
             <Button type="success" v-if="submissionId" @click="goCodeReview" title="AI 分析代码质量">
-              <Icon type="ios-pulse-strong"></Icon>
+              <Icon type="ios-pulse"></Icon>
               AI 审查
             </Button>
 
@@ -197,7 +197,7 @@
               {{$t('m.' + submissionStatus.text.replace(/ /g, "_"))}}
             </Tag>
             <Button type="success" size="small" @click="goCodeReview" style="margin-left: 8px;">
-              <Icon type="ios-pulse-strong"></Icon>
+              <Icon type="ios-pulse"></Icon>
               AI 审查代码
             </Button>
           </template>
@@ -232,34 +232,34 @@
           </VerticalMenu-item>
 
           <VerticalMenu-item :route="{name: 'contest-announcement-list', params: {contestID: contestID}}">
-            <Icon type="chatbubble-working"></Icon>
+            <Icon type="ios-chatbubbles"></Icon>
             {{$t('m.Announcements')}}
           </VerticalMenu-item>
         </template>
 
         <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission" :route="submissionRoute">
-          <Icon type="navicon-round"></Icon>
+          <Icon type="ios-menu"></Icon>
            {{$t('m.Submissions')}}
         </VerticalMenu-item>
 
         <template v-if="this.contestID">
           <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission"
                              :route="{name: 'contest-rank', params: {contestID: contestID}}">
-            <Icon type="stats-bars"></Icon>
+            <Icon type="ios-stats"></Icon>
             {{$t('m.Rankings')}}
           </VerticalMenu-item>
           <VerticalMenu-item :route="{name: 'contest-details', params: {contestID: contestID}}">
-            <Icon type="home"></Icon>
+            <Icon type="ios-home"></Icon>
             {{$t('m.View_Contest')}}
           </VerticalMenu-item>
         </template>
       </VerticalMenu>
 
       <Card id="info">
-        <div slot="title" class="header">
-          <Icon type="information-circled"></Icon>
+        <template #title><div class="header">
+          <Icon type="ios-information-circle"></Icon>
           <span class="card-title">{{$t('m.Information')}}</span>
-        </div>
+        </div></template>
         <ul>
           <li><p>ID</p>
             <p>{{problem._id || '—'}}</p></li>
@@ -287,9 +287,9 @@
             <p>
               <Poptip trigger="hover" placement="top" transfer word-wrap width="260">
                 <a>{{$t('m.Show')}}</a>
-                <div slot="content" style="display: flex; flex-wrap: wrap; gap: 4px">
+                <template #content><div style="display: flex; flex-wrap: wrap; gap: 4px">
                   <Tag v-for="tag in problem.tags" :key="tag">{{ tagDisplayName(tag) }}</Tag>
-                </div>
+                </div></template>
               </Poptip>
             </p>
           </li>
@@ -297,20 +297,20 @@
       </Card>
 
       <Card id="pieChart" ref="pieChart" :padding="0">
-        <div slot="title">
+        <template #title><div>
           <Icon type="ios-analytics"></Icon>
           <span class="card-title">{{$t('m.Statistic')}}</span>
           <Button type="ghost" size="small" id="detail" @click="graphVisible = !graphVisible">Details</Button>
-        </div>
+        </div></template>
         <div class="echarts" ref="pieChartDom"></div>
       </Card>
     </div>
 
     <Modal v-model="graphVisible">
       <div id="pieChart-detail" ref="pieChartDetail"></div>
-      <div slot="footer">
+      <template #footer><div>
         <Button type="ghost" @click="graphVisible=false">{{$t('m.Close')}}</Button>
-      </div>
+      </div></template>
     </Modal>
 
   </div>
@@ -390,6 +390,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
   import {mapGetters, mapActions} from 'vuex'
   import {types} from '../../../../store'
   import CodeMirror from '@oj/components/CodeMirror.vue'
@@ -402,7 +403,7 @@
   import {pie, largePie} from './chartData'
   import * as echarts from 'echarts'
   import { tagDisplayName } from '@/i18n'
-  import {renderElement} from '@/plugins/katex'
+  import katex from 'katex'
 
   // 只显示这些状态的图形占用
   const filtedStatus = ['-1', '-2', '0', '1', '2', '3', '4', '8']
@@ -586,6 +587,17 @@
         text = text.replace(/@@TAG(\d+)@@/g, (m, idx) => tagPlaceholders[parseInt(idx)])
         text = text.replace(/@@MDP(\d+)@@/g, (m, idx) => mathDelimPlaceholders[parseInt(idx)])
         text = text.replace(/@@LPH(\d+)@@/g, (m, idx) => '$$' + placeholders[parseInt(idx)] + '$$')
+        // Vue3 迁移: 在字符串层直接渲染 katex(替代 DOM 后处理 auto-render),
+        // 避免挂载后替换 DOM 节点破坏 Vue3 patchBlockChildren 的 container/anchor 推导导致 insertBefore null 崩溃
+        const renderMath = (tex, displayMode) => {
+          try {
+            return katex.renderToString(tex, { displayMode, throwOnError: false })
+          } catch (e) {
+            return null
+          }
+        }
+        text = text.replace(/\$\$([\s\S]*?)\$\$/g, (m, inner) => renderMath(inner, true) || m)
+        text = text.replace(/\$(?!\$)([^$\n]+?)\$(?!\$)/g, (m, inner) => renderMath(inner, false) || m)
         return text
       },
       init () {
@@ -599,17 +611,12 @@
         api[func](this.problemID, this.contestID).then(res => {
           this.$Loading.finish()
           let problem = res.data.data
-          // 先处理数学公式内容，再赋值，避免 v-html 先渲染未处理内容导致 v-katex 时序问题
+          // 先在字符串层完成 katex 渲染再赋值, v-html 直接得到最终数学公式 HTML
           problem.description = this.processMathContent(problem.description)
           problem.input_description = this.processMathContent(problem.input_description)
           problem.output_description = this.processMathContent(problem.output_description)
           problem.hint = this.processMathContent(problem.hint)
           this.problem = problem
-          // 确保 DOM 更新后手动触发 katex 渲染，解决 transition 包裹下 componentUpdated 时序问题
-          this.$nextTick(() => {
-            const el = document.getElementById('problem-content')
-            if (el) renderElement(el)
-          })
           this.changeDomTitle({title: problem.title})
           api.submissionExists(problem.id).then(res => {
             this.submissionExists = res.data.data
@@ -706,7 +713,7 @@
         if (this.pieChart) {
           this.pieChart.dispose()
         }
-        this.pieChart = echarts.init(dom)
+        this.pieChart = markRaw(echarts.init(dom))
         this.pieChart.setOption(this.pie)
       },
       initLargePieChart () {
@@ -715,7 +722,7 @@
         if (this.largePieChart) {
           this.largePieChart.dispose()
         }
-        this.largePieChart = echarts.init(dom)
+        this.largePieChart = markRaw(echarts.init(dom))
         this.largePieChart.setOption(this.largePie)
       },
       disposeCharts () {
@@ -1048,7 +1055,7 @@
       })
       next()
     },
-    beforeDestroy () {
+    beforeUnmount () {
       window.removeEventListener('mousemove', this.handleResize)
       window.removeEventListener('mouseup', this.stopResize)
       window.removeEventListener('resize', this._resizeHandler)
@@ -1151,14 +1158,14 @@
             flex-direction: column;
           }
 
-          ::v-deep .layout-left > .ivu-card {
+          :deep(.layout-left > .ivu-card){
             flex: 1 1 auto;
             min-height: 0;
             display: flex;
             flex-direction: column;
           }
 
-          ::v-deep .layout-left .ivu-card-body {
+          :deep(.layout-left .ivu-card-body){
             flex: 1 1 0%;
             min-height: 0;
           }
@@ -1266,7 +1273,7 @@
         overflow: hidden;
         margin-bottom: 20px;
 
-        ::v-deep .ivu-card-body {
+        :deep(.ivu-card-body){
           padding: 0;
         }
 
@@ -1329,7 +1336,7 @@
         display: flex;
         flex-direction: column;
 
-        ::v-deep .ivu-card-body {
+        :deep(.ivu-card-body){
           padding: 0;
           display: flex;
           justify-content: center;
@@ -1386,16 +1393,16 @@
     overflow-wrap: break-word;
     min-width: 0;
 
-    /deep/ pre {
+    :deep(pre){
       overflow-x: auto;
     }
 
-    /deep/ img {
+    :deep(img){
       max-width: 100%;
       height: auto;
     }
 
-    /deep/ table {
+    :deep(table){
       display: block;
       overflow-x: auto;
       max-width: 100%;

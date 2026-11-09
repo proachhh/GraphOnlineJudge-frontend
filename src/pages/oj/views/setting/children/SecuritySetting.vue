@@ -4,15 +4,15 @@
     <div class="flex-container setting-content">
       <template v-for="session in sessions">
         <Card :padding="20" class="flex-child">
-          <span slot="title" style="line-height: 20px">{{session.ip}}</span>
-          <div slot="extra">
+          <template #title><span style="line-height: 20px">{{session.ip}}</span></template>
+          <template #extra><div>
             <Tag v-if="session.current_session" color="green">Current</Tag>
             <Button v-else
                     type="warning"
                     size="small"
                     @click="deleteSession(session.session_key)">Revoke
             </Button>
-          </div>
+          </div></template>
           <Form :label-width="100">
             <FormItem label="OS :" class="item">
               {{session.user_agent | platform}}

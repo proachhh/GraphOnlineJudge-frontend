@@ -1,3 +1,4 @@
+import { Icon } from 'view-ui-plus'
 import utils from '@/utils/utils'
 
 export default {
@@ -30,11 +31,9 @@ export default {
           if (status === null || status === undefined) {
             return undefined
           }
-          return h('Icon', {
-            props: {
-              type: status === 0 ? 'checkmark-round' : 'minus-round',
-              size: '16'
-            },
+          return h(Icon, {
+            type: status === 0 ? 'ios-checkmark-circle' : 'ios-remove-circle',
+            size: '16',
             style: {
               color: status === 0 ? '#19be6b' : '#ed3f14'
             }

@@ -7,7 +7,7 @@
       
       <Menu theme="light" mode="horizontal" @on-select="handleRoute" :active-name="activeMenu" class="oj-menu">
         <Menu-item name="/">
-          <Icon type="home"></Icon>
+          <Icon type="ios-home"></Icon>
           {{$t('m.Home')}}
         </Menu-item>
         <Menu-item name="/problem">
@@ -15,7 +15,7 @@
           {{$t('m.NavProblems')}}
         </Menu-item>
         <Menu-item name="/contest">
-          <Icon type="trophy"></Icon>
+          <Icon type="ios-trophy"></Icon>
           {{$t('m.Contests')}}
         </Menu-item>
         <Menu-item name="/knowledge-universe">
@@ -31,7 +31,7 @@
           题集
         </Menu-item>
         <Menu-item name="/immersion">
-          <Icon type="flash"></Icon>
+          <Icon type="ios-flash"></Icon>
           {{$t('m.Immersive_Practice')}}
         </Menu-item>
         <Menu-item name="/forum">
@@ -39,8 +39,8 @@
           {{$t('m.Community')}}
         </Menu-item>
         <!-- <Submenu name="rank">
-          <template slot="title">
-            <Icon type="podium"></Icon>
+          <template #title>
+            <Icon type="ios-trophy"></Icon>
             {{$t('m.Rank')}}
           </template>
           <Menu-item name="/acm-rank">
@@ -51,8 +51,8 @@
           </Menu-item>
         </Submenu> -->
         <!-- <Submenu name="about">
-          <template slot="title">
-            <Icon type="information-circled"></Icon>
+          <template #title>
+            <Icon type="ios-information-circle"></Icon>
             {{$t('m.About')}}
           </template>
           <Menu-item name="/about">
@@ -86,16 +86,16 @@
               <span class="user-name">{{ user.username }}</span>
               <Icon type="ios-arrow-down" class="user-arrow" />
             </div>
-            <Dropdown-menu slot="list">
+            <template #list><Dropdown-menu>
               <Dropdown-item name="/user-home"><span class="drop-icon"><Icon type="ios-home" size="18"/></span>{{$t('m.MyHome')}}</Dropdown-item>
-              <Dropdown-item name="/learning-report"><span class="drop-icon"><Icon type="ios-pulse-strong" size="18"/></span>{{$t('m.NavStatus')}}</Dropdown-item>
+              <Dropdown-item name="/learning-report"><span class="drop-icon"><Icon type="ios-pulse" size="18"/></span>{{$t('m.NavStatus')}}</Dropdown-item>
               <Dropdown-item name="/profile-onboarding"><span class="drop-icon"><Icon type="ios-person" size="18"/></span>{{$t('m.Profile_Onboarding')}}</Dropdown-item>
               <Dropdown-item name="/status?myself=1"><span class="drop-icon"><Icon type="ios-paper" size="18"/></span>{{$t('m.MySubmissions')}}</Dropdown-item>
               <Dropdown-item name="/setting/profile"><span class="drop-icon"><Icon type="ios-settings" size="18"/></span>{{$t('m.Settings')}}</Dropdown-item>
               <Dropdown-item v-if="isTeacher || isAdminRole" name="/teacher"><span class="drop-icon"><Icon type="ios-people" size="18"/></span>教师</Dropdown-item>
               <Dropdown-item v-if="isAdminRole" name="/admin"><span class="drop-icon"><Icon type="ios-cog" size="18"/></span>{{$t('m.Management')}}</Dropdown-item>
               <Dropdown-item divided name="/logout"><span class="drop-icon"><Icon type="ios-log-out" size="18"/></span>{{$t('m.Logout')}}</Dropdown-item>
-            </Dropdown-menu>
+            </Dropdown-menu></template>
           </Dropdown>
         </template>
       </div>
@@ -104,6 +104,8 @@
 </template>
 
 <script>
+  import logo1 from '@/assets/logo.png'
+  import logo2 from '@/assets/logo2.png'
   import { mapGetters, mapActions } from 'vuex'
 
   export default {
@@ -116,7 +118,7 @@
       this.getProfile()
       window.addEventListener('scroll', this.handleScroll)
     },
-    beforeDestroy () {
+    beforeUnmount () {
       window.removeEventListener('scroll', this.handleScroll)
     },
     methods: {
@@ -147,7 +149,7 @@
       logoSrc () {
         // 首页未滚动时显示 logo.png，学习页面（透明背景）也显示 logo.png，其他情况显示 logo2.png
         const isLearningPath = this.$route.path === '/knowledge-universe'
-        return (this.isHome && !this.scrolled) || (isLearningPath && !this.scrolled) ? require('@/assets/logo.png') : require('@/assets/logo2.png')
+        return (this.isHome && !this.scrolled) || (isLearningPath && !this.scrolled) ? logo1 : logo2
       },
       activeMenu () {
         const path = this.$route.path
@@ -176,12 +178,12 @@
     position: fixed;
     top: 0;
     left: 0;
-    height: 80px;
+    height: 64px;
     width: 100%;
     z-index: 1000;
     transition: all 0.3s ease;
     border: none !important;
-    padding-top: 10px;
+    padding-top: 6px;
     
     &.header-transparent {
       background-color: transparent;
@@ -290,7 +292,7 @@
       flex-shrink: 0;
       
       .logo-img {
-        height: 46px;
+        height: 38px;
         object-fit: contain;
         vertical-align: middle;
         transition: transform 0.2s ease;
@@ -315,9 +317,9 @@
       
       .ivu-menu-item, .ivu-menu-submenu-title {
         margin: 0 4px;
-        padding: 0 16px;
-        height: 40px;
-        line-height: 40px;
+        padding: 0 14px;
+        height: 34px;
+        line-height: 34px;
         border-radius: 20px;
         border: 2px solid #1e3a8a;
         color: #1e3a8a !important;
@@ -420,7 +422,7 @@
   }
 
   .drop-menu {
-    /deep/ .ivu-select-dropdown {
+    :deep(.ivu-select-dropdown){
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(30, 58, 138, 0.12);
       border: 1px solid #e2e8f0;
@@ -428,7 +430,7 @@
       min-width: 140px;
     }
 
-    /deep/ .ivu-dropdown-menu {
+    :deep(.ivu-dropdown-menu){
       border-radius: 12px;
     }
 
@@ -441,7 +443,7 @@
       flex-shrink: 0;
     }
 
-    /deep/ .ivu-dropdown-item {
+    :deep(.ivu-dropdown-item){
       padding: 8px 14px;
       border-radius: 8px;
       margin: 1px 0;
@@ -467,7 +469,7 @@
       }
     }
 
-    /deep/ .ivu-dropdown-item-divided {
+    :deep(.ivu-dropdown-item-divided){
       margin-top: 6px;
       padding-top: 10px;
       border-top: 1px solid #f1f5f9;

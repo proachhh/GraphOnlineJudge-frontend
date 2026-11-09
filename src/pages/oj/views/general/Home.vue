@@ -61,7 +61,7 @@
         <p class="cta-subtitle">{{ $t('m.Home_CTA_Subtitle') }}</p>
         <div class="cta-buttons">
           <Button type="primary" size="large" class="cta-btn" @click="goToProfileOnboarding">
-            <Icon type="ios-rocket" /> 开始
+            <Icon type="ios-jet" /> 开始
           </Button>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default {
           screenshot: '/static/pictures/graph.png'
         },
         {
-          icon: 'flash',
+          icon: 'ios-flash',
           titleKey: 'm.Feature_Recommendation',
           descKey: 'm.Feature_Recommendation_Desc',
           key: 'recommendation',
@@ -217,7 +217,7 @@ export default {
     this.initScrollAnimations()
     window.addEventListener('scroll', this.onHeroScroll, { passive: true })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('scroll', this.onHeroScroll)
   }
 }

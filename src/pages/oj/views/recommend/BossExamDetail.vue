@@ -6,16 +6,16 @@
         <el-button icon="el-icon-arrow-left" size="mini" circle @click="$router.back()" class="back-btn"></el-button>
         <div class="header-info">
           <div class="header-title">
-            <i class="el-icon-trophy"></i>
+            <el-icon-trophy/>
             <span>{{ exam.title || 'Boss 挑战' }}</span>
             <span class="boss-tag">BOSS</span>
           </div>
           <div class="header-meta">
             <el-tag size="mini" :type="diffTag(exam.difficulty)" effect="dark" v-if="exam.difficulty">{{ diffText(exam.difficulty) }}</el-tag>
             <el-tag size="mini" type="danger" effect="plain" v-if="exam.passing_score != null">及格 {{ exam.passing_score }} 分</el-tag>
-            <span class="meta-text" v-if="exam.time_limit"><i class="el-icon-time"></i> {{ exam.time_limit }} 分钟</span>
+            <span class="meta-text" v-if="exam.time_limit"><el-icon-time/> {{ exam.time_limit }} 分钟</span>
             <span class="meta-text" v-if="timerActive" :class="{ 'timer-warn': remainSeconds < 60 }">
-              <i class="el-icon-alarm-clock"></i> 剩余 {{ formattedTime }}
+              <el-icon-alarm-clock/> 剩余 {{ formattedTime }}
             </span>
           </div>
         </div>
@@ -49,7 +49,7 @@
     <!-- Boss 知识点 + 描述 -->
     <div class="boss-info-box" v-if="exam.boss_topic || exam.description || exam.topic_area">
       <div class="boss-topic-row" v-if="exam.boss_topic">
-        <i class="el-icon-aim"></i>
+        <el-icon-aim/>
         <span class="bt-label">Boss 汇聚知识点：</span>
         <span class="bt-name">{{ exam.boss_topic }}</span>
       </div>
@@ -81,7 +81,7 @@
         <!-- 代码题 -->
         <div v-else-if="q.question_type === 'code'" class="q-body">
           <div class="problem-link" v-if="q.problem" @click="goProblem(q.problem)">
-            <i class="el-icon-link"></i> 关联题目：{{ q.problem.title || '#' + q.problem._id }}
+            <el-icon-link/> 关联题目：{{ q.problem.title || '#' + q.problem._id }}
           </div>
           <el-input type="textarea" v-model="answers[q.id]" :rows="8" placeholder="在此输入代码..."
             :disabled="phase !== 'answering'"></el-input>
@@ -113,7 +113,7 @@
         </div>
         <el-button type="warning" size="medium" v-if="phase === 'submitted' && pendingAiGrading"
                    @click="startGradingStream" :loading="grading">
-          <i class="el-icon-magic-stick"></i> 开始 AI 评估
+          <el-icon-magic-stick/> 开始 AI 评估
         </el-button>
         <el-button type="success" size="medium" v-if="phase === 'submitted' && !pendingAiGrading"
                    @click="loadReport">查看报告</el-button>
@@ -121,7 +121,7 @@
 
       <!-- AI 流式反馈 -->
       <div class="ai-stream" v-if="phase === 'grading' && streamingText">
-        <div class="stream-title"><i class="el-icon-loading"></i> AI 综合评估</div>
+        <div class="stream-title"><el-icon-loading/> AI 综合评估</div>
         <div class="stream-text markdown-body" v-html="renderMarkdown(streamingText)"></div>
       </div>
     </div>
@@ -135,7 +135,7 @@
         </div>
         <div class="summary-status">
           <div class="pass-text" :class="passed ? 'pass' : 'fail'">
-            <i :class="passed ? 'el-icon-success' : 'el-icon-error'"></i>
+            <component :is="passed ? 'el-icon-success' : 'el-icon-error'"/>
             {{ passed ? '挑战通过！' : '挑战未通过' }}
           </div>
           <div class="pass-detail" v-if="exam.passing_score != null">及格线：{{ exam.passing_score }} 分</div>
@@ -145,7 +145,7 @@
 
       <!-- 总体 AI 评估 -->
       <div class="overall-ai" v-if="report.ai_feedback || report.overall_feedback">
-        <div class="overall-title"><i class="el-icon-magic-stick"></i> AI 综合评价</div>
+        <div class="overall-title"><el-icon-magic-stick/> AI 综合评价</div>
         <div class="overall-text markdown-body" v-html="renderMarkdown(report.ai_feedback || report.overall_feedback)"></div>
       </div>
 
@@ -174,7 +174,7 @@
           <div class="exp-text" v-html="renderMarkdown(q.explanation)"></div>
         </div>
         <div class="report-ai" v-if="q.ai_feedback">
-          <span class="exp-label ai"><i class="el-icon-magic-stick"></i> AI 反馈</span>
+          <span class="exp-label ai"><el-icon-magic-stick/> AI 反馈</span>
           <div class="exp-text" v-html="renderMarkdown(q.ai_feedback)"></div>
         </div>
       </div>
@@ -185,7 +185,7 @@
     </div>
 
     <div v-if="!loading && !questions.length && phase !== 'done'" class="empty-hint">
-      <i class="el-icon-warning-outline"></i>
+      <el-icon-warning-outline/>
       <p>未找到试卷内容</p>
     </div>
 
@@ -302,7 +302,7 @@ export default {
   mounted () {
     this.loadDetail()
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.clearTimer()
     this.clearVictory()
   },
@@ -764,8 +764,8 @@ export default {
   width: 100%;
 }
 .q-option:hover { background: #f5f7fa; }
-.q-option /deep/ .el-radio { margin-right: 0; white-space: normal; }
-.q-option /deep/ .el-radio__label { white-space: normal; word-break: break-word; }
+.q-option :deep(.el-radio){ margin-right: 0; white-space: normal; }
+.q-option :deep(.el-radio__label){ white-space: normal; word-break: break-word; }
 
 .problem-link {
   color: #c0392b;
@@ -787,27 +787,27 @@ export default {
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-.submit-bar /deep/ .el-button--danger {
+.submit-bar :deep(.el-button--danger){
   background: #c0392b;
   border-color: #c0392b;
 }
-.submit-bar /deep/ .el-button--danger:hover {
+.submit-bar :deep(.el-button--danger:hover){
   background: #d04438;
   border-color: #d04438;
 }
-.result-bar /deep/ .el-button--warning {
+.result-bar :deep(.el-button--warning){
   background: #e6a23c;
   border-color: #e6a23c;
 }
-.result-bar /deep/ .el-button--warning:hover {
+.result-bar :deep(.el-button--warning:hover){
   background: #ebb563;
   border-color: #ebb563;
 }
-.result-bar /deep/ .el-button--success {
+.result-bar :deep(.el-button--success){
   background: #67c23a;
   border-color: #67c23a;
 }
-.result-bar /deep/ .el-button--success:hover {
+.result-bar :deep(.el-button--success:hover){
   background: #85ce61;
   border-color: #85ce61;
 }
@@ -831,8 +831,8 @@ export default {
 }
 .stream-title { font-size: 15px; font-weight: 600; color: #c0392b; margin-bottom: 10px; }
 .stream-text { font-size: 14px; line-height: 1.8; color: #303133; white-space: pre-wrap; }
-.stream-text /deep/ pre { background: #2d2d2d; color: #f8f8f2; padding: 12px; border-radius: 6px; overflow-x: auto; }
-.stream-text /deep/ code { background: #eef1f6; padding: 2px 6px; border-radius: 3px; }
+.stream-text :deep(pre){ background: #2d2d2d; color: #f8f8f2; padding: 12px; border-radius: 6px; overflow-x: auto; }
+.stream-text :deep(code){ background: #eef1f6; padding: 2px 6px; border-radius: 3px; }
 
 .report-wrap { display: flex; flex-direction: column; gap: 16px; }
 .report-summary {
@@ -865,8 +865,8 @@ export default {
 }
 .overall-title { font-size: 16px; font-weight: 600; color: #c0392b; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 .overall-text { font-size: 15px; line-height: 1.9; color: #303133; }
-.overall-text /deep/ pre { background: #2d2d2d; color: #f8f8f2; padding: 12px; border-radius: 6px; overflow-x: auto; }
-.overall-text /deep/ code { background: #eef1f6; padding: 2px 6px; border-radius: 3px; }
+.overall-text :deep(pre){ background: #2d2d2d; color: #f8f8f2; padding: 12px; border-radius: 6px; overflow-x: auto; }
+.overall-text :deep(code){ background: #eef1f6; padding: 2px 6px; border-radius: 3px; }
 
 .report-answers { background: #f5f7fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
 .ra-row { display: flex; gap: 6px; padding: 4px 0; font-size: 14px; }
@@ -885,15 +885,15 @@ export default {
 .exp-label { color: #909399; font-size: 13px; font-weight: 600; }
 .exp-label.ai { color: #c0392b; }
 .exp-text { font-size: 14px; line-height: 1.8; margin-top: 6px; color: #303133; }
-.exp-text /deep/ pre { background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 6px; overflow-x: auto; }
-.exp-text /deep/ code { background: #eef1f6; padding: 2px 4px; border-radius: 3px; }
+.exp-text :deep(pre){ background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 6px; overflow-x: auto; }
+.exp-text :deep(code){ background: #eef1f6; padding: 2px 4px; border-radius: 3px; }
 
 .report-actions { text-align: center; padding: 10px 0; }
-.report-actions /deep/ .el-button--danger {
+.report-actions :deep(.el-button--danger){
   background: #c0392b;
   border-color: #c0392b;
 }
-.report-actions /deep/ .el-button--success {
+.report-actions :deep(.el-button--success){
   background: #67c23a;
   border-color: #67c23a;
 }

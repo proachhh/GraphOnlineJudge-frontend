@@ -1,9 +1,8 @@
-import Vue from 'vue'
+import { ElMessage } from 'element-plus'
 import router from './router'
 import axios from 'axios'
 import utils from '@/utils/utils'
 
-Vue.prototype.$http = axios
 axios.defaults.baseURL = '/api'
 axios.defaults.withCredentials = true
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
@@ -431,7 +430,7 @@ function ajax (url, method, options) {
       // API正常返回(status=20x), 是否错误通过有无error判断
       if (res.data.error != null) {
         let errorMsg = res.data.data || res.data.error || '操作失败'
-        Vue.prototype.$error(errorMsg)
+        ElMessage.error(errorMsg)
         reject(res)
         // 仅在 login-required 错误时跳转登录页
         if (res.data.error === 'login-required') {
@@ -440,7 +439,7 @@ function ajax (url, method, options) {
       } else {
         resolve(res)
         if (method !== 'get') {
-          Vue.prototype.$success('Succeeded')
+          ElMessage.success('Succeeded')
         }
       }
     }, res => {
@@ -462,7 +461,7 @@ function ajax (url, method, options) {
       } else if (res.statusText) {
         errorMsg = res.statusText
       }
-      Vue.prototype.$error(errorMsg)
+      ElMessage.error(errorMsg)
     })
   })
 }

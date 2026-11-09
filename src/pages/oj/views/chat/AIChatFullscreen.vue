@@ -99,6 +99,7 @@
 </template>
 
 <script>
+import logo3 from '@/assets/logo3.png'
 import MessageItem from './components/MessageItem.vue'
 import { formatAgentResponse, extractAgentDisplay } from './utils.js'
 import chatState from './chatState.js'
@@ -142,7 +143,7 @@ export default {
       return this.quickQuestionsKeys.map(key => this.$t(key))
     },
     aiAvatar () {
-      if (this.aiModel === 'agent') return require('@/assets/logo3.png')
+      if (this.aiModel === 'agent') return logo3
       return this.aiModel === 'deepseek' ? '/static/pictures/ds.png' : '/static/pictures/xh.png'
     },
     aiDisplayName () {
@@ -306,8 +307,8 @@ export default {
               if (data.event === 'step') {
                 const steps = chatState.messages[loadingIdx].thinkingSteps || []
                 steps.push(data.text)
-                this.$set(chatState.messages[loadingIdx], 'thinkingSteps', steps)
-                this.$set(chatState.messages[loadingIdx], 'currentStepIndex', steps.length)
+                chatState.messages[loadingIdx]['thinkingSteps'] = steps
+                chatState.messages[loadingIdx]['currentStepIndex'] = steps.length
                 await this.$nextTick()
               } else if (data.event === 'done') {
                 chatState.messages[loadingIdx].allStepsDone = true
@@ -469,8 +470,8 @@ export default {
 
   .header-right {
     .model-select { width: 150px;
-      /deep/ .ivu-select-selection { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; }
-      /deep/ .ivu-select-arrow { color: rgba(255, 255, 255, 0.8); }
+      :deep(.ivu-select-selection){ background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; }
+      :deep(.ivu-select-arrow){ color: rgba(255, 255, 255, 0.8); }
     }
   }
 }
@@ -489,7 +490,7 @@ export default {
   h3 { font-size: 22px; color: #17233d; margin: 0 0 8px; }
   p { font-size: 14px; color: #808695; margin: 0 0 24px; }
   .quick-commands { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 24px;
-    /deep/ .ivu-btn { font-size: 15px; padding: 10px 22px; border-radius: 12px; }
+    :deep(.ivu-btn){ font-size: 15px; padding: 10px 22px; border-radius: 12px; }
   }
 }
 
@@ -499,7 +500,7 @@ export default {
 
 .input-section { padding: 12px 16px; background: #fff; border-top: 1px solid #e8eaec; }
 .input-container .message-input {
-  /deep/ textarea { resize: none; border-radius: 8px; }
+  :deep(textarea){ resize: none; border-radius: 8px; }
 }
 .input-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 8px;
   .hint { font-size: 12px; color: #c5c8ce; }

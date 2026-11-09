@@ -1,16 +1,14 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
+import { setAppRouter } from '@/store'
 // 引入 view 组件
 import { Announcement, Conf, Contest, ContestList, Home, JudgeServer, Login,
   Problem, ProblemList, User, PruneTestCase, Dashboard, ProblemImportOrExport, DataDashboard, ImmersionDashboard, Feedback,
   ForumPostManage, ForumUserManage, ForumReportManage } from './views'
 const LessonPlan = () => import('./views/lesson/LessonPlan.vue')
-Vue.use(VueRouter)
 
-export default new VueRouter({
-  mode: 'history',
-  base: '/admin/',
-  scrollBehavior: () => ({y: 0}),
+const router = createRouter({
+  history: createWebHistory('/admin/'),
+  scrollBehavior: () => ({left: 0, top: 0}),
   routes: [
     {
       path: '/login',
@@ -143,7 +141,12 @@ export default new VueRouter({
       component: ImmersionDashboard
     },
     {
-      path: '*', redirect: '/login'
+      path: '/:pathMatch(.*)*', redirect: '/login'
     }
   ]
 })
+
+// 注入 router 实例供 store.changeDomTitle 使用（替代已废弃的 vuex-router-sync）
+setAppRouter(router)
+
+export default router

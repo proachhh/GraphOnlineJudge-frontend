@@ -6,7 +6,7 @@
       <div class="status-section">
         <Alert :type="status.type" showIcon>
           <span class="status-title">{{$t('m.' + status.statusName.replace(/ /g, "_"))}}</span>
-          <div slot="desc" class="status-content">
+          <template #desc><div class="status-content">
             <template v-if="isCE">
               <pre>{{submission.statistic_info.err_info}}</pre>
             </template>
@@ -16,7 +16,7 @@
               <span>{{$t('m.Lang')}}: {{submission.language}}</span>
               <span>{{$t('m.Author')}}: {{submission.username}}</span>
             </template>
-          </div>
+          </div></template>
         </Alert>
       </div>
 
@@ -83,7 +83,7 @@
       <!-- AI 深度审查报告入口 -->
       <div v-if="isAccepted" class="deep-review-entry">
         <Button type="warning" size="large" long @click="goDeepReview">
-          <Icon type="ios-pulse-strong"></Icon>
+          <Icon type="ios-pulse"></Icon>
           AI 深度审查报告（复杂度/评分/雷达图）
         </Button>
       </div>
@@ -92,6 +92,7 @@
 </template>
 
 <script>
+import { Tag } from 'view-ui-plus'
   import api from '@oj/api'
   import {JUDGE_STATUS, buildProblemCodeKey} from '@/utils/constants'
   import utils from '@/utils/utils'
@@ -117,10 +118,8 @@
             title: this.$i18n.t('m.Status'),
             align: 'center',
             render: (h, params) => {
-              return h('Tag', {
-                props: {
-                  color: JUDGE_STATUS[params.row.result].color
-                }
+              return h(Tag, {
+                color: JUDGE_STATUS[params.row.result].color
               }, this.$i18n.t('m.' + JUDGE_STATUS[params.row.result].name.replace(/ /g, '_')))
             }
           },

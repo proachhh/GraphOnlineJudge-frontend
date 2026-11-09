@@ -38,7 +38,7 @@
       this.getWebsiteConfig()
       this.toggleHomeBackground()
     },
-    beforeDestroy () {
+    beforeUnmount () {
     },
     methods: {
       ...mapActions(['getWebsiteConfig', 'changeDomTitle']),
@@ -105,7 +105,7 @@
 
   .content-app {
   min-height: 100vh;
-  margin-top: 80px;
+  margin-top: 64px;
   padding: 0 2%;
 }
 

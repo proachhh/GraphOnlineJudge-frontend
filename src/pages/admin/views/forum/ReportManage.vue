@@ -16,7 +16,7 @@
         style="width: 100%; margin-top: 10px;">
         <el-table-column prop="reporter" label="举报人" width="120"></el-table-column>
         <el-table-column label="目标类型" width="100">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag v-if="scope.row.target_type === 'post'" size="small">帖子</el-tag>
             <el-tag v-else-if="scope.row.target_type === 'comment'" type="info" size="small">评论</el-tag>
             <el-tag v-else type="warning" size="small">{{ scope.row.target_type }}</el-tag>
@@ -24,22 +24,22 @@
         </el-table-column>
         <el-table-column prop="target_id" label="目标ID" width="90"></el-table-column>
         <el-table-column prop="reason" label="举报原因" min-width="120">
-          <template slot-scope="scope">{{ scope.row.reason }}</template>
+          <template #default="scope">{{ scope.row.reason }}</template>
         </el-table-column>
         <el-table-column label="被举报内容" min-width="200">
-          <template slot-scope="scope">
+          <template #default="scope">
             <div v-html="scope.row.target_content" style="max-height:60px;overflow:hidden;font-size:12px;color:#666;cursor:pointer" @click="previewVisible=true;previewHtml=scope.row.target_content"></div>
           </template>
         </el-table-column>
         <el-table-column prop="detail" label="详细说明" min-width="160">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tooltip :content="scope.row.detail" placement="top" :disabled="!scope.row.detail || scope.row.detail.length < 30">
               <span class="text-ellipsis">{{ scope.row.detail || '—' }}</span>
             </el-tooltip>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="90">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag v-if="scope.row.status === 'pending'" type="warning" size="small">待处理</el-tag>
             <el-tag v-else-if="scope.row.status === 'resolved'" type="success" size="small">已处理</el-tag>
             <el-tag v-else-if="scope.row.status === 'dismissed'" type="info" size="small">已驳回</el-tag>
@@ -47,12 +47,12 @@
           </template>
         </el-table-column>
         <el-table-column prop="create_time" label="举报时间" width="170">
-          <template slot-scope="scope">
+          <template #default="scope">
             {{ scope.row.create_time | localtime }}
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="100" align="center">
-          <template slot-scope="{row}">
+          <template #default="{row}">
             <el-button v-if="row.status === 'pending'" type="primary" size="mini"
                        icon="el-icon-edit" @click="openHandleDialog(row)">处理</el-button>
             <span v-else>—</span>
@@ -95,10 +95,10 @@
                     placeholder="可选填写处理备注..."></el-input>
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <template #footer><span class="dialog-footer">
         <cancel @click.native="showHandleDialog = false">取消</cancel>
         <save @click.native="confirmHandle" :loading="handling">确认处理</save>
-      </span>
+      </span></template>
     </el-dialog>
     <el-dialog title="内容预览" :visible.sync="previewVisible" width="750px" top="5vh">
       <div v-html="previewHtml" style="max-height:70vh;overflow-y:auto"></div>

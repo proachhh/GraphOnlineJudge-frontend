@@ -3,13 +3,13 @@
     <div style="padding-bottom: 10px;">
     </div>
     <panel title="Export Problems (beta)">
-      <div slot="header">
+      <template #header><div>
         <el-input
           v-model="keyword"
           prefix-icon="el-icon-search"
           placeholder="Keywords">
         </el-input>
-      </div>
+      </div></template>
       <el-table :data="problems"
                 v-loading="loadingProblems" @selection-change="handleSelectionChange">
         <el-table-column
@@ -37,7 +37,7 @@
         <el-table-column
           prop="create_time"
           label="Create Time">
-          <template slot-scope="scope">
+          <template #default="scope">
             {{scope.row.create_time | localtime }}
           </template>
         </el-table-column>
@@ -69,7 +69,7 @@
         :auto-upload="false"
         :on-success="uploadSucceeded"
         :on-error="uploadFailed">
-        <el-button size="small" type="primary" icon="el-icon-fa-upload" slot="trigger">Choose File</el-button>
+        <template #trigger><el-button size="small" type="primary" icon="el-icon-fa-upload">Choose File</el-button></template>
         <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload('QDU')">Upload</el-button>
       </el-upload>
     </panel>
@@ -87,7 +87,7 @@
         :auto-upload="false"
         :on-success="uploadSucceeded"
         :on-error="uploadFailed">
-        <el-button size="small" type="primary" icon="el-icon-fa-upload" slot="trigger">Choose File</el-button>
+        <template #trigger><el-button size="small" type="primary" icon="el-icon-fa-upload">Choose File</el-button></template>
         <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload('FPS')">Upload</el-button>
       </el-upload>
     </panel>
@@ -100,21 +100,21 @@
       </div>
       <div style="display: flex; margin-bottom: 15px;">
         <el-input v-model="lojUrl" placeholder="输入 LOJ 题目编号，如 1" @keyup.enter.native="fetchLojProblem" :disabled="lojFetching">
-          <el-button slot="append" icon="el-icon-fa-download" @click="fetchLojProblem" :loading="lojFetching">获取题目</el-button>
+          <template #append><el-button icon="el-icon-fa-download" @click="fetchLojProblem" :loading="lojFetching">获取题目</el-button></template>
         </el-input>
       </div>
 
       <div v-if="lojFetching" style="text-align:center;padding:20px;color:#909399;">
-        <i class="el-icon-loading"></i> 正在从 LOJ 获取题目数据...
+        <el-icon-loading/> 正在从 LOJ 获取题目数据...
       </div>
 
       <div v-if="lojError" class="loj-error-msg">
-        <i class="el-icon-warning"></i> {{ lojError }}
+        <el-icon-warning/> {{ lojError }}
       </div>
 
       <div v-if="lojPreview" class="loj-preview">
         <el-card shadow="never">
-          <div slot="header" style="display:flex;align-items:center;justify-content:space-between;">
+          <template #header><div style="display:flex;align-items:center;justify-content:space-between;">
             <span style="font-weight:bold;">题目预览</span>
             <div>
               <el-button type="primary" size="small" @click="importLojProblem" :loading="lojImporting">
@@ -122,7 +122,7 @@
               </el-button>
               <el-button size="small" @click="resetLojPanel">取消</el-button>
             </div>
-          </div>
+          </div></template>
           <div style="padding: 10px 0;">
             <p><strong>标题：</strong>{{ lojPreview.title }}</p>
             <p><strong>时间限制：</strong>{{ lojPreview.time_limit }} ms</p>
@@ -140,7 +140,7 @@
       </div>
 
       <div v-if="lojImportResult" class="loj-import-success">
-        <i class="el-icon-success"></i>
+        <el-icon-success/>
         题目导入成功！ID: {{ lojImportResult._id }}，标题: {{ lojImportResult.title }}
         <span v-if="lojImportResult.testcase_count">，测试点: {{ lojImportResult.testcase_count }} 组</span>
         <el-button type="text" @click="resetLojPanel">继续导入下一题</el-button>

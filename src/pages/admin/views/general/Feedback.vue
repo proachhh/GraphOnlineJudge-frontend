@@ -1,34 +1,34 @@
 <template>
   <div class="feedback-admin">
     <el-card>
-      <div slot="header" style="display:flex;justify-content:space-between;align-items:center">
+      <template #header><div style="display:flex;justify-content:space-between;align-items:center">
         <span>反馈管理</span>
         <el-select v-model="filter" size="small" @change="load" style="width:140px">
           <el-option label="全部" value="all"/>
           <el-option label="未处理" value="false"/>
           <el-option label="已处理" value="true"/>
         </el-select>
-      </div>
+      </div></template>
       <el-table :data="list" v-loading="loading" border stripe>
         <el-table-column prop="username" label="用户" width="100"/>
         <el-table-column prop="title" label="标题" min-width="160"/>
         <el-table-column label="内容" min-width="200">
-          <template slot-scope="scope">
+          <template #default="scope">
             <div v-html="scope.row.content" style="max-height:60px;overflow:hidden"/>
           </template>
         </el-table-column>
         <el-table-column prop="create_time" label="时间" width="160">
-          <template slot-scope="scope">{{ scope.row.create_time | localtime }}</template>
+          <template #default="scope">{{ scope.row.create_time | localtime }}</template>
         </el-table-column>
         <el-table-column label="状态" width="90">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag :type="scope.row.resolved ? 'success' : 'warning'" size="small">
               {{ scope.row.resolved ? '已处理' : '未处理' }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="160">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-button type="text" size="small" @click="openDetail(scope.row)">详情</el-button>
             <el-button v-if="!scope.row.resolved" type="text" size="small" @click="markResolved(scope.row)">标记已处理</el-button>
             <el-button type="text" size="small" style="color:#f56c6c" @click="del(scope.row)">删除</el-button>

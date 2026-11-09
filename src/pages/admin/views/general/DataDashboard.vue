@@ -15,7 +15,7 @@
     <div class="overview-cards">
       <div class="card overview-card">
         <div class="card-icon" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
-          <i class="el-icon-fa-users"></i>
+          <el-icon-fa-users/>
         </div>
         <div class="card-content">
           <div class="card-value">{{ overview.total_users || 0 }}</div>
@@ -24,7 +24,7 @@
       </div>
       <div class="card overview-card">
         <div class="card-icon" style="background: linear-gradient(135deg, #1e40af, #6366f1);">
-          <i class="el-icon-fa-file-text"></i>
+          <el-icon-fa-file-text/>
         </div>
         <div class="card-content">
           <div class="card-value">{{ overview.total_problems || 0 }}</div>
@@ -33,7 +33,7 @@
       </div>
       <div class="card overview-card">
         <div class="card-icon" style="background: linear-gradient(135deg, #1e3a8a, #2563eb);">
-          <i class="el-icon-fa-paper-plane"></i>
+          <el-icon-fa-paper-plane/>
         </div>
         <div class="card-content">
           <div class="card-value">{{ overview.total_submissions || 0 }}</div>
@@ -42,7 +42,7 @@
       </div>
       <div class="card overview-card">
         <div class="card-icon" style="background: linear-gradient(135deg, #1e40af, #3b82f6);">
-          <i class="el-icon-fa-trophy"></i>
+          <el-icon-fa-trophy/>
         </div>
         <div class="card-content">
           <div class="card-value">{{ overview.total_contests || 0 }}</div>
@@ -121,14 +121,14 @@
           <el-table-column prop="_id" label="ID" width="80"></el-table-column>
           <el-table-column prop="title" label="题目标题" show-overflow-tooltip></el-table-column>
           <el-table-column label="难度" width="80">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-tag :type="diffTagType(scope.row.difficulty)" size="small">{{ diffLabel(scope.row.difficulty) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="submission_count" label="提交数" width="80"></el-table-column>
           <el-table-column prop="accepted_count" label="通过数" width="80"></el-table-column>
           <el-table-column label="通过率" width="100">
-            <template slot-scope="scope">
+            <template #default="scope">
               <span>{{ (scope.row.pass_rate || 0).toFixed(1) }}%</span>
             </template>
           </el-table-column>
@@ -141,14 +141,14 @@
           <el-table-column prop="_id" label="ID" width="80"></el-table-column>
           <el-table-column prop="title" label="题目标题" show-overflow-tooltip></el-table-column>
           <el-table-column label="难度" width="80">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-tag :type="diffTagType(scope.row.difficulty)" size="small">{{ diffLabel(scope.row.difficulty) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="submission_count" label="提交数" width="80"></el-table-column>
           <el-table-column prop="accepted_count" label="通过数" width="80"></el-table-column>
           <el-table-column label="通过率" width="100">
-            <template slot-scope="scope">
+            <template #default="scope">
               <span>{{ (scope.row.pass_rate || 0).toFixed(1) }}%</span>
             </template>
           </el-table-column>
@@ -164,12 +164,12 @@
           <el-table-column prop="rank" label="排名" width="60"></el-table-column>
           <el-table-column prop="username" label="用户名" width="120"></el-table-column>
           <el-table-column label="真实姓名" width="120">
-            <template slot-scope="scope">{{ scope.row.real_name || '-' }}</template>
+            <template #default="scope">{{ scope.row.real_name || '-' }}</template>
           </el-table-column>
           <el-table-column prop="accepted_count" label="通过数" width="80"></el-table-column>
           <el-table-column prop="submission_count" label="提交数" width="80"></el-table-column>
           <el-table-column label="AC率" width="80">
-            <template slot-scope="scope">
+            <template #default="scope">
               <span>{{ (typeof scope.row.ac_rate === 'number' ? scope.row.ac_rate.toFixed(1) : scope.row.ac_rate || 0) }}%</span>
             </template>
           </el-table-column>
@@ -183,13 +183,13 @@
           <el-table-column prop="username" label="用户" width="110" show-overflow-tooltip></el-table-column>
           <el-table-column prop="problem_id" label="题号" width="80"></el-table-column>
           <el-table-column label="结果" width="100">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-tag :type="resultTagType(scope.row.result)" size="mini">{{ resultLabel(scope.row.result) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="language" label="语言" width="90" show-overflow-tooltip></el-table-column>
           <el-table-column label="时间" width="180" class-name="nowrap-cell">
-            <template slot-scope="scope">{{ scope.row.create_time }}</template>
+            <template #default="scope">{{ scope.row.create_time }}</template>
           </el-table-column>
         </el-table>
         <div v-if="!recentSubmissions.length" class="no-data">暂无数据</div>
@@ -202,7 +202,7 @@
         <el-table :data="topSubmittersAllTime" :key="'t4-'+tableKey" size="small" stripe>
           <el-table-column prop="username" label="用户名" width="120"></el-table-column>
           <el-table-column label="真实姓名" width="120">
-            <template slot-scope="scope">{{ scope.row.real_name || '-' }}</template>
+            <template #default="scope">{{ scope.row.real_name || '-' }}</template>
           </el-table-column>
           <el-table-column prop="submission_count" label="提交数" width="100"></el-table-column>
           <el-table-column prop="accepted_count" label="通过数" width="100"></el-table-column>
@@ -215,7 +215,7 @@
         <el-table :data="topSubmittersWeek" :key="'t5-'+tableKey" size="small" stripe>
           <el-table-column prop="username" label="用户名" width="120"></el-table-column>
           <el-table-column label="真实姓名" width="120">
-            <template slot-scope="scope">{{ scope.row.real_name || '-' }}</template>
+            <template #default="scope">{{ scope.row.real_name || '-' }}</template>
           </el-table-column>
           <el-table-column prop="submission_count" label="本周提交" width="100"></el-table-column>
           <el-table-column prop="accepted_count" label="本周通过" width="100"></el-table-column>
@@ -254,7 +254,7 @@ export default {
     this.fetchData()
     window.addEventListener('resize', this.handleResize)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     window.removeEventListener('resize', this.handleResize)
   },
   methods: {
@@ -496,7 +496,7 @@ export default {
   background: #f5f7fa;
 }
 
-.data-dashboard /deep/ .nowrap-cell .cell {
+.data-dashboard :deep(.nowrap-cell .cell){
   white-space: nowrap;
 }
 
@@ -603,9 +603,9 @@ export default {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   h3 { font-size: 18px; font-weight: 600; color: #1e3a8a; margin: 0 0 16px; }
 
-  /deep/ .el-table { font-size: 15px; }
-  /deep/ .el-table th { font-size: 15px; padding: 10px 0; }
-  /deep/ .el-table td { font-size: 15px; padding: 8px 0; }
+  :deep(.el-table){ font-size: 15px; }
+  :deep(.el-table th){ font-size: 15px; padding: 10px 0; }
+  :deep(.el-table td){ font-size: 15px; padding: 8px 0; }
 }
 
 .no-data {

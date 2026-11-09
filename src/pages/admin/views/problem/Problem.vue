@@ -134,9 +134,9 @@
         <div>
           <el-form-item v-for="(sample, index) in problem.samples" :key="'sample'+index">
             <Accordion :title="'Sample' + (index + 1)">
-              <el-button type="warning" size="small" icon="el-icon-delete" slot="header" @click="deleteSample(index)">
+              <template #header><el-button type="warning" size="small" icon="el-icon-delete" @click="deleteSample(index)">
                 Delete
-              </el-button>
+              </el-button></template>
               <el-row :gutter="20">
                 <el-col :span="12">
                   <el-form-item :label="$t('m.Input_Samples')" required>
@@ -164,7 +164,7 @@
         </div>
 
         <div class="add-sample-btn">
-          <button type="button" class="add-samples" @click="addSample()"><i class="el-icon-plus"></i>{{$t('m.Add_Sample')}}
+          <button type="button" class="add-samples" @click="addSample()"><el-icon-plus/>{{$t('m.Add_Sample')}}
           </button>
         </div>
 
@@ -193,7 +193,7 @@
 
         <el-form-item v-if="problem.spj">
           <Accordion :title="$t('m.Special_Judge_Code')">
-            <template slot="header">
+            <template #header>
               <span>{{$t('m.SPJ_language')}}</span>
               <el-radio-group v-model="problem.spj_language">
                 <el-tooltip class="spj-radio" v-for="lang in allLanguage.spj_languages" :key="lang.name" effect="dark"
@@ -268,7 +268,7 @@
               <el-table-column
                 prop="score"
                 :label="$t('m.Score')">
-                <template slot-scope="scope">
+                <template #default="scope">
                   <el-input
                     size="small"
                     :placeholder="$t('m.Score')"
@@ -310,17 +310,17 @@
         <el-form label-width="80px">
           <el-form-item label="题目编号">
             <el-input v-model="scrapeUrl" placeholder="输入 LOJ 题目编号，如 5" @keyup.enter.native="doScrape">
-              <el-button slot="append" icon="el-icon-download" @click="doScrape" :loading="scrapeLoading">
+              <template #append><el-button icon="el-icon-download" @click="doScrape" :loading="scrapeLoading">
                 获取
-              </el-button>
+              </el-button></template>
             </el-input>
           </el-form-item>
         </el-form>
         <div v-if="scrapeLoading" style="text-align:center;padding:20px;color:#909399;">
-          <i class="el-icon-loading"></i> {{ scrapeStageText || '正在处理...' }}
+          <el-icon-loading/> {{ scrapeStageText || '正在处理...' }}
         </div>
         <div v-if="scrapeError" class="scrape-error-msg">
-          <i class="el-icon-warning"></i> {{ scrapeError }}
+          <el-icon-warning/> {{ scrapeError }}
         </div>
       </div>
 
@@ -331,34 +331,34 @@
         <!-- Linux / Mac -->
         <div class="scrape-cmd-label">Linux / Mac：</div>
         <el-input :value="scrapeCurlCmd" type="textarea" :rows="2" readonly class="scrape-cmd-input" style="margin-bottom:8px;">
-          <el-button slot="append" v-clipboard:copy="scrapeCurlCmd" v-clipboard:success="onCurlCopied" size="mini">复制</el-button>
+          <template #append><el-button v-clipboard:copy="scrapeCurlCmd" v-clipboard:success="onCurlCopied" size="mini">复制</el-button></template>
         </el-input>
         <!-- Windows PowerShell -->
         <div class="scrape-cmd-label">Windows PowerShell：</div>
         <el-input :value="scrapePowershellCmd" type="textarea" :rows="2" readonly class="scrape-cmd-input" style="margin-bottom:8px;">
-          <el-button slot="append" v-clipboard:copy="scrapePowershellCmd" v-clipboard:success="onCurlCopied" size="mini">复制</el-button>
+          <template #append><el-button v-clipboard:copy="scrapePowershellCmd" v-clipboard:success="onCurlCopied" size="mini">复制</el-button></template>
         </el-input>
         <!-- 浏览器 Console -->
         <div class="scrape-cmd-label">浏览器 DevTools Console（推荐）：</div>
         <el-input :value="scrapeBrowserConsoleCmd" type="textarea" :rows="3" readonly class="scrape-cmd-input" style="margin-bottom:12px;">
-          <el-button slot="append" v-clipboard:copy="scrapeBrowserConsoleCmd" v-clipboard:success="onBrowserCmdCopied" size="mini">复制</el-button>
+          <template #append><el-button v-clipboard:copy="scrapeBrowserConsoleCmd" v-clipboard:success="onBrowserCmdCopied" size="mini">复制</el-button></template>
         </el-input>
 
         <div class="scrape-info-row" style="margin-top:4px">
           <span class="scrape-label">API 地址：</span>
           <el-input :value="scrapeApiUrl" size="small" readonly>
-            <el-button slot="append" v-clipboard:copy="scrapeApiUrl" v-clipboard:success="() => $message.success('已复制')" size="mini">复制</el-button>
+            <template #append><el-button v-clipboard:copy="scrapeApiUrl" v-clipboard:success="() => $message.success('已复制')" size="mini">复制</el-button></template>
           </el-input>
         </div>
         <div class="scrape-info-row">
           <span class="scrape-label">请求体：</span>
           <el-input :value="scrapeApiBodyStr" size="small" type="textarea" :rows="3" readonly>
-            <el-button slot="append" v-clipboard:copy="scrapeApiBodyStr" v-clipboard:success="() => $message.success('已复制')" size="mini">复制</el-button>
+            <template #append><el-button v-clipboard:copy="scrapeApiBodyStr" v-clipboard:success="() => $message.success('已复制')" size="mini">复制</el-button></template>
           </el-input>
         </div>
 
         <div class="scrape-hint">
-          <i class="el-icon-info"></i>
+          <el-icon-info/>
           在终端执行上方 cURL 命令，将返回的 JSON 粘贴到下方文本框中。
         </div>
 

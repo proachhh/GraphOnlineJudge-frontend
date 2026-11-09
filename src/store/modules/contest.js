@@ -2,6 +2,12 @@ import moment from 'moment'
 import types from '../types'
 import api from '@oj/api'
 import { CONTEST_STATUS, USER_TYPE, CONTEST_TYPE } from '@/utils/constants'
+import { getActiveRoute } from '../index'
+
+const routeParam = (key) => {
+  const route = getActiveRoute()
+  return route && route.params ? route.params[key] : undefined
+}
 
 const state = {
   now: moment(),
@@ -134,9 +140,9 @@ const mutations = {
 }
 
 const actions = {
-  getContest ({commit, rootState, dispatch}) {
+  getContest ({commit, dispatch}, contestID) {
     return new Promise((resolve, reject) => {
-      api.getContest(rootState.route.params.contestID).then((res) => {
+      api.getContest(contestID || routeParam('contestID')).then((res) => {
         resolve(res)
         let contest = res.data.data
         commit(types.CHANGE_CONTEST, {contest: contest})
@@ -149,9 +155,9 @@ const actions = {
       })
     })
   },
-  getContestProblems ({commit, rootState}) {
+  getContestProblems ({commit}, contestID) {
     return new Promise((resolve, reject) => {
-      api.getContestProblemList(rootState.route.params.contestID).then(res => {
+      api.getContestProblemList(contestID || routeParam('contestID')).then(res => {
         res.data.data.sort((a, b) => {
           const na = parseInt(a._id), nb = parseInt(b._id)
           if (!isNaN(na) && !isNaN(nb)) return na - nb
@@ -164,9 +170,9 @@ const actions = {
       })
     })
   },
-  getContestAccess ({commit, rootState}) {
+  getContestAccess ({commit}, contestID) {
     return new Promise((resolve, reject) => {
-      api.getContestAccess(rootState.route.params.contestID).then(res => {
+      api.getContestAccess(contestID || routeParam('contestID')).then(res => {
         commit(types.CONTEST_ACCESS, {access: res.data.data.access})
         resolve(res)
       }).catch()

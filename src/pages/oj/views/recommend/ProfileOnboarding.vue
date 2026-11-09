@@ -58,7 +58,7 @@
               </div>
               <div class="summary-tile" v-if="weakTopics.length">
                 <div class="tile-icon" style="background: rgba(237,64,20,0.1)">
-                  <Icon type="alert-circled" size="20" color="#ed4014" />
+                  <Icon type="ios-alert" size="20" color="#ed4014" />
                 </div>
                 <div class="tile-body">
                   <span class="tile-label">弱项</span>
@@ -69,7 +69,7 @@
               </div>
               <div class="summary-tile" v-if="profile.coding_style">
                 <div class="tile-icon" style="background: rgba(25,190,107,0.1)">
-                  <Icon type="code-working" size="20" color="#19be6b" />
+                  <Icon type="ios-code-working" size="20" color="#19be6b" />
                 </div>
                 <div class="tile-body">
                   <span class="tile-label">编码风格</span>
@@ -87,7 +87,7 @@
               </div>
               <div class="summary-tile" v-if="profile.recommended_focus">
                 <div class="tile-icon" style="background: rgba(156,39,176,0.1)">
-                  <Icon type="compass" size="20" color="#9c27b0" />
+                  <Icon type="ios-compass" size="20" color="#9c27b0" />
                 </div>
                 <div class="tile-body">
                   <span class="tile-label">建议方向</span>
@@ -135,7 +135,7 @@
           <!-- 问题区 -->
           <div class="question-body">
             <div class="question-label">
-              <Icon type="ios-help-outline" size="18" color="#2d8cf0" />
+              <Icon type="ios-help-circle-outline" size="18" color="#2d8cf0" />
               <span>问题</span>
             </div>
             <div class="question-text">{{ currentQuestion }}</div>
@@ -184,7 +184,7 @@ export default {
       dimensions: [
         { key: 'background', label: '专业背景', icon: 'ios-briefcase', color: '#2d8cf0' },
         { key: 'current_courses', label: '当前课程', icon: 'ios-book', color: '#19be6b' },
-        { key: 'weak_areas', label: '薄弱知识点', icon: 'alert-circled', color: '#ed4014' },
+        { key: 'weak_areas', label: '薄弱知识点', icon: 'ios-alert', color: '#ed4014' },
         { key: 'learning_goals', label: '学习目标', icon: 'ios-flag', color: '#f90' },
         { key: 'learning_style', label: '偏好学习方式', icon: 'ios-color-wand', color: '#9c27b0' },
         { key: 'weekly_hours', label: '每周学习时长', icon: 'ios-time', color: '#1e3a8a' }
@@ -274,7 +274,7 @@ export default {
       })
     },
     openChatFloat () {
-      this.$root.$emit('open-ai-chat')
+      bus.emit('open-ai-chat')
     },
     async submitAnswer () {
       if (!this.answer.trim()) return
@@ -345,7 +345,7 @@ export default {
 .card-fade-enter-active, .card-fade-leave-active {
   transition: all 0.4s ease;
 }
-.card-fade-enter {
+.card-fade-enter-from {
   opacity: 0;
   transform: translateY(20px);
 }
@@ -617,7 +617,7 @@ export default {
   }
   .input-area {
     .answer-input {
-      /deep/ .ivu-input {
+      :deep(.ivu-input){
         border-radius: 12px;
         font-size: 15px;
         padding: 12px 16px;

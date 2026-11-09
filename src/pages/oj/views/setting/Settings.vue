@@ -10,7 +10,7 @@
               <div class="avatar-mask">
                 <a @click.stop="goRoute({name: 'profile-setting'})">
                   <div class="mask-content">
-                    <Icon type="camera" size="30"></Icon>
+                    <Icon type="ios-camera" size="30"></Icon>
                     <p class="text">Change Avatar</p>
                   </div>
                 </a>

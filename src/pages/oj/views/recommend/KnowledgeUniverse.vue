@@ -3,7 +3,7 @@
     <!-- 顶部工具栏 -->
     <div class="ku-toolbar">
       <div class="ku-title">
-        <i class="el-icon-fa-globe"></i>
+        <el-icon-fa-globe/>
         <span>知识宇宙</span>
         <span class="ku-meta" v-if="meta">
           {{ meta.totalTopics }} 个知识点 · {{ meta.totalEdges }} 条关联
@@ -13,10 +13,10 @@
 
     <!-- 路径规划卡片 -->
     <div class="ku-path-card">
-      <div class="card-title"><i class="el-icon-share"></i> 路径规划</div>
+      <div class="card-title"><el-icon-share/> 路径规划</div>
       <div class="path-field">
         <span class="field-label" @click="selectMode='start'">
-          <i class="el-icon-aim" :class="{active: selectMode==='start'}"></i> 起点
+          <el-icon-aim :class="{active: selectMode==='start'}"/> 起点
         </span>
         <el-autocomplete v-model="startTopic" size="mini" placeholder="搜索或点击节点"
           :fetch-suggestions="querySearchTopics" popper-class="dark-popper"
@@ -25,7 +25,7 @@
       </div>
       <div class="path-field">
         <span class="field-label" @click="selectMode='target'">
-          <i class="el-icon-aim" :class="{active: selectMode==='target'}"></i> 终点
+          <el-icon-aim :class="{active: selectMode==='target'}"/> 终点
         </span>
         <el-autocomplete v-model="targetTopic" size="mini" placeholder="搜索或点击节点"
           :fetch-suggestions="querySearchTopics" popper-class="dark-popper"
@@ -51,8 +51,8 @@
     <transition name="slide-fade">
       <div class="ku-detail-card" v-if="detailData">
         <div class="card-title">
-          <i class="el-icon-fa-bookmark"></i> {{ detailData.name }}
-          <i class="el-icon-close detail-close" @click="detailData=null"></i>
+          <el-icon-fa-bookmark/> {{ detailData.name }}
+          <el-icon-close class="detail-close" @click="detailData=null"/>
         </div>
         <div class="detail-row">
           <span class="detail-label">关联题目</span>
@@ -81,6 +81,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import * as echarts from 'echarts'
 import api from '@oj/api'
 
@@ -106,7 +107,7 @@ export default {
     this.fetchData()
     window.addEventListener('resize', this.handleResize)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     clearTimeout(this._freezeTimer)
     window.removeEventListener('resize', this.handleResize)
     if (this.chart) this.chart.dispose()
@@ -140,7 +141,7 @@ export default {
     render () {
       if (!this.$refs.chart) return
       if (!this.chart) {
-        this.chart = echarts.init(this.$refs.chart)
+        this.chart = markRaw(echarts.init(this.$refs.chart))
         this.chart.on('click', (params) => {
           if (params.dataType === 'node') this.onNodeClick(params.data.name)
         })
@@ -152,7 +153,7 @@ export default {
         let symbolSize = 45, fontSize = 12
         if (len > 8) { symbolSize = 55; fontSize = 11 }
         if (len > 12) { symbolSize = 65; fontSize = 10 }
-        const color = loggedIn ? this.masteryColor(n.mastery || 0) : '#2E6A99'
+        const color = '#2E6A99'
         return {
           id: n.name,
           name: displayName,
@@ -290,7 +291,7 @@ export default {
   background: linear-gradient(180deg, rgba(13,27,46,0.9), transparent);
 }
 .ku-title { color: #fff; font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-.ku-title i { font-size: 24px; color: #60a5fa; }
+.ku-title i, .ku-title svg { font-size: 24px; color: #60a5fa; }
 .ku-meta { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.85); }
 
 /* 路径规划卡片 */
@@ -305,7 +306,7 @@ export default {
 .card-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 4px; }
 .path-field { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
 .field-label { font-size: 14px; color: rgba(255,255,255,0.85); min-width: 42px; cursor: pointer; display: flex; align-items: center; gap: 2px; }
-.field-label i.active { color: #4A9EE6; }
+.field-label i.active, .field-label svg.active { color: #4A9EE6; }
 .path-result { margin-top: 10px; max-height: 220px; overflow-y: auto; }
 .path-step { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 14px; }
 .path-step:hover { background: rgba(74,122,158,0.2); }
@@ -333,22 +334,25 @@ export default {
 .mastery-text { position: absolute; right: 6px; top: 0; line-height: 16px; font-size: 11px; color: #fff; text-shadow: 0 0 2px rgba(0,0,0,0.5); }
 
 .slide-fade-enter-active { transition: all 0.3s ease; }
-.slide-fade-enter { transform: translateX(20px); opacity: 0; }
+.slide-fade-enter-from { transform: translateX(20px); opacity: 0; }
 
 .ku-chart { width: 100%; height: 100%; }
 
 /* el-input 深色风格 */
-.ku-path-card /deep/ .el-input__inner {
+.ku-path-card :deep(.el-input__inner){
   background: rgba(10,10,26,0.6);
   border-color: rgba(74,122,158,0.3);
   color: #fff;
 }
-.ku-path-card /deep/ .el-input.active .el-input__inner {
+.ku-path-card :deep(.el-input.active .el-input__inner){
   border-color: #4A9EE6;
   box-shadow: 0 0 0 2px rgba(74,158,230,0.2);
 }
 
-/* autocomplete 下拉建议深色样式（popper 挂在 body 上，需要非 scoped） */
+</style>
+
+<style>
+/* autocomplete 下拉建议深色样式（popper 挂在 body 上，非 scoped 块） */
 .dark-popper {
   background: rgba(20,35,60,0.95) !important;
   border: 1px solid rgba(74,122,158,0.3) !important;

@@ -20,7 +20,7 @@
           <Button type="default" size="small" icon="ios-settings">
             {{$t('m.Settings')}}
           </Button>
-          <div slot="content" id="switches">
+          <template #content><div id="switches">
             <p>
               <span>{{$t('m.Menu')}}</span>
               <i-switch v-model="showMenu"></i-switch>
@@ -44,7 +44,7 @@
             <template>
               <Button type="primary" size="small" @click="downloadRankCSV">{{$t('m.download_csv')}}</Button>
             </template>
-          </div>
+          </div></template>
         </Poptip>
       </div>
     </div>

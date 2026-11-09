@@ -6,15 +6,15 @@
         <el-button icon="el-icon-arrow-left" size="mini" circle @click="$router.back()" class="back-btn"></el-button>
         <div class="header-info">
           <div class="header-title">
-            <i class="el-icon-document"></i>
+            <el-icon-document/>
             <span>{{ set.title || '试题练习' }}</span>
           </div>
           <div class="header-meta">
             <el-tag size="mini" type="info" v-if="set.topic">{{ set.topic }}</el-tag>
             <el-tag size="mini" :type="diffTag(set.difficulty)" v-if="set.difficulty">{{ diffText(set.difficulty) }}</el-tag>
-            <span class="meta-text" v-if="set.time_limit"><i class="el-icon-time"></i> {{ set.time_limit }} 分钟</span>
+            <span class="meta-text" v-if="set.time_limit"><el-icon-time/> {{ set.time_limit }} 分钟</span>
             <span class="meta-text" v-if="timerActive" :class="{ 'timer-warn': remainSeconds < 60 }">
-              <i class="el-icon-alarm-clock"></i> 剩余 {{ formattedTime }}
+              <el-icon-alarm-clock/> 剩余 {{ formattedTime }}
             </span>
           </div>
         </div>
@@ -48,7 +48,7 @@
         <!-- 代码题 -->
         <div v-else-if="q.question_type === 'code'" class="q-body">
           <div class="problem-link" v-if="q.problem" @click="goProblem(q.problem)">
-            <i class="el-icon-link"></i> 关联题目：{{ q.problem.title || '#' + q.problem._id }}
+            <el-icon-link/> 关联题目：{{ q.problem.title || '#' + q.problem._id }}
           </div>
           <el-input type="textarea" v-model="answers[q.id]" :rows="8" placeholder="在此输入代码..."
             :disabled="phase !== 'answering'"></el-input>
@@ -82,7 +82,7 @@
         </div>
         <el-button type="warning" size="medium" v-if="phase === 'submitted' && pendingAiGrading"
                    @click="startGradingStream" :loading="grading">
-          <i class="el-icon-magic-stick"></i> 开始 AI 批改
+          <el-icon-magic-stick/> 开始 AI 批改
         </el-button>
         <el-button type="success" size="medium" v-if="phase === 'submitted' && !pendingAiGrading"
                    @click="loadReport">查看报告</el-button>
@@ -90,7 +90,7 @@
 
       <!-- AI 流式反馈 -->
       <div class="ai-stream" v-if="phase === 'grading' && streamingText">
-        <div class="stream-title"><i class="el-icon-loading"></i> AI 反馈</div>
+        <div class="stream-title"><el-icon-loading/> AI 反馈</div>
         <div class="stream-text markdown-body" v-html="renderMarkdown(streamingText)"></div>
       </div>
     </div>
@@ -137,7 +137,7 @@
           <div class="exp-text" v-html="renderMarkdown(q.explanation)"></div>
         </div>
         <div class="report-ai" v-if="q.ai_feedback">
-          <span class="exp-label ai"><i class="el-icon-magic-stick"></i> AI 反馈</span>
+          <span class="exp-label ai"><el-icon-magic-stick/> AI 反馈</span>
           <div class="exp-text" v-html="renderMarkdown(q.ai_feedback)"></div>
         </div>
       </div>
@@ -162,28 +162,28 @@
         </div>
         <el-table :data="rankingData ? rankingData.ranking : []" stripe size="small" max-height="380">
           <el-table-column prop="rank" label="名次" width="70">
-            <template slot-scope="{row}">
+            <template #default="{row}">
               <span :class="{'rank-me': row.is_me}">{{ row.rank }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="username" label="用户" min-width="120">
-            <template slot-scope="{row}">
+            <template #default="{row}">
               <span :class="{'rank-me': row.is_me}">{{ row.username }}{{ row.is_me ? ' (我)' : '' }}</span>
             </template>
           </el-table-column>
           <el-table-column label="得分" width="90">
-            <template slot-scope="{row}">{{ row.score != null ? row.score : '-' }}</template>
+            <template #default="{row}">{{ row.score != null ? row.score : '-' }}</template>
           </el-table-column>
           <el-table-column prop="create_time" label="提交时间" min-width="140">
-            <template slot-scope="{row}">{{ formatTime(row.create_time) }}</template>
+            <template #default="{row}">{{ formatTime(row.create_time) }}</template>
           </el-table-column>
         </el-table>
       </div>
-      <div slot="footer"><el-button @click="rankingDialogVisible = false">关闭</el-button></div>
+      <template #footer><div><el-button @click="rankingDialogVisible = false">关闭</el-button></div></template>
     </el-dialog>
 
     <div v-if="!loading && !questions.length && phase !== 'done'" class="empty-hint">
-      <i class="el-icon-warning-outline"></i>
+      <el-icon-warning-outline/>
       <p>未找到试题内容</p>
     </div>
   </div>
@@ -248,7 +248,7 @@ export default {
   mounted () {
     this.loadDetail()
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.clearTimer()
   },
   methods: {
@@ -277,9 +277,14 @@ export default {
             }
           }
         }).catch((err) => {
-          // 已达最大次数等错误
-          const msg = (err && err.response && err.response.data && err.response.data.error) || '开始作答失败'
-          this.$message.error(msg)
+          // 已达最大次数：直接展示最近一次提交的报告，避免空白页
+          const d = (err && err.response && err.response.data) || {}
+          if (d.submission_id) {
+            this.submissionId = d.submission_id
+            this.loadReport()
+            return
+          }
+          this.$message.error(d.error || '开始作答失败')
           this.phase = 'done'
           this.report = null
         })
@@ -600,8 +605,8 @@ export default {
   width: 100%;
 }
 .q-option:hover { background: #f5f7fa; }
-.q-option /deep/ .el-radio { margin-right: 0; white-space: normal; }
-.q-option /deep/ .el-radio__label { white-space: normal; word-break: break-word; }
+.q-option :deep(.el-radio){ margin-right: 0; white-space: normal; }
+.q-option :deep(.el-radio__label){ white-space: normal; word-break: break-word; }
 
 .problem-link {
   color: #1e3a8a;
@@ -623,28 +628,28 @@ export default {
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-.submit-bar /deep/ .el-button--primary, .result-bar /deep/ .el-button--primary,
-.result-bar /deep/ .el-button--warning, .result-bar /deep/ .el-button--success {
+.submit-bar :deep(.el-button--primary), .result-bar :deep(.el-button--primary),
+.result-bar :deep(.el-button--warning), .result-bar :deep(.el-button--success){
   background: #1e3a8a;
   border-color: #1e3a8a;
 }
-.submit-bar /deep/ .el-button--primary:hover, .result-bar /deep/ .el-button--primary:hover {
+.submit-bar :deep(.el-button--primary:hover), .result-bar :deep(.el-button--primary:hover){
   background: #2950b3;
   border-color: #2950b3;
 }
-.result-bar /deep/ .el-button--warning {
+.result-bar :deep(.el-button--warning){
   background: #e6a23c;
   border-color: #e6a23c;
 }
-.result-bar /deep/ .el-button--warning:hover {
+.result-bar :deep(.el-button--warning:hover){
   background: #ebb563;
   border-color: #ebb563;
 }
-.result-bar /deep/ .el-button--success {
+.result-bar :deep(.el-button--success){
   background: #67c23a;
   border-color: #67c23a;
 }
-.result-bar /deep/ .el-button--success:hover {
+.result-bar :deep(.el-button--success:hover){
   background: #85ce61;
   border-color: #85ce61;
 }
@@ -665,8 +670,8 @@ export default {
 }
 .stream-title { font-size: 15px; font-weight: 600; color: #1e3a8a; margin-bottom: 10px; }
 .stream-text { font-size: 14px; line-height: 1.8; color: #303133; white-space: pre-wrap; }
-.stream-text /deep/ pre { background: #2d2d2d; color: #f8f8f2; padding: 12px; border-radius: 6px; overflow-x: auto; }
-.stream-text /deep/ code { background: #eef1f6; padding: 2px 6px; border-radius: 3px; }
+.stream-text :deep(pre){ background: #2d2d2d; color: #f8f8f2; padding: 12px; border-radius: 6px; overflow-x: auto; }
+.stream-text :deep(code){ background: #eef1f6; padding: 2px 6px; border-radius: 3px; }
 
 .report-wrap { display: flex; flex-direction: column; gap: 16px; }
 .report-summary {
@@ -679,12 +684,12 @@ export default {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 .summary-actions { display: flex; gap: 8px; }
-.summary-actions /deep/ .el-button--warning {
+.summary-actions :deep(.el-button--warning){
   background: rgba(230, 162, 60, 0.1);
   border-color: rgba(230, 162, 60, 0.5);
   color: #e6a23c;
 }
-.summary-actions /deep/ .el-button--warning:hover {
+.summary-actions :deep(.el-button--warning:hover){
   background: #e6a23c;
   color: #fff;
 }
@@ -692,7 +697,7 @@ export default {
 .big-score { font-size: 42px; font-weight: 700; color: #1e3a8a; }
 .max-score { font-size: 20px; color: #909399; }
 .summary-score .score-label { font-size: 16px; color: #606266; margin-left: 6px; }
-.report-summary /deep/ .el-button--primary {
+.report-summary :deep(.el-button--primary){
   background: #1e3a8a;
   border-color: #1e3a8a;
 }
@@ -714,11 +719,11 @@ export default {
 .exp-label { color: #909399; font-size: 13px; font-weight: 600; }
 .exp-label.ai { color: #1e3a8a; }
 .exp-text { font-size: 14px; line-height: 1.8; margin-top: 6px; color: #303133; }
-.exp-text /deep/ pre { background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 6px; overflow-x: auto; }
-.exp-text /deep/ code { background: #eef1f6; padding: 2px 4px; border-radius: 3px; }
+.exp-text :deep(pre){ background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 6px; overflow-x: auto; }
+.exp-text :deep(code){ background: #eef1f6; padding: 2px 4px; border-radius: 3px; }
 
 .report-actions { text-align: center; padding: 10px 0; }
-.report-actions /deep/ .el-button--primary {
+.report-actions :deep(.el-button--primary){
   background: #1e3a8a;
   border-color: #1e3a8a;
 }

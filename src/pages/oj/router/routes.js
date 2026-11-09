@@ -186,7 +186,8 @@ export default [
     component: FAQ
   },
   {
-    path: '*',
+    // vue-router 4 的 catch-all 写法（替代旧 path: '*'）
+    path: '/:pathMatch(.*)*',
     meta: {title: '404'},
     component: NotFound
   },

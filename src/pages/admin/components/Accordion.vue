@@ -9,7 +9,7 @@
     <div class="body" v-show="isOpen">
       <slot></slot>
     </div>
-    <footer @click="isOpen = !isOpen"><i :class="{'rotate': !isOpen}" class="el-icon-caret-top"></i></footer>
+    <footer @click="isOpen = !isOpen"><el-icon-caret-top :class="{'rotate': !isOpen}"/></footer>
   </div>
 </template>
 

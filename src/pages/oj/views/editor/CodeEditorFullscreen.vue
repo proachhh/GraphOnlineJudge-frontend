@@ -109,7 +109,7 @@ export default {
       }
     } catch (e) {}
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.saveState()
   },
   methods: {
@@ -248,7 +248,7 @@ export default {
   padding: 24px;
   overflow-y: auto;
 
-  ::v-deep .ivu-card {
+  :deep(.ivu-card){
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   }

@@ -9,7 +9,7 @@
           @on-enter="handleSearch"
           @on-change="debounceSearch"
         >
-          <Icon type="ios-search" slot="prefix" />
+          <template #prefix><Icon type="ios-search" /></template>
         </Input>
         <RadioGroup v-model="viewMode" type="button" size="small" class="view-toggle">
           <Radio label="card">
@@ -510,9 +510,9 @@ export default {
 
 .table-wrap {
   .lesson-table {
-    /deep/ .ivu-table-row { cursor: pointer; }
-    /deep/ td { padding: 12px 10px; font-size: 15px; }
-    /deep/ th {
+    :deep(.ivu-table-row){ cursor: pointer; }
+    :deep(td){ padding: 12px 10px; font-size: 15px; }
+    :deep(th){
       background: #f8fafc;
       font-weight: 600;
       color: #475569;
@@ -520,14 +520,14 @@ export default {
       padding: 12px 10px;
       font-size: 15px;
     }
-    /deep/ .ivu-table-row:hover td {
+    :deep(.ivu-table-row:hover td){
       background: #f0f9ff;
     }
-    /deep/ .col-index {
+    :deep(.col-index){
       padding-left: 6px;
       padding-right: 6px;
     }
-    /deep/ .col-index .ivu-table-cell {
+    :deep(.col-index .ivu-table-cell){
       padding-left: 0;
       padding-right: 0;
     }
@@ -543,9 +543,9 @@ export default {
   margin-top: 20px;
   border-top: 1px solid #f1f5f9;
 
-  /deep/ .ivu-page-item,
-  /deep/ .ivu-page-prev,
-  /deep/ .ivu-page-next {
+  :deep(.ivu-page-item),
+  :deep(.ivu-page-prev),
+  :deep(.ivu-page-next){
     cursor: pointer;
     pointer-events: auto;
     min-width: 36px;
@@ -554,16 +554,16 @@ export default {
     font-size: 15px;
   }
 
-  /deep/ .ivu-page {
+  :deep(.ivu-page){
     text-align: center;
   }
 
-  /deep/ .ivu-select-selection {
+  :deep(.ivu-select-selection){
     height: 36px;
     line-height: 34px;
   }
 
-  /deep/ .ivu-page-options-elevator input {
+  :deep(.ivu-page-options-elevator input){
     height: 36px;
   }
 }

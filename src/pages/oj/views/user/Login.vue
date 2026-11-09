@@ -3,17 +3,17 @@
     <Form ref="formLogin" :model="formLogin" :rules="ruleLogin">
       <FormItem prop="username">
         <Input type="text" v-model="formLogin.username" :placeholder="$t('m.LoginUsername')" size="large" @on-enter="handleLogin">
-        <Icon type="ios-person-outline" slot="prepend"></Icon>
+        <template #prepend><Icon type="ios-person-outline"></Icon></template>
         </Input>
       </FormItem>
       <FormItem prop="password">
         <Input type="password" v-model="formLogin.password" :placeholder="$t('m.LoginPassword')" size="large" @on-enter="handleLogin">
-        <Icon type="ios-locked-outline" slot="prepend"></Icon>
+        <template #prepend><Icon type="ios-lock-outline"></Icon></template>
         </Input>
       </FormItem>
       <FormItem prop="tfa_code" v-if="tfaRequired">
         <Input v-model="formLogin.tfa_code" :placeholder="$t('m.TFA_Code')" size="large">
-        <Icon type="ios-lightbulb-outline" slot="prepend"></Icon>
+        <template #prepend><Icon type="ios-bulb-outline"></Icon></template>
         </Input>
       </FormItem>
     </Form>
@@ -117,7 +117,7 @@
 .login-wrap {
   padding: 4px 0 0;
 
-  /deep/ .ivu-input-large {
+  :deep(.ivu-input-large){
     height: 44px;
     border-radius: 10px;
     border: 2px solid #e2e8f0;
@@ -132,7 +132,7 @@
     }
   }
 
-  /deep/ .ivu-input-group-prepend {
+  :deep(.ivu-input-group-prepend){
     border-radius: 10px 0 0 10px;
     border: 2px solid #e2e8f0;
     border-right: none;
@@ -143,11 +143,11 @@
     }
   }
 
-  /deep/ .ivu-form-item {
+  :deep(.ivu-form-item){
     margin-bottom: 18px;
   }
 
-  /deep/ .ivu-form-item-error .ivu-input {
+  :deep(.ivu-form-item-error .ivu-input){
     border-color: #ed4014;
   }
 }

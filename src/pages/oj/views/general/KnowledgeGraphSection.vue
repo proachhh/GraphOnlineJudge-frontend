@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import * as echarts from 'echarts'
 import api from '@oj/api'
 
@@ -26,7 +27,7 @@ export default {
     this.fetchGraphData()
     this.enableEdgePan()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.chart) {
       this.chart.dispose()
     }
@@ -117,7 +118,7 @@ export default {
       const chartDom = this.$refs.chart
       if (!chartDom || chartDom.clientWidth === 0) return
 
-      this.chart = echarts.init(chartDom)
+      this.chart = markRaw(echarts.init(chartDom))
 
       const nodes = this.graphData.nodes || []
       const edges = this.graphData.edges || []

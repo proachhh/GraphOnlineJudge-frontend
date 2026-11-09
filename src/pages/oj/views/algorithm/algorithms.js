@@ -771,19 +771,19 @@ export function coinChange (coins, amount) {
 
 export const ALGORITHMS = {
   bubbleSort: {
-    key: 'bubbleSort', name: '冒泡排序', category: 'sort', type: 'array', icon: 'arrow-swap', color: '#2d8cf0',
+    key: 'bubbleSort', name: '冒泡排序', category: 'sort', type: 'array', icon: 'ios-swap', color: '#2d8cf0',
     complexity: { time: 'O(n²)', space: 'O(1)' }, desc: '相邻元素两两比较，逆序则交换，每轮将最大值冒泡到末尾',
     code: ['function bubbleSort(a) {', '  for (i = 0; i < n-1; i++)', '    for (j = 0; j < n-i-1; j++)', '      if (a[j] > a[j+1])', '        swap(a[j], a[j+1])', '  return a', '}'],
     run: (input) => bubbleSort(input.array)
   },
   selectionSort: {
-    key: 'selectionSort', name: '选择排序', category: 'sort', type: 'array', icon: 'android-checkbox-outline', color: '#16a085',
+    key: 'selectionSort', name: '选择排序', category: 'sort', type: 'array', icon: 'md-checkbox-outline', color: '#16a085',
     complexity: { time: 'O(n²)', space: 'O(1)' }, desc: '每轮从未排序部分找最小值，与当前位置交换',
     code: ['function selectionSort(a) {', '  for (i = 0; i < n-1; i++) {', '    minIdx = i', '    for (j = i+1; j < n; j++)', '      if (a[j] < a[minIdx])', '        minIdx = j', '    swap(a[i], a[minIdx])', '  }', '}'],
     run: (input) => selectionSort(input.array)
   },
   insertionSort: {
-    key: 'insertionSort', name: '插入排序', category: 'sort', type: 'array', icon: 'log-in', color: '#e67e22',
+    key: 'insertionSort', name: '插入排序', category: 'sort', type: 'array', icon: 'ios-log-in', color: '#e67e22',
     complexity: { time: 'O(n²)', space: 'O(1)' }, desc: '将每个元素插入到已排序部分的正确位置',
     code: ['function insertionSort(a) {', '  for (i = 1; i < n; i++) {', '    key = a[i]; j = i-1', '    while (j >= 0 && a[j] > key)', '      a[j+1] = a[j]; j--', '    a[j+1] = key', '  }', '}'],
     run: (input) => insertionSort(input.array)
@@ -795,13 +795,13 @@ export const ALGORITHMS = {
     run: (input) => heapSort(input.array)
   },
   quickSort: {
-    key: 'quickSort', name: '快速排序', category: 'sort', type: 'array', icon: 'flash', color: '#ed3f14',
+    key: 'quickSort', name: '快速排序', category: 'sort', type: 'array', icon: 'ios-flash', color: '#ed3f14',
     complexity: { time: 'O(n log n)', space: 'O(log n)' }, desc: '选取基准元素，分区使左小右大，递归排序两侧',
     code: ['function quickSort(a, lo, hi) {', '  if (lo < hi) {', '    pivot = a[hi]', '    i = lo - 1', '    for (j = lo; j < hi; j++)', '      if (a[j] <= pivot) swap(a[++i], a[j])', '    swap(a[i+1], a[hi])', '    return i + 1', '  }', '}'],
     run: (input) => quickSort(input.array)
   },
   mergeSort: {
-    key: 'mergeSort', name: '归并排序', category: 'sort', type: 'array', icon: 'merge', color: '#19be6b',
+    key: 'mergeSort', name: '归并排序', category: 'sort', type: 'array', icon: 'ios-git-merge', color: '#19be6b',
     complexity: { time: 'O(n log n)', space: 'O(n)' }, desc: '分治法：分割到单元素，再两两合并为有序序列',
     code: ['function mergeSort(a, lo, hi) {', '  if (lo < hi) {', '    mid = (lo + hi) / 2', '    mergeSort(lo, mid)', '    mergeSort(mid+1, hi)', '    // 合并两个有序段', '    merge(a, lo, mid, hi)', '  }', '}'],
     run: (input) => mergeSort(input.array)
@@ -819,7 +819,7 @@ export const ALGORITHMS = {
     run: (input) => linearSearch(input.array, input.target)
   },
   bfs: {
-    key: 'bfs', name: '广度优先搜索', category: 'graph', type: 'graph', icon: 'network', color: '#2d8cf0',
+    key: 'bfs', name: '广度优先搜索', category: 'graph', type: 'graph', icon: 'ios-git-network', color: '#2d8cf0',
     complexity: { time: 'O(V + E)', space: 'O(V)' }, desc: '从起点出发，逐层访问所有可达节点，使用队列',
     code: ['function bfs(graph, start) {', '  queue = [start]; visited = {start}', '  while (queue not empty) {', '    node = queue.dequeue()', '    visit(node)', '    for (neighbor of graph[node])', '      if (neighbor not visited)', '        visited.add(neighbor)', '        queue.enqueue(neighbor)', '  }', '}'],
     run: (input) => bfs(input.graph, input.start)
@@ -837,25 +837,25 @@ export const ALGORITHMS = {
     run: (input) => dijkstra(input.graph, input.start)
   },
   prim: {
-    key: 'prim', name: 'Prim 最小生成树', category: 'graph', type: 'graph', icon: 'share', color: '#1abc9c',
+    key: 'prim', name: 'Prim 最小生成树', category: 'graph', type: 'graph', icon: 'ios-share-alt', color: '#1abc9c',
     complexity: { time: 'O(V²)', space: 'O(V)' }, desc: '从一个节点开始，每次加入最短的横切边扩展 MST',
     code: ['function prim(graph, start) {', '  key = { all: INF }; key[start] = 0', '  while (mst not full) {', '    u = min key node not in MST', '    mst.add(u)', '    for (neighbor of u)', '      if (edge < key[neighbor])', '        key[neighbor] = edge', '  }', '}'],
     run: (input) => prim(input.graph, input.start)
   },
   topologicalSort: {
-    key: 'topologicalSort', name: '拓扑排序', category: 'graph', type: 'graph', icon: 'shuffle', color: '#34495e',
+    key: 'topologicalSort', name: '拓扑排序', category: 'graph', type: 'graph', icon: 'ios-shuffle', color: '#34495e',
     complexity: { time: 'O(V + E)', space: 'O(V)' }, desc: 'Kahn 算法：不断移除入度为0的节点（课程先修关系）',
     code: ['function topoSort(graph) {', '  queue = nodes with inDegree==0', '  while (queue not empty) {', '    node = queue.dequeue()', '    output(node)', '    for (neighbor of node)', '      inDegree[neighbor]--', '      if (inDegree == 0)', '        queue.enqueue(neighbor)', '  }', '}'],
     run: (input) => topologicalSort(input.graph)
   },
   knapsack: {
-    key: 'knapsack', name: '0-1 背包', category: 'dp', type: 'table', icon: 'cube', color: '#d35400',
+    key: 'knapsack', name: '0-1 背包', category: 'dp', type: 'table', icon: 'ios-cube', color: '#d35400',
     complexity: { time: 'O(nW)', space: 'O(nW)' }, desc: '动态规划：在容量限制下选择物品使总价值最大',
     code: ['function knapsack(w, v, W) {', '  dp[0][*] = 0', '  for (i = 1; i <= n; i++)', '    for (j = 0; j <= W; j++)', '      if (j < w[i]) dp[i][j] = dp[i-1][j]', '      else dp[i][j] = max(', '        dp[i-1][j],', '        dp[i-1][j-w[i]] + v[i])', '  return dp[n][W]', '}'],
     run: () => knapsack([2, 3, 4, 5], [3, 4, 5, 6], 8)
   },
   lcs: {
-    key: 'lcs', name: '最长公共子序列', category: 'dp', type: 'table', icon: 'link', color: '#27ae60',
+    key: 'lcs', name: '最长公共子序列', category: 'dp', type: 'table', icon: 'ios-link', color: '#27ae60',
     complexity: { time: 'O(mn)', space: 'O(mn)' }, desc: '动态规划：求两个序列的最长公共子序列长度',
     code: ['function lcs(s1, s2) {', '  dp[0][*] = 0; dp[*][0] = 0', '  for (i = 1; i <= m; i++)', '    for (j = 1; j <= n; j++)', '      if (s1[i] == s2[j])', '        dp[i][j] = dp[i-1][j-1] + 1', '      else', '        dp[i][j] = max(dp[i-1][j], dp[i][j-1])', '  return dp[m][n]', '}'],
     run: () => lcs('ABCBDAB', 'BDCABA')
@@ -867,7 +867,7 @@ export const ALGORITHMS = {
     run: (input) => shellSort(input.array)
   },
   cocktailSort: {
-    key: 'cocktailSort', name: '鸡尾酒排序', category: 'sort', type: 'array', icon: 'ios-loop', color: '#1abc9c',
+    key: 'cocktailSort', name: '鸡尾酒排序', category: 'sort', type: 'array', icon: 'ios-repeat', color: '#1abc9c',
     complexity: { time: 'O(n²)', space: 'O(1)' }, desc: '双向冒泡：正向把最大值推到末尾，反向把最小值推到开头',
     code: ['function cocktailSort(a) {', '  while (swapped) {', '    // 正向', '    for (i = start; i < end; i++)', '      if (a[i] > a[i+1]) swap', '    // 反向', '    for (i = end-1; i >= start; i--)', '      if (a[i] > a[i+1]) swap', '  }', '}'],
     run: (input) => cocktailSort(input.array)
@@ -879,7 +879,7 @@ export const ALGORITHMS = {
     run: (input) => countingSort(input.array)
   },
   interpolationSearch: {
-    key: 'interpolationSearch', name: '插值查找', category: 'search', type: 'array', icon: 'ios-location', color: '#e84393',
+    key: 'interpolationSearch', name: '插值查找', category: 'search', type: 'array', icon: 'ios-pin', color: '#e84393',
     complexity: { time: 'O(log log n)', space: 'O(1)' }, desc: '根据目标值估算位置，适合均匀分布的有序数组',
     code: ['function interpolationSearch(a, t) {', '  lo = 0; hi = n - 1', '  while (lo <= hi) {', '    pos = lo + (t-a[lo])*(hi-lo)/(a[hi]-a[lo])', '    if (a[pos] == t) return pos', '    else if (a[pos] < t) lo = pos+1', '    else hi = pos - 1', '  }', '}'],
     run: (input) => interpolationSearch(input.array, input.target)

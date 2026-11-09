@@ -26,7 +26,7 @@
           </span>
         </div>
         <div class="top-bar-right">
-          <Button v-if="currentProblem" type="primary" size="small" @click="showFullRight = !showFullRight" icon="ios-split">
+          <Button v-if="currentProblem" type="primary" size="small" @click="showFullRight = !showFullRight" icon="ios-albums">
             {{ showFullRight ? 'Show Split' : 'Focus Mode' }}
           </Button>
         </div>
@@ -275,7 +275,7 @@ export default {
       document.body.style.userSelect = ''
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     document.removeEventListener('mousemove', this.handleResize)
     document.removeEventListener('mouseup', this.stopResize)
   }
@@ -489,27 +489,27 @@ export default {
   line-height: 1.9;
   color: #334155;
 
-  /deep/ img {
+  :deep(img){
     max-width: 100%;
     height: auto;
     border-radius: 8px;
     margin: 16px 0;
   }
 
-  /deep/ h1 { font-size: 1.8em; color: #1e3a8a; margin: 28px 0 14px; }
-  /deep/ h2 { font-size: 1.5em; color: #1e3a8a; margin: 24px 0 12px; }
-  /deep/ h3 { font-size: 1.25em; color: #1e3a8a; margin: 20px 0 10px; }
-  /deep/ h4, /deep/ h5, /deep/ h6 {
+  :deep(h1){ font-size: 1.8em; color: #1e3a8a; margin: 28px 0 14px; }
+  :deep(h2){ font-size: 1.5em; color: #1e3a8a; margin: 24px 0 12px; }
+  :deep(h3){ font-size: 1.25em; color: #1e3a8a; margin: 20px 0 10px; }
+  :deep(h4), :deep(h5), :deep(h6){
     color: #1e3a8a;
     margin-top: 20px;
     margin-bottom: 10px;
   }
 
-  /deep/ p {
+  :deep(p){
     margin-bottom: 16px;
   }
 
-  /deep/ code {
+  :deep(code){
     background: #f1f5f9;
     padding: 2px 8px;
     border-radius: 4px;
@@ -517,7 +517,7 @@ export default {
     font-size: 0.9em;
   }
 
-  /deep/ pre {
+  :deep(pre){
     background: #1e293b;
     color: #e2e8f0;
     padding: 18px 20px;
@@ -534,42 +534,42 @@ export default {
     }
   }
 
-  /deep/ ul, /deep/ ol {
+  :deep(ul), :deep(ol){
     padding-left: 32px;
     margin-bottom: 16px;
   }
 
-  /deep/ ol {
+  :deep(ol){
     list-style-position: outside;
   }
 
-  /deep/ ol li {
+  :deep(ol li){
     word-break: break-word;
   }
 
-  /deep/ ul li {
+  :deep(ul li){
     word-break: break-word;
   }
 
-  /deep/ blockquote {
+  :deep(blockquote){
     border-left: 4px solid #3b82f6;
     padding-left: 16px;
     margin: 16px 0;
     color: #64748b;
   }
 
-  /deep/ a {
+  :deep(a){
     color: #2563eb;
     text-decoration: underline;
   }
 
-  /deep/ hr {
+  :deep(hr){
     border: none;
     border-top: 1px solid #e2e8f0;
     margin: 20px 0;
   }
 
-  /deep/ table {
+  :deep(table){
     width: 100%;
     border-collapse: collapse;
     margin: 16px 0;
@@ -588,7 +588,7 @@ export default {
     }
   }
 
-  /deep/ strong {
+  :deep(strong){
     color: #1e3a8a;
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="view">
     <Panel :title="$t('m.User_User') ">
-      <div slot="header">
+      <template #header><div>
         <el-row :gutter="20">
           <el-col :span="8">
             <el-button v-show="selectedUsers.length"
@@ -13,7 +13,7 @@
             <el-input v-model="keyword" prefix-icon="el-icon-search" placeholder="Keywords"></el-input>
           </el-col>
         </el-row>
-      </div>
+      </div></template>
       <el-table
         v-loading="loadingTable"
         element-loading-text="loading"
@@ -28,13 +28,13 @@
         <el-table-column prop="username" label="Username"></el-table-column>
 
         <el-table-column prop="create_time" label="Create Time">
-          <template slot-scope="scope">
+          <template #default="scope">
             {{scope.row.create_time | localtime }}
           </template>
         </el-table-column>
 
         <el-table-column prop="last_login" label="Last Login">
-          <template slot-scope="scope">
+          <template #default="scope">
             {{scope.row.last_login | localtime }}
           </template>
         </el-table-column>
@@ -44,15 +44,15 @@
         <el-table-column prop="email" label="Email"></el-table-column>
 
         <el-table-column prop="admin_type" label="User Type">
-          <template slot-scope="scope">
+          <template #default="scope">
             {{ scope.row.admin_type }}
           </template>
         </el-table-column>
 
         <el-table-column fixed="right" label="Option" width="200">
-          <template slot-scope="{row}">
-            <icon-btn name="Edit" icon="edit" @click.native="openUserDialog(row.id)"></icon-btn>
-            <icon-btn name="Delete" icon="trash" @click.native="deleteUsers([row.id])"></icon-btn>
+          <template #default="{row}">
+            <icon-btn name="Edit" icon="ios-create" @click.native="openUserDialog(row.id)"></icon-btn>
+            <icon-btn name="Delete" icon="ios-trash" @click.native="deleteUsers([row.id])"></icon-btn>
           </template>
         </el-table-column>
       </el-table>
@@ -68,13 +68,13 @@
     </Panel>
 
     <Panel>
-      <span slot="title">{{$t('m.Import_User')}}
+      <template #title><span>{{$t('m.Import_User')}}
         <el-popover placement="right" trigger="hover">
           <p>Only support csv file without headers, check the <a
             href="http://docs.onlinejudge.me/#/onlinejudge/guide/import_users">link</a> for details</p>
-          <i slot="reference" class="el-icon-fa-question-circle import-user-icon"></i>
+          <template #reference><el-icon-fa-question-circle class="import-user-icon"/></template>
         </el-popover>
-      </span>
+      </span></template>
       <el-upload v-if="!uploadUsers.length"
                  action=""
                  :show-file-list="false"
@@ -85,22 +85,22 @@
       <template v-else>
         <el-table :data="uploadUsersPage">
           <el-table-column label="Username">
-            <template slot-scope="{row}">
+            <template #default="{row}">
               {{row[0]}}
             </template>
           </el-table-column>
           <el-table-column label="Password">
-            <template slot-scope="{row}">
+            <template #default="{row}">
               {{row[1]}}
             </template>
           </el-table-column>
           <el-table-column label="Email">
-            <template slot-scope="{row}">
+            <template #default="{row}">
               {{row[2]}}
             </template>
           </el-table-column>
           <el-table-column label="RealName">
-            <template slot-scope="{row}">
+            <template #default="{row}">
               {{row[3]}}
             </template>
           </el-table-column>
@@ -243,10 +243,10 @@
           </el-col>
         </el-row>
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <template #footer><span class="dialog-footer">
         <cancel @click.native="showUserDialog = false">Cancel</cancel>
         <save @click.native="saveUser()"></save>
-      </span>
+      </span></template>
     </el-dialog>
   </div>
 </template>

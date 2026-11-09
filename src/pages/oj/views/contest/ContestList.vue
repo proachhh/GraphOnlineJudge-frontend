@@ -4,7 +4,7 @@
     <!-- 页头横幅 -->
     <div class="page-header">
       <div class="header-left">
-        <h2 class="header-title"><Icon type="trophy"></Icon> 竞赛大厅</h2>
+        <h2 class="header-title"><Icon type="ios-trophy"></Icon> 竞赛大厅</h2>
       </div>
       <div class="header-stats">
         <div class="hs-item">
@@ -42,7 +42,7 @@
                   <span>{{ query.rule_type === '' ? $t('m.Rule') : query.rule_type }}</span>
                   <Icon type="ios-arrow-down" />
                 </div>
-                <Dropdown-menu slot="list">
+                <template #list><Dropdown-menu>
                   <Dropdown-item name="">{{ $t('m.All') }}</Dropdown-item>
                   <Dropdown-item name="OI">
                     <Tag color="blue" size="small">OI</Tag>
@@ -50,7 +50,7 @@
                   <Dropdown-item name="ACM">
                     <Tag color="green" size="small">ACM</Tag>
                   </Dropdown-item>
-                </Dropdown-menu>
+                </Dropdown-menu></template>
               </Dropdown>
 
               <Dropdown @on-click="onStatusChange" class="filter-dropdown">
@@ -59,7 +59,7 @@
                   <span>{{ query.status === '' ? $t('m.Status') : $t('m.' + CONTEST_STATUS_REVERSE[query.status].name.replace(/ /g, '_')) }}</span>
                   <Icon type="ios-arrow-down" />
                 </div>
-                <Dropdown-menu slot="list">
+                <template #list><Dropdown-menu>
                   <Dropdown-item name="">{{ $t('m.All') }}</Dropdown-item>
                   <Dropdown-item name="0">
                     <Tag color="green" size="small">{{ $t('m.Underway') }}</Tag>
@@ -70,7 +70,7 @@
                   <Dropdown-item name="-1">
                     <Tag color="default" size="small">{{ $t('m.Ended') }}</Tag>
                   </Dropdown-item>
-                </Dropdown-menu>
+                </Dropdown-menu></template>
               </Dropdown>
             </div>
 
@@ -88,7 +88,7 @@
                        @on-enter="changeRoute"
                        :placeholder="$t('m.Search')"
                        class="search-input">
-                  <Icon type="ios-search" slot="prefix" />
+                  <template #prefix><Icon type="ios-search" /></template>
                 </Input>
               </div>
             </div>
@@ -161,7 +161,7 @@
         <!-- 进行中的竞赛 -->
         <div class="side-card ongoing-card" v-if="ongoingContests.length">
           <div class="side-title">
-            <Icon type="ios-pulse-strong" class="title-icon-pulse"></Icon>
+            <Icon type="ios-pulse" class="title-icon-pulse"></Icon>
             正在进行
           </div>
           <div class="ongoing-list">
@@ -206,7 +206,7 @@
         <!-- 竞赛规则 -->
         <div class="side-card">
           <div class="side-title">
-            <Icon type="information-circled"></Icon>
+            <Icon type="ios-information-circle"></Icon>
             赛制说明
           </div>
           <div class="rule-guide">
@@ -245,7 +245,7 @@
               <Icon type="ios-arrow-forward" class="ql-arrow"></Icon>
             </div>
             <div class="ql-item" @click="$router.push('/immersion')">
-              <Icon type="flash" class="ql-icon"></Icon>
+              <Icon type="ios-flash" class="ql-icon"></Icon>
               <span>沉浸式练习</span>
               <Icon type="ios-arrow-forward" class="ql-arrow"></Icon>
             </div>
@@ -262,6 +262,7 @@
 </template>
 
 <script>
+import { Tag, Icon } from 'view-ui-plus'
 import api from '@oj/api'
 import { mapGetters } from 'vuex'
 import utils from '@/utils/utils'
@@ -401,7 +402,7 @@ export default {
           align: 'center',
           render: (h, p) => {
             const r = p.row.rule_type
-            return h('Tag', { props: { color: r === 'ACM' ? 'green' : 'blue', size: 'small' } }, r)
+            return h(Tag, { color: r === 'ACM' ? 'green' : 'blue', size: 'small' }, r)
           }
         },
         {
@@ -411,7 +412,7 @@ export default {
           align: 'center',
           render: (h, p) => {
             const s = CONTEST_STATUS_REVERSE[p.row.status]
-            return h('Tag', { props: { color: s ? s.color : 'default', size: 'small' } }, s ? this.$t('m.' + s.name.replace(/ /g, '_')) : '-')
+            return h(Tag, { color: s ? s.color : 'default', size: 'small' }, s ? this.$t('m.' + s.name.replace(/ /g, '_')) : '-')
           }
         },
         {
@@ -435,7 +436,7 @@ export default {
           align: 'center',
           render: (h, p) => {
             if (p.row.contest_type !== 'Public') {
-              return h('Icon', { props: { type: 'ios-lock', color: '#e6a23c', size: 16 } })
+              return h(Icon, { type: 'ios-lock', color: '#e6a23c', size: 16 })
             }
             return h('span', { style: { color: '#94a3b8' } }, '-')
           }
@@ -571,7 +572,7 @@ export default {
   .search-input {
     width: 240px;
 
-    /deep/ .ivu-input {
+    :deep(.ivu-input){
       border-radius: 8px;
       border: 1px solid #e2e8f0;
       padding-left: 36px;
@@ -582,7 +583,7 @@ export default {
       }
     }
 
-    /deep/ .ivu-input-prefix {
+    :deep(.ivu-input-prefix){
       left: 12px;
       color: #94a3b8;
     }
@@ -758,9 +759,9 @@ export default {
 
 .table-wrap {
   .contest-table {
-    /deep/ .ivu-table-row { cursor: pointer; }
-    /deep/ td { padding: 10px 8px; font-size: 14px; white-space: nowrap; }
-    /deep/ th {
+    :deep(.ivu-table-row){ cursor: pointer; }
+    :deep(td){ padding: 10px 8px; font-size: 14px; white-space: nowrap; }
+    :deep(th){
       background: #f8fafc;
       font-weight: 600;
       color: #475569;
@@ -769,7 +770,7 @@ export default {
       font-size: 14px;
       white-space: nowrap;
     }
-    /deep/ .ivu-table-row:hover td {
+    :deep(.ivu-table-row:hover td){
       background: #f0f9ff;
     }
   }

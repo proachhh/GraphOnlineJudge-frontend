@@ -172,27 +172,27 @@ export default {
     .assistant & { border-top-left-radius: 4px; }
     .user & { background: #2d8cf0; color: #fff; border-top-right-radius: 4px; }
 
-    /deep/ pre {
+    :deep(pre){
       background: #1e1e2e; color: #cdd6f4; border-radius: 8px; padding: 14px;
       overflow-x: auto; margin: 8px 0; font-size: 13px; line-height: 1.5;
     }
-    /deep/ code { background: rgba(0,0,0,0.06); padding: 2px 5px; border-radius: 3px; font-size: 90%; }
-    .user & /deep/ code { background: rgba(255,255,255,0.2); }
+    :deep(code){ background: rgba(0,0,0,0.06); padding: 2px 5px; border-radius: 3px; font-size: 90%; }
+    .user & :deep(code){ background: rgba(255,255,255,0.2); }
 
-    /deep/ h2 { font-size: 18px; font-weight: 700; margin: 12px 0 6px; color: #17233d; }
-    /deep/ h3 { font-size: 16px; font-weight: 600; margin: 10px 0 5px; color: #17233d; }
-    /deep/ h4 { font-size: 14px; font-weight: 600; margin: 8px 0 4px; color: #333; }
-    /deep/ strong { font-weight: 700; }
-    /deep/ em { font-style: italic; }
-    /deep/ del { text-decoration: line-through; opacity: 0.6; }
-    /deep/ blockquote {
+    :deep(h2){ font-size: 18px; font-weight: 700; margin: 12px 0 6px; color: #17233d; }
+    :deep(h3){ font-size: 16px; font-weight: 600; margin: 10px 0 5px; color: #17233d; }
+    :deep(h4){ font-size: 14px; font-weight: 600; margin: 8px 0 4px; color: #333; }
+    :deep(strong){ font-weight: 700; }
+    :deep(em){ font-style: italic; }
+    :deep(del){ text-decoration: line-through; opacity: 0.6; }
+    :deep(blockquote){
       border-left: 3px solid #2d8cf0; padding: 3px 10px; margin: 2px 0;
       color: #515a6e; background: rgba(45,140,240,0.04); border-radius: 0 6px 6px 0;
     }
-    /deep/ hr { border: none; border-top: 1px solid #e8eaec; margin: 10px 0; }
-    /deep/ .md-ul { padding-left: 18px; margin: 6px 0; }
-    /deep/ .md-li { margin: 3px 0; list-style: disc; }
-    /deep/ a { color: #2d8cf0; text-decoration: none; &:hover { text-decoration: underline; } }
+    :deep(hr){ border: none; border-top: 1px solid #e8eaec; margin: 10px 0; }
+    :deep(.md-ul){ padding-left: 18px; margin: 6px 0; }
+    :deep(.md-li){ margin: 3px 0; list-style: disc; }
+    :deep(a){ color: #2d8cf0; text-decoration: none; &:hover { text-decoration: underline; } }
   }
 
   .thinking-steps {
@@ -252,5 +252,5 @@ export default {
 
 .slide-enter-active, .slide-leave-active { transition: all 0.3s ease; overflow: hidden; }
 .slide-enter, .slide-leave-to { max-height: 0; opacity: 0; }
-.slide-enter-to, .slide-leave { max-height: 400px; opacity: 1; }
+.slide-enter-to, .slide-leave-from { max-height: 400px; opacity: 1; }
 </style>

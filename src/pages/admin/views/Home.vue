@@ -5,20 +5,20 @@
     </div>
     <div id="header">
       <span class="hamburger-btn" @click="toggleSideMenu">
-        <i class="el-icon-menu"></i>
+        <el-icon-menu/>
       </span>
       <div class="header-spacer"></div>
-      <i class="el-icon-fa-font katex-editor" @click="katexVisible=true" title="LaTeX 编辑器"></i>
+      <el-icon-fa-font class="katex-editor" @click="katexVisible=true" title="LaTeX 编辑器"/>
       <screen-full :width="14" :height="14" class="screen-full"></screen-full>
       <el-dropdown @command="handleCommand" class="user-dropdown">
         <span class="user-trigger">
-          <i class="el-icon-user-solid user-avatar-icon"></i>
+          <el-icon-user-solid class="user-avatar-icon"/>
           {{user.username}}
-          <i class="el-icon-caret-bottom el-icon--right"></i>
+          <el-icon-caret-bottom class="el-icon--right"/>
         </span>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="logout"><i class="el-icon-switch-button"></i> 退出登录</el-dropdown-item>
-        </el-dropdown-menu>
+        <template #dropdown><el-dropdown-menu>
+          <el-dropdown-item command="logout"><el-icon-switch-button/> 退出登录</el-dropdown-item>
+        </el-dropdown-menu></template>
       </el-dropdown>
     </div>
     <div class="content-app">

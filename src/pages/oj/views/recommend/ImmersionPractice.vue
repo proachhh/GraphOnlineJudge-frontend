@@ -41,11 +41,11 @@
         <div class="problem-layout-wrapper" :class="layoutMode">
           <div class="layout-left" :style="layoutLeftStyle">
             <Panel :padding="40" shadow>
-          <div slot="title" class="panel-title-row">
+          <template #title><div class="panel-title-row">
             <span class="problem-title-id">#{{ currentProblem._id }}.</span>
             <span class="problem-title-text">{{ currentProblem.title }}</span>
             <span class="diff-tag" :class="diffClass">{{ diffLabel }}</span>
-          </div>
+          </div></template>
 
           <div id="problem-content" class="markdown-body" v-katex :key="'katex-' + currentIndex">
             <p class="title">{{ $t('m.Description') }}</p>
@@ -65,7 +65,7 @@
                        v-clipboard:copy="sample.input"
                        v-clipboard:success="onCopy"
                        v-clipboard:error="onCopyError">
-                      <Icon type="clipboard"></Icon>
+                      <Icon type="ios-clipboard"></Icon>
                     </a>
                   </p>
                   <pre>{{ sample.input }}</pre>
@@ -157,7 +157,7 @@
 
           <div class="submit-row">
             <div class="submit-row-left">
-              <Button type="primary" icon="edit" :loading="submitting" @click="submitCode"
+              <Button type="primary" icon="ios-create" :loading="submitting" @click="submitCode"
                       :disabled="!code.trim()">
                 <span v-if="submitting">{{ $t('m.Submitting') }}</span>
                 <span v-else>{{ $t('m.Submit') }}</span>
@@ -209,10 +209,10 @@
 
       <div id="right-column" v-show="layoutMode === 'vertical'">
         <Card id="info">
-          <div slot="title" class="header">
-            <Icon type="information-circled"></Icon>
+          <template #title><div class="header">
+            <Icon type="ios-information-circle"></Icon>
             <span class="card-title">{{ $t('m.Information') }}</span>
-          </div>
+          </div></template>
           <ul>
             <li><p>ID</p><p>{{ currentProblem._id }}</p></li>
             <li><p>{{ $t('m.Time_Limit') }}</p><p>{{ currentProblem.time_limit || 1000 }}MS</p></li>
@@ -225,9 +225,9 @@
               <p>
                 <Poptip trigger="hover" placement="top" transfer word-wrap width="260">
                   <a>{{ $t('m.Show') }}</a>
-                  <div slot="content" style="display: flex; flex-wrap: wrap; gap: 4px">
+                  <template #content><div style="display: flex; flex-wrap: wrap; gap: 4px">
                     <Tag v-for="tag in currentProblem.tags" :key="tag">{{ tagDisplayName(tag) }}</Tag>
-                  </div>
+                  </div></template>
                 </Poptip>
               </p>
             </li>
@@ -235,19 +235,19 @@
         </Card>
 
         <Card id="pieChart" ref="pieChart" :padding="0">
-          <div slot="title" class="header">
+          <template #title><div class="header">
             <Icon type="ios-analytics"></Icon>
             <span class="card-title">{{ $t('m.Statistic') }}</span>
             <Button type="ghost" size="small" id="detail" @click="graphVisible = !graphVisible">Details</Button>
-          </div>
+          </div></template>
           <div class="echarts" ref="pieChartDom"></div>
         </Card>
 
         <Modal v-model="graphVisible">
           <div id="pieChart-detail" ref="pieChartDetail"></div>
-          <div slot="footer">
+          <template #footer><div>
             <Button type="ghost" @click="graphVisible=false">{{ $t('m.Close') }}</Button>
-          </div>
+          </div></template>
         </Modal>
       </div>
     </div>
@@ -322,6 +322,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import api from '@oj/api'
 import { mapGetters } from 'vuex'
 import { JUDGE_STATUS } from '@/utils/constants'
@@ -481,7 +482,7 @@ export default {
     this._restorePrefs()
     this.loadProblems()
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this._savePrefs()
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer)
@@ -534,7 +535,7 @@ export default {
       api.getProblem(problemId).then(res => {
         const problem = res.data.data
         if (problem) {
-          this.$set(this.problemList, this.currentIndex, { ...this.problemList[this.currentIndex], ...problem })
+          this.problemList[this.currentIndex] = { ...this.problemList[this.currentIndex], ...problem }
           if (problem.samples && problem.samples.length > 0) {
             this.selfTestInput = problem.samples[0].input
           }
@@ -544,7 +545,7 @@ export default {
           const templateCode = this.getTemplateCode(this.language)
           this.code = templateCode || this.defaultCode(this.language)
           api.submissionExists(problem._id).then(res => {
-            this.$set(this.problemList[this.currentIndex], 'my_status', res.data.data ? 0 : -1)
+            this.problemList[this.currentIndex]['my_status'] = res.data.data ? 0 : -1
           }).catch(() => {})
           this.changePie(problem)
         }
@@ -774,7 +775,7 @@ export default {
       if (this.pieChart) {
         this.pieChart.dispose()
       }
-      this.pieChart = echarts.init(dom)
+      this.pieChart = markRaw(echarts.init(dom))
       this.pieChart.setOption(this.pie)
     },
     initLargePieChart () {
@@ -783,7 +784,7 @@ export default {
       if (this.largePieChart) {
         this.largePieChart.dispose()
       }
-      this.largePieChart = echarts.init(dom)
+      this.largePieChart = markRaw(echarts.init(dom))
       this.largePieChart.setOption(this.largePie)
     },
     disposeCharts () {
@@ -858,8 +859,8 @@ export default {
   min-width: 0;
   margin-right: 24px;
 
-  /deep/ .ivu-panel,
-  /deep/ .ivu-card {
+  :deep(.ivu-panel),
+  :deep(.ivu-card){
     width: 100%;
   }
 
@@ -947,7 +948,7 @@ export default {
       font-size: 16px;
       line-height: 1.9;
       color: #515a6e;
-      /deep/ p { margin: 8px 0; }
+      :deep(p){ margin: 8px 0; }
     }
     .sample {
       display: flex;
@@ -1365,7 +1366,7 @@ export default {
           flex-direction: column;
         }
 
-        .layout-left ::v-deep .ivu-card-body {
+        .layout-left :deep(.ivu-card-body){
           flex: 1 1 0%;
           min-height: 0;
           overflow-y: auto;
@@ -1395,7 +1396,7 @@ export default {
       padding: 4px;
       background: #f1f5f9;
       border-radius: 8px;
-      ::v-deep .ivu-radio-group-button .ivu-radio-wrapper { padding: 2px 12px; }
+      :deep(.ivu-radio-group-button .ivu-radio-wrapper){ padding: 2px 12px; }
     }
 
     .resize-handle {
@@ -1427,7 +1428,7 @@ export default {
       padding: 4px;
       background: #f1f5f9;
       border-radius: 8px;
-      ::v-deep .ivu-radio-group-button .ivu-radio-wrapper { padding: 2px 12px; }
+      :deep(.ivu-radio-group-button .ivu-radio-wrapper){ padding: 2px 12px; }
     }
 
     .problem-layout-wrapper {

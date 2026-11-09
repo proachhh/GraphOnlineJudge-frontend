@@ -87,7 +87,7 @@
           </div>
         </div>
         <div class="step-desc-bar" v-if="currentStepData" :key="'step-' + currentStep">
-          <Icon type="information-circled" class="desc-icon" />
+          <Icon type="ios-information-circle" class="desc-icon" />
           <span class="desc-text">{{ currentStepData.desc }}</span>
         </div>
       </div>
@@ -123,12 +123,12 @@
     <!-- 底部控制栏 -->
     <div class="control-bar" v-if="currentAlgo">
       <div class="ctrl-left">
-        <Button @click="prevStep" :disabled="currentStep === 0" icon="ios-skipbackward" size="small"></Button>
+        <Button @click="prevStep" :disabled="currentStep === 0" icon="ios-rewind" size="small"></Button>
         <Button @click="togglePlay" :type="playing ? 'warning' : 'primary'" size="small">
           <Icon :type="playing ? 'ios-pause' : 'ios-play'" />
           {{ playing ? '暂停' : '播放' }}
         </Button>
-        <Button @click="nextStep" :disabled="currentStep >= steps.length - 1" icon="ios-skipforward" size="small"></Button>
+        <Button @click="nextStep" :disabled="currentStep >= steps.length - 1" icon="ios-fastforward" size="small"></Button>
         <Button @click="reset" icon="ios-refresh" size="small"></Button>
       </div>
       <div class="ctrl-center">
@@ -147,6 +147,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import * as echarts from 'echarts'
 import { ALGORITHMS, CATEGORIES, DEFAULT_GRAPH, DAG_GRAPH } from './algorithms'
 
@@ -235,7 +236,7 @@ export default {
     })
     window.addEventListener('resize', this.handleResize)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.stopPlay()
     window.removeEventListener('resize', this.handleResize)
     if (this.chart) { this.chart.dispose(); this.chart = null }
@@ -247,7 +248,7 @@ export default {
       if (this.chart) return
       const el = this.$refs.chartContainer
       if (!el || el.offsetWidth === 0) return
-      this.chart = echarts.init(el)
+      this.chart = markRaw(echarts.init(el))
     },
     handleResize () {
       if (this.chart && this.isTableType === false) this.chart.resize()
@@ -468,7 +469,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  padding-top: 80px;
+  padding-top: 64px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

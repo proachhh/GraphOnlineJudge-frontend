@@ -132,8 +132,8 @@
             const cols = this.ACMTableColumns
             for (let i = 0; i < cols.length; i++) {
               if (cols[i].width) {
-                this.$set(cols[i], 'minWidth', cols[i].width)
-                this.$delete(cols[i], 'width')
+                cols[i]['minWidth'] = cols[i].width
+                delete cols[i]['width']
               }
             }
           }
@@ -226,11 +226,11 @@
     border-radius: 8px;
     overflow: hidden;
 
-    ::v-deep .ivu-table {
+    :deep(.ivu-table){
       table-layout: auto !important;
     }
 
-    ::v-deep .ivu-table-cell {
+    :deep(.ivu-table-cell){
       white-space: nowrap !important;
       overflow: visible !important;
       text-overflow: clip !important;

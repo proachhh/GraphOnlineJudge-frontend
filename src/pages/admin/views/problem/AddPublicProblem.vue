@@ -18,12 +18,12 @@
         class="search-input"
         @keyup.enter.native="doSearch"
         @clear="doSearch">
-        <el-button slot="append" icon="el-icon-search" @click="doSearch">搜索</el-button>
+        <template #append><el-button icon="el-icon-search" @click="doSearch">搜索</el-button></template>
       </el-input>
     </div>
 
     <div v-if="errorMsg" class="error-msg">
-      <i class="el-icon-warning"></i> {{ errorMsg }}
+      <el-icon-warning/> {{ errorMsg }}
     </div>
 
     <el-table
@@ -51,7 +51,7 @@
         label="难度"
         width="80"
         prop="difficulty">
-        <template slot-scope="{row}">
+        <template #default="{row}">
           <el-tag :type="difficultyType(row.difficulty)" size="small">{{ row.difficulty || '-' }}</el-tag>
         </template>
       </el-table-column>
@@ -60,7 +60,7 @@
         width="80"
         align="center"
         fixed="right">
-        <template slot-scope="{row}">
+        <template #default="{row}">
           <el-button type="primary" size="mini" icon="el-icon-plus" @click.stop="handleAddProblem(row)">加入</el-button>
         </template>
       </el-table-column>
@@ -236,7 +236,7 @@ export default {
       }, 400)
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     if (searchTimer) clearTimeout(searchTimer)
   }
 }

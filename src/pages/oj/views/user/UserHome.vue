@@ -41,13 +41,13 @@
 
           <div class="social-section">
             <a v-if="profile.github" :href="profile.github" class="social-link" title="GitHub">
-              <Icon type="social-github-outline" size="20" />
+              <i class="fa fa-github" style="font-size:20px"></i>
             </a>
             <a v-if="profile.user && profile.user.email" :href="'mailto:'+ profile.user.email" class="social-link" title="邮箱">
-              <Icon type="ios-email-outline" size="20" />
+              <Icon type="ios-mail-outline" size="20" />
             </a>
             <a v-if="profile.blog" :href="profile.blog" class="social-link" title="博客">
-              <Icon type="ios-world-outline" size="20" />
+              <Icon type="ios-globe-outline" size="20" />
             </a>
           </div>
         </div>
@@ -91,7 +91,7 @@
         <div class="stats-section">
           <div class="stat-card">
             <div class="stat-icon stat-icon-green">
-              <Icon type="checkmark-circled" />
+              <Icon type="ios-checkmark-circle" />
             </div>
             <div class="stat-info">
               <p class="stat-label">{{ $t('m.UserHomeSolved') }}</p>
@@ -109,7 +109,7 @@
           </div>
           <div class="stat-card">
             <div class="stat-icon stat-icon-orange">
-              <Icon type="trophy" />
+              <Icon type="ios-trophy" />
             </div>
             <div class="stat-info">
               <p class="stat-label">{{ $t('m.UserHomeScore') }}</p>
@@ -134,11 +134,11 @@
             <span>{{ $t('m.List_Solved_Problems') }}</span>
             <span class="section-count">{{ problems.length }} 题</span>
             <Poptip v-if="refreshVisible" trigger="hover" placement="right-start">
-              <Icon type="help-circled" class="help-icon" />
-              <div slot="content">
+              <Icon type="ios-help-circle" class="help-icon" />
+              <template #content><div>
                 <p>{{ $t('m.Problem_ID_Not_Exist_Message') }}</p>
                 <Button type="info" @click="freshProblemDisplayID">{{ $t('m.Regenerate_Button') }}</Button>
-              </div>
+              </div></template>
             </Poptip>
           </div>
           <div v-if="!problems.length" class="no-problems">
@@ -177,7 +177,7 @@
                   <span class="timeline-result" :class="'result-' + sub.resultType">{{ sub.resultText }}</span>
                 </div>
                 <div class="timeline-meta">
-                  <span class="meta-lang"><Icon type="code" /> {{ sub.language }}</span>
+                  <span class="meta-lang"><Icon type="ios-code" /> {{ sub.language }}</span>
                   <span class="meta-time">{{ sub.timeAgo }}</span>
                   <span v-if="sub.memory" class="meta-mem">{{ sub.memory }} KB</span>
                   <span v-if="sub.executeTime" class="meta-time-cost">{{ sub.executeTime }} ms</span>
@@ -424,8 +424,8 @@
           { key: 'first', name: '初出茅庐', desc: '首次 AC', icon: 'ios-flag', unlocked: ac >= 1 },
           { key: 'ac10', name: '渐入佳境', desc: 'AC 10 题', icon: 'ios-star', unlocked: ac >= 10 },
           { key: 'ac50', name: '刷题达人', desc: 'AC 50 题', icon: 'ios-trophy', unlocked: ac >= 50 },
-          { key: 'ac100', name: '题海勇士', desc: 'AC 100 题', icon: 'ribbon-b', unlocked: ac >= 100 },
-          { key: 'rate80', name: '精准射手', desc: '通过率 80%+', icon: 'lightbulb', unlocked: rate >= 80 && sub >= 10 },
+          { key: 'ac100', name: '题海勇士', desc: 'AC 100 题', icon: 'ios-ribbon', unlocked: ac >= 100 },
+          { key: 'rate80', name: '精准射手', desc: '通过率 80%+', icon: 'ios-bulb', unlocked: rate >= 80 && sub >= 10 },
           { key: 'score1k', name: '积分破千', desc: '积分 1000+', icon: 'ios-flame', unlocked: score >= 1000 }
         ]
       }

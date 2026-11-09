@@ -6,7 +6,7 @@
         <!-- 页面标题 -->
         <div class="page-header">
           <div class="header-left">
-            <h2 class="page-title"><i class="el-icon-reading"></i> {{ $t('m.ES_Title') }}</h2>
+            <h2 class="page-title"><el-icon-reading/> {{ $t('m.ES_Title') }}</h2>
           </div>
           <div class="header-stats">
             <div class="hs-item">
@@ -59,30 +59,30 @@
                     <span class="card-diff">{{ diffText(s.difficulty) }}</span>
                   </div>
                   <div class="card-tags">
-                    <span class="card-topic" v-if="s.topic"><i class="el-icon-collection-tag"></i> {{ s.topic }}</span>
-                    <span class="card-submitted" v-if="s.has_submitted"><i class="el-icon-circle-check"></i> {{ $t('m.ES_Submitted_Badge') }}</span>
+                    <span class="card-topic" v-if="s.topic"><el-icon-collection-tag/> {{ s.topic }}</span>
+                    <span class="card-submitted" v-if="s.has_submitted"><el-icon-circle-check/> {{ $t('m.ES_Submitted_Badge') }}</span>
                   </div>
                   <div class="card-meta">
                     <div class="meta-line">
-                      <span class="meta-item"><i class="el-icon-document-copy"></i><b>{{ s.question_count || 0 }}</b> {{ $t('m.ES_Question_Unit') }}</span>
-                      <span class="meta-item"><i class="el-icon-user"></i><b>{{ s.submission_count || 0 }}</b> {{ $t('m.ES_People_Unit') }}</span>
+                      <span class="meta-item"><el-icon-document-copy/><b>{{ s.question_count || 0 }}</b> {{ $t('m.ES_Question_Unit') }}</span>
+                      <span class="meta-item"><el-icon-user/><b>{{ s.submission_count || 0 }}</b> {{ $t('m.ES_People_Unit') }}</span>
                     </div>
                     <div class="meta-line">
-                      <span class="meta-item" v-if="s.time_limit"><i class="el-icon-time"></i>{{ s.time_limit }} {{ $t('m.ES_Minutes') }}</span>
-                      <span class="meta-item" v-else><i class="el-icon-time"></i>{{ $t('m.ES_No_Time_Limit') }}</span>
-                      <span class="meta-item" v-if="s.max_attempts"><i class="el-icon-edit-outline"></i>{{ $t('m.ES_Limit_Attempts', {n: s.max_attempts}) }}</span>
-                      <span class="meta-item" v-else><i class="el-icon-edit-outline"></i>{{ $t('m.ES_Unlimited_Attempts') }}</span>
+                      <span class="meta-item" v-if="s.time_limit"><el-icon-time/>{{ s.time_limit }} {{ $t('m.ES_Minutes') }}</span>
+                      <span class="meta-item" v-else><el-icon-time/>{{ $t('m.ES_No_Time_Limit') }}</span>
+                      <span class="meta-item" v-if="s.max_attempts"><el-icon-edit-outline/>{{ $t('m.ES_Limit_Attempts', {n: s.max_attempts}) }}</span>
+                      <span class="meta-item" v-else><el-icon-edit-outline/>{{ $t('m.ES_Unlimited_Attempts') }}</span>
                     </div>
                   </div>
                   <div class="card-action">
-                    <span class="action-btn">{{ $t('m.ES_Start_Practice') }} <i class="el-icon-arrow-right"></i></span>
+                    <span class="action-btn">{{ $t('m.ES_Start_Practice') }} <el-icon-arrow-right/></span>
                   </div>
                 </div>
               </div>
             </el-col>
           </el-row>
           <div v-else-if="!loading" class="empty-hint">
-            <i class="el-icon-folder-opened"></i>
+            <el-icon-folder-opened/>
             <p>{{ $t('m.ES_Empty') }}</p>
           </div>
         </div>
@@ -92,7 +92,7 @@
       <el-col :xs="24" :lg="6">
         <!-- 我的练习进度 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-data-line"></i> {{ $t('m.ES_My_Practice') }}</div>
+          <div class="side-title"><el-icon-data-line/> {{ $t('m.ES_My_Practice') }}</div>
           <div class="progress-ring-wrap">
             <el-progress type="circle" :percentage="practiceProgress" :width="100" :stroke-width="8" :color="'#1e3a8a'"></el-progress>
             <div class="progress-text">
@@ -102,15 +102,15 @@
           </div>
           <div class="progress-stats">
             <div class="ps-row">
-              <span class="ps-label"><i class="el-icon-circle-check" style="color:#19be6b"></i> {{ $t('m.ES_Completed') }}</span>
+              <span class="ps-label"><el-icon-circle-check style="color:#19be6b"/> {{ $t('m.ES_Completed') }}</span>
               <span class="ps-val">{{ submittedCount }}</span>
             </div>
             <div class="ps-row">
-              <span class="ps-label"><i class="el-icon-time" style="color:#f90"></i> {{ $t('m.ES_In_Progress') }}</span>
+              <span class="ps-label"><el-icon-time style="color:#f90"/> {{ $t('m.ES_In_Progress') }}</span>
               <span class="ps-val">0</span>
             </div>
             <div class="ps-row">
-              <span class="ps-label"><i class="el-icon-document" style="color:#94a3b8"></i> {{ $t('m.ES_Not_Started') }}</span>
+              <span class="ps-label"><el-icon-document style="color:#94a3b8"/> {{ $t('m.ES_Not_Started') }}</span>
               <span class="ps-val">{{ sets.length - submittedCount }}</span>
             </div>
           </div>
@@ -118,7 +118,7 @@
 
         <!-- 难度分布 -->
         <div class="side-card" v-if="sets.length">
-          <div class="side-title"><i class="el-icon-pie-chart"></i> {{ $t('m.ES_Diff_Dist') }}</div>
+          <div class="side-title"><el-icon-pie-chart/> {{ $t('m.ES_Diff_Dist') }}</div>
           <div class="diff-stat" v-for="d in difficultyDist" :key="d.key">
             <span class="diff-dot" :style="{ background: d.color }"></span>
             <span class="diff-name">{{ d.label }}</span>
@@ -131,7 +131,7 @@
 
         <!-- 热门题集 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-star-on"></i> {{ $t('m.ES_Hot_Sets') }}</div>
+          <div class="side-title"><el-icon-star-on/> {{ $t('m.ES_Hot_Sets') }}</div>
           <div class="hot-list">
             <div
               v-for="(s, idx) in hotSets"
@@ -144,29 +144,29 @@
                 <span class="hot-name">{{ s.title }}</span>
                 <span class="hot-meta">{{ $t('m.ES_People_Joined', {n: s.submission_count || 0}) }} · {{ diffText(s.difficulty) }}</span>
               </div>
-              <i class="el-icon-arrow-right hot-arrow"></i>
+              <el-icon-arrow-right class="hot-arrow"/>
             </div>
           </div>
         </div>
 
         <!-- 快捷入口 -->
         <div class="side-card">
-          <div class="side-title"><i class="el-icon-s-grid"></i> {{ $t('m.ES_Quick_Links') }}</div>
+          <div class="side-title"><el-icon-s-grid/> {{ $t('m.ES_Quick_Links') }}</div>
           <div class="quick-links">
             <div class="ql-item" @click="$router.push('/problem')">
-              <i class="el-icon-document-copy"></i>
+              <el-icon-document-copy/>
               <span>{{ $t('m.ES_Ql_Problems') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/immersion')">
-              <i class="el-icon-magic-stick"></i>
+              <el-icon-magic-stick/>
               <span>{{ $t('m.ES_Ql_Immersion') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/boss-exam')">
-              <i class="el-icon-trophy"></i>
+              <el-icon-trophy/>
               <span>{{ $t('m.ES_Ql_Boss') }}</span>
             </div>
             <div class="ql-item" @click="$router.push('/algorithm-viz')">
-              <i class="el-icon-discover"></i>
+              <el-icon-discover/>
               <span>{{ $t('m.ES_Ql_Viz') }}</span>
             </div>
           </div>
@@ -338,11 +338,11 @@ export default {
 }
 .filter-item { display: flex; align-items: center; gap: 8px; }
 .filter-label { font-size: 15px; color: #606266; }
-.filter-bar /deep/ .el-button--primary {
+.filter-bar :deep(.el-button--primary){
   background: #1e3a8a;
   border-color: #1e3a8a;
 }
-.filter-bar /deep/ .el-button--primary:hover {
+.filter-bar :deep(.el-button--primary:hover){
   background: #2950b3;
   border-color: #2950b3;
 }

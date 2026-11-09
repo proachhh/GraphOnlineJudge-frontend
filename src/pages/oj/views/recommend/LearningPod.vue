@@ -4,7 +4,7 @@
     <div class="pod-header">
       <div class="pod-title">
         <el-button icon="el-icon-arrow-left" size="mini" circle @click="$router.back()"></el-button>
-        <i class="el-icon-fa-bookmark"></i>
+        <el-icon-fa-bookmark/>
         <span class="pod-topic">{{ topic }}</span>
         <span class="pod-badge">学习空间</span>
       </div>
@@ -18,7 +18,7 @@
     <el-tabs v-model="activeTab" class="pod-tabs">
       <!-- 1. 入口诊断（选择题） -->
       <el-tab-pane name="diagnosis">
-        <span slot="label"><i class="el-icon-fa-stethoscope"></i> 入口诊断</span>
+        <template #label><span><el-icon-fa-stethoscope/> 入口诊断</span></template>
         <div class="tab-content">
           <div class="diag-intro" v-if="diagStage === 'idle'">
             <h3>入口诊断</h3>
@@ -40,7 +40,7 @@
             <div class="quiz-counter">第 {{ diagIndex + 1 }} / {{ diagQuestions.length }} 题</div>
             <div class="quiz-question">{{ currentQuiz.question }}</div>
             <div class="quiz-feedback" :class="quizIsCorrect ? 'correct' : 'wrong'">
-              <i :class="quizIsCorrect ? 'el-icon-success' : 'el-icon-error'"></i>
+              <component :is="quizIsCorrect ? 'el-icon-success' : 'el-icon-error'"/>
               {{ quizIsCorrect ? '回答正确' : '回答错误' }}
               <span v-if="!quizIsCorrect">正确答案：{{ String.fromCharCode(65 + currentQuiz.answer) }}</span>
             </div>
@@ -61,7 +61,7 @@
             </div>
             <div class="report-questions">
               <div v-for="(q, i) in diagQuestions" :key="i" class="report-q-item">
-                <i :class="q.userCorrect ? 'el-icon-success' : 'el-icon-error'" :style="{color: q.userCorrect ? '#67C23A' : '#F56C6C'}"></i>
+                <component :is="q.userCorrect ? 'el-icon-success' : 'el-icon-error'" :style="{color: q.userCorrect ? '#67C23A' : '#F56C6C'}"/>
                 <span>第 {{ i + 1 }} 题</span>
                 <span class="rq-status" :class="q.userCorrect ? 'ok' : 'fail'">{{ q.userCorrect ? '正确' : '错误' }}</span>
               </div>
@@ -74,7 +74,7 @@
 
       <!-- 2. 讲义（系统自带） -->
       <el-tab-pane name="lecture">
-        <span slot="label"><i class="el-icon-document"></i> 讲义</span>
+        <template #label><span><el-icon-document/> 讲义</span></template>
         <div class="tab-content">
           <div v-loading="lectureLoading">
             <div class="lecture-content" v-if="lectureHtml" v-html="lectureHtml"></div>
@@ -90,7 +90,7 @@
 
       <!-- 3. 代码练习 -->
       <el-tab-pane name="practice">
-        <span slot="label"><i class="el-icon-fa-code"></i> 代码练习</span>
+        <template #label><span><el-icon-fa-code/> 代码练习</span></template>
         <div class="tab-content" v-loading="problemsLoading">
           <div v-if="problems && problems.length" class="problem-list">
             <div class="problem-item" v-for="p in problems" :key="p.id" @click="goProblem(p)">
@@ -105,7 +105,7 @@
 
       <!-- 4. 思维导图 -->
       <el-tab-pane name="mindmap">
-        <span slot="label"><i class="el-icon-fa-sitemap"></i> 思维导图</span>
+        <template #label><span><el-icon-fa-sitemap/> 思维导图</span></template>
         <div class="tab-content">
           <el-button type="primary" size="small" icon="el-icon-magic-stick" @click="genMindmap"
                      :loading="mindmapLoading" :disabled="mindmapLoaded">
@@ -125,7 +125,7 @@
 
       <!-- 5. 协作讨论（费曼学习法） -->
       <el-tab-pane name="discuss">
-        <span slot="label"><i class="el-icon-chat-dot-round"></i> 协作讨论</span>
+        <template #label><span><el-icon-chat-dot-round/> 协作讨论</span></template>
         <div class="tab-content discuss-tab">
           <div class="discuss-msgs" ref="discussMsgs">
             <div class="msg ai markdown-body" v-html="renderMarkdown('你好！我是你的学习考官。请尝试用你自己的话解释「' + topic + '」这个知识点，我会追问以检验你的理解深度。')"></div>
@@ -144,7 +144,7 @@
 
       <!-- 6. 学习报告 -->
       <el-tab-pane name="report">
-        <span slot="label"><i class="el-icon-fa-bar-chart"></i> 学习报告</span>
+        <template #label><span><el-icon-fa-bar-chart/> 学习报告</span></template>
         <div class="tab-content report-tab">
           <div class="report-card">
             <h3>本次学习概览</h3>
@@ -462,30 +462,30 @@ answer是正确选项的索引(0-3)。`
   min-height: 500px;
 }
 
-.pod-tabs /deep/ .el-tabs__item {
+.pod-tabs :deep(.el-tabs__item){
   font-size: 16px;
   height: 48px;
   line-height: 48px;
 }
 
 /* 深蓝按钮覆盖 Element 默认浅蓝 */
-.pod-tabs /deep/ .el-button--primary {
+.pod-tabs :deep(.el-button--primary){
   background: #1e3a8a;
   border-color: #1e3a8a;
   border-radius: 4px;
 }
-.pod-tabs /deep/ .el-button--primary:hover {
+.pod-tabs :deep(.el-button--primary:hover){
   background: #5cadff;
   border-color: #5cadff;
 }
 /* tab 切换深蓝色 */
-.pod-tabs /deep/ .el-tabs__active-bar {
+.pod-tabs :deep(.el-tabs__active-bar){
   background-color: #1e3a8a;
 }
-.pod-tabs /deep/ .el-tabs__item.is-active {
+.pod-tabs :deep(.el-tabs__item.is-active){
   color: #1e3a8a;
 }
-.pod-tabs /deep/ .el-tabs__item:hover {
+.pod-tabs :deep(.el-tabs__item:hover){
   color: #1e3a8a;
 }
 
@@ -503,8 +503,8 @@ answer是正确选项的索引(0-3)。`
 .quiz-options { display: flex; flex-direction: column; gap: 10px; }
 .quiz-option { display: flex; align-items: flex-start; padding: 10px 14px; border: 1px solid #ebeef5; border-radius: 6px; font-size: 15px; margin: 0 !important; }
 .quiz-option:hover { background: #f5f7fa; }
-.quiz-option /deep/ .el-radio { margin-right: 0; white-space: normal; }
-.quiz-option /deep/ .el-radio__label { white-space: normal; word-break: break-word; }
+.quiz-option :deep(.el-radio){ margin-right: 0; white-space: normal; }
+.quiz-option :deep(.el-radio__label){ white-space: normal; word-break: break-word; }
 .quiz-feedback { padding: 12px 16px; border-radius: 6px; font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 .quiz-feedback.correct { background: #f0f9eb; color: #67C23A; }
 .quiz-feedback.wrong { background: #fef0f0; color: #F56C6C; }
@@ -533,23 +533,23 @@ answer是正确选项的索引(0-3)。`
 
 /* 讲义 */
 .lecture-content { line-height: 1.9; font-size: 15px; }
-.lecture-content /deep/ h1, .lecture-content /deep/ h2, .lecture-content /deep/ h3 { margin-top: 20px; border-bottom: 1px solid #ebeef5; padding-bottom: 8px; }
-.lecture-content /deep/ pre { background: #2d2d2d; color: #f8f8f2; padding: 14px; border-radius: 6px; overflow-x: auto; }
-.lecture-content /deep/ img { max-width: 100%; border-radius: 6px; }
+.lecture-content :deep(h1), .lecture-content :deep(h2), .lecture-content :deep(h3){ margin-top: 20px; border-bottom: 1px solid #ebeef5; padding-bottom: 8px; }
+.lecture-content :deep(pre){ background: #2d2d2d; color: #f8f8f2; padding: 14px; border-radius: 6px; overflow-x: auto; }
+.lecture-content :deep(img){ max-width: 100%; border-radius: 6px; }
 
 /* markdown 通用 */
 .ai-content { margin-top: 16px; padding: 20px; background: #f5f7fa; border-radius: 8px; line-height: 1.9; font-size: 15px; }
-.ai-content /deep/ h1, .ai-content /deep/ h2, .ai-content /deep/ h3 { margin-top: 16px; border-bottom: 1px solid #ebeef5; padding-bottom: 8px; }
-.ai-content /deep/ pre { background: #2d2d2d; color: #f8f8f2; padding: 14px; border-radius: 6px; overflow-x: auto; }
-.ai-content /deep/ code { background: #eef1f6; padding: 2px 6px; border-radius: 3px; font-family: Consolas, monospace; }
-.ai-content /deep/ pre code { background: none; padding: 0; }
-.ai-content /deep/ li { margin-left: 20px; }
-.ai-content /deep/ blockquote { border-left: 4px solid #2d8cf0; padding-left: 12px; color: #606266; margin: 8px 0; }
+.ai-content :deep(h1), .ai-content :deep(h2), .ai-content :deep(h3){ margin-top: 16px; border-bottom: 1px solid #ebeef5; padding-bottom: 8px; }
+.ai-content :deep(pre){ background: #2d2d2d; color: #f8f8f2; padding: 14px; border-radius: 6px; overflow-x: auto; }
+.ai-content :deep(code){ background: #eef1f6; padding: 2px 6px; border-radius: 3px; font-family: Consolas, monospace; }
+.ai-content :deep(pre code){ background: none; padding: 0; }
+.ai-content :deep(li){ margin-left: 20px; }
+.ai-content :deep(blockquote){ border-left: 4px solid #2d8cf0; padding-left: 12px; color: #606266; margin: 8px 0; }
 
-.discuss-msgs /deep/ h1, .discuss-msgs /deep/ h2, .discuss-msgs /deep/ h3 { font-size: 16px; margin: 8px 0 4px; }
-.discuss-msgs /deep/ pre { background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 14px; }
-.discuss-msgs /deep/ code { background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 3px; }
-.discuss-msgs /deep/ pre code { background: none; padding: 0; }
+.discuss-msgs :deep(h1), .discuss-msgs :deep(h2), .discuss-msgs :deep(h3){ font-size: 16px; margin: 8px 0 4px; }
+.discuss-msgs :deep(pre){ background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 14px; }
+.discuss-msgs :deep(code){ background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 3px; }
+.discuss-msgs :deep(pre code){ background: none; padding: 0; }
 
 .empty-hint { padding: 40px; text-align: center; color: #c0c4cc; font-size: 15px; }
 

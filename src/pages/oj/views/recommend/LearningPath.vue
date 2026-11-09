@@ -187,7 +187,7 @@ export default {
       }
     })
   },
-  beforeDestroy () {
+  beforeUnmount () {
     // 移除导航栏透明样式
     const header = document.getElementById('header')
     if (header) {
@@ -364,7 +364,7 @@ export default {
   margin: 0 auto 20px;
 
   .topic-search {
-    /deep/ .ivu-input {
+    :deep(.ivu-input){
       background: rgba(255, 255, 255, 0.95);
       border: none;
       border-radius: 24px;
@@ -378,7 +378,7 @@ export default {
       }
     }
 
-    /deep/ .ivu-input-prefix {
+    :deep(.ivu-input-prefix){
       left: 15px;
       color: #808695;
     }
@@ -413,14 +413,14 @@ export default {
     font-weight: 600;
 
     .start-tag,
-    .start-tag /deep/ .ivu-tag-text {
+    .start-tag :deep(.ivu-tag-text){
       background: #2d8cf0 !important;
       border-color: #2d8cf0 !important;
       color: white !important;
     }
 
     .target-tag,
-    .target-tag /deep/ .ivu-tag-text {
+    .target-tag :deep(.ivu-tag-text){
       background: #ed4014 !important;
       border-color: #ed4014 !important;
       color: white !important;
@@ -542,12 +542,12 @@ export default {
   }
 
   .path-timeline {
-    /deep/ .ivu-timeline-item-tail {
+    :deep(.ivu-timeline-item-tail){
       border-left: 2px solid #e8eaec;
       left: 15px;
     }
 
-    /deep/ .ivu-timeline-item-head {
+    :deep(.ivu-timeline-item-head){
       width: 12px;
       height: 12px;
       left: 10px;
@@ -555,7 +555,7 @@ export default {
       border-color: #2d8cf0;
     }
 
-    /deep/ .ivu-timeline-item-content {
+    :deep(.ivu-timeline-item-content){
       padding-left: 24px;
     }
 
@@ -721,7 +721,7 @@ export default {
     }
   }
 
-  /deep/ .ai-response-card {
+  :deep(.ai-response-card){
     margin-top: 0;
   }
 }

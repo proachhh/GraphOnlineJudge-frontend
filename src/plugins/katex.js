@@ -1,6 +1,7 @@
 import 'katex'
 import renderMathInElement from 'katex/contrib/auto-render/auto-render'
 import 'katex/dist/katex.min.css'
+import { nextTick } from 'vue'
 
 function _ () {
 }
@@ -31,14 +32,13 @@ export function renderElement (el) {
 }
 
 export default {
-  install: function (Vue, options) {
-    Vue.directive('katex', {
-      bind: render,
-      // update 在子节点更新前触发，用 nextTick 延迟到 DOM 更新后渲染
-      update: function (el, binding) {
-        Vue.nextTick(() => render(el, binding))
-      },
-      componentUpdated: render
+  install: function (app, options) {
+    // Vue 3 指令钩子：bind → beforeMount, update/componentUpdated → updated
+    app.directive('katex', {
+      beforeMount: render,
+      updated: function (el, binding) {
+        nextTick(() => render(el, binding))
+      }
     })
   }
 }

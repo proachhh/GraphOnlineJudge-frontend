@@ -281,12 +281,12 @@ export default {
   line-height: 1.8;
   font-size: 14px;
 
-  /deep/ h2 { color: #64ffda; font-size: 18px; margin: 16px 0 8px; }
-  /deep/ h3 { color: #ccd6f6; font-size: 15px; margin: 12px 0 6px; }
-  /deep/ code { background: #1d2d50; padding: 2px 6px; border-radius: 4px; }
-  /deep/ pre { background: #0a192f; padding: 16px; border-radius: 8px; overflow-x: auto; }
-  /deep/ ul, /deep/ ol { padding-left: 20px; }
-  /deep/ li { margin: 4px 0; }
+  :deep(h2){ color: #64ffda; font-size: 18px; margin: 16px 0 8px; }
+  :deep(h3){ color: #ccd6f6; font-size: 15px; margin: 12px 0 6px; }
+  :deep(code){ background: #1d2d50; padding: 2px 6px; border-radius: 4px; }
+  :deep(pre){ background: #0a192f; padding: 16px; border-radius: 8px; overflow-x: auto; }
+  :deep(ul), :deep(ol){ padding-left: 20px; }
+  :deep(li){ margin: 4px 0; }
 }
 
 .mermaid-container {
@@ -333,7 +333,7 @@ export default {
       gap: 6px;
       margin-bottom: 10px;
 
-      /deep/ .ivu-radio-wrapper { color: #a8b2d1; }
+      :deep(.ivu-radio-wrapper){ color: #a8b2d1; }
     }
 
     .ex-answer {
@@ -399,8 +399,8 @@ export default {
 
 .code-example-body {
   line-height: 1.8;
-  /deep/ pre { background: #0a192f; }
-  /deep/ code { background: #1d2d50; }
+  :deep(pre){ background: #0a192f; }
+  :deep(code){ background: #1d2d50; }
 }
 
 .loading-block {

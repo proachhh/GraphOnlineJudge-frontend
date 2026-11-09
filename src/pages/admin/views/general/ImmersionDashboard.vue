@@ -3,7 +3,7 @@
 
     <div class="top-bar">
       <div class="brand">
-        <img :src="require('@/assets/logo.png')" class="brand-logo" alt="logo" />
+        <img :src="logo1" class="brand-logo" alt="logo" />
         <span class="brand-sub">数据看板</span>
       </div>
       <div class="top-bar-time">{{ currentTime }}</div>
@@ -25,7 +25,7 @@
         </div>
         <div class="user-analytics-panel">
           <div class="ua-header">
-            <i class="el-icon-fa-bar-chart" style="font-size:16px; color: #3b82f6;"></i>
+            <el-icon-fa-bar-chart style="font-size:16px; color: #3b82f6;"/>
             <span>用户分析 — {{ selectedUser ? selectedUserLabel : '请选择用户' }}</span>
             <el-select
               v-model="selectedUserId"
@@ -73,7 +73,7 @@
         </div>
         <div class="judge-panel">
           <div class="judge-header">
-            <i class="el-icon-fa-server" style="font-size:14px; color: #3b82f6;"></i>
+            <el-icon-fa-server style="font-size:14px; color: #3b82f6;"/>
             <span>判题服务器 {{ judgeServers.length }}</span>
           </div>
           <div class="judge-scroll-box" ref="judgeScrollBox">
@@ -158,7 +158,7 @@
                   :width="col.width"
                   :min-width="col.minWidth"
                 >
-                  <template slot-scope="scope">
+                  <template #default="scope">
                     <span v-html="col._html(scope.row)" class="nowrap-cell"></span>
                   </template>
                 </el-table-column>
@@ -173,6 +173,7 @@
 </template>
 
 <script>
+import logo1 from '@/assets/logo.png'
 import * as echarts from 'echarts'
 import api from '@admin/api'
 import { mapGetters } from 'vuex'
@@ -211,6 +212,7 @@ export default {
     }
   },
   computed: {
+      logo1 () { return logo1 },
     ...mapGetters(['user']),
     statCards () {
       return [
@@ -308,7 +310,7 @@ export default {
       immediate: true
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     clearInterval(this.timeTimer)
     this.stopAllScrollTimers()
     this.animTimers.forEach(t => clearInterval(t))
@@ -958,7 +960,7 @@ export default {
 
     .stat-emoji { font-size: 16px; line-height: 1; flex-shrink: 0; }
     .ua-user-select { margin-left: auto; width: 160px; flex-shrink: 0;
-      /deep/ .el-input__inner {
+      :deep(.el-input__inner){
         background: rgba(16, 21, 37, 0.9); color: #e5eaf5;
         border-color: rgba(100, 120, 160, 0.3);
       }
@@ -1057,18 +1059,18 @@ export default {
 }
 
 .table-fixed-wrap {
-  /deep/ .el-table__header-wrapper {
+  :deep(.el-table__header-wrapper){
     flex-shrink: 0;
   }
-  /deep/ .el-table__body-wrapper {
+  :deep(.el-table__body-wrapper){
     height: 220px !important;
     overflow-y: auto !important;
     &::-webkit-scrollbar { width: 0; }
   }
   /* 隐藏 el-table 默认底部/右侧白线（深色背景下 ::before/::after 为 #ebeef5） */
-  /deep/ .el-table::before,
-  /deep/ .el-table::after,
-  /deep/ .el-table__body-wrapper {
+  :deep(.el-table::before),
+  :deep(.el-table::after),
+  :deep(.el-table__body-wrapper){
     background-color: transparent !important;
     border: none !important;
   }
@@ -1081,8 +1083,8 @@ export default {
     font-size: 13px;
   }
 
-  /deep/ .dark-table .el-table__header-wrapper th,
-  /deep/ .dark-table .dark-th {
+  :deep(.dark-table .el-table__header-wrapper th),
+  :deep(.dark-table .dark-th){
     background: rgba(255,255,255,0.05) !important;
     color: #a0b0d0 !important;
     border-bottom: 1px solid @border-color !important;
@@ -1092,8 +1094,8 @@ export default {
     white-space: nowrap;
   }
 
-  /deep/ .dark-table .el-table__body-wrapper td,
-  /deep/ .dark-table .dark-tr {
+  :deep(.dark-table .el-table__body-wrapper td),
+  :deep(.dark-table .dark-tr){
     background: transparent !important;
     border-bottom: 1px solid rgba(255,255,255,0.03) !important;
     color: #d0d8f0 !important;
@@ -1101,11 +1103,11 @@ export default {
     font-size: 13px;
   }
 
-  /deep/ .dark-table td.nowrap-cell .cell {
+  :deep(.dark-table td.nowrap-cell .cell){
     white-space: nowrap;
   }
 
-  /deep/ .dark-table tr:hover > td {
+  :deep(.dark-table tr:hover > td){
     background: rgba(255,255,255,0.04) !important;
   }
 }
@@ -1118,7 +1120,7 @@ export default {
   white-space: nowrap;
 }
 
-/deep/ .el-loading-mask { background: rgba(16, 21, 37, 0.85); }
+:deep(.el-loading-mask){ background: rgba(16, 21, 37, 0.85); }
 </style>
 
 <style lang="less">

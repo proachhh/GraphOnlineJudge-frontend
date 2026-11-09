@@ -2,8 +2,7 @@
   <codemirror v-model="currentValue" :options="options" ref="editor"></codemirror>
 </template>
 <script>
-  import { codemirror } from 'vue-codemirror-lite'
-  import 'codemirror/mode/clike/clike.js'
+    import 'codemirror/mode/clike/clike.js'
   import 'codemirror/mode/python/python.js'
   import 'codemirror/theme/solarized.css'
 
@@ -25,10 +24,7 @@
         }
       }
     },
-    components: {
-      codemirror
-    },
-    props: {
+        props: {
       value: {
         type: String,
         default: ''

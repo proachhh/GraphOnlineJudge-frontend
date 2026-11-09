@@ -22,7 +22,7 @@
             prop="description"
             :label="$t('m.Description_Col')"
             width="130">
-            <template slot-scope="scope">
+            <template #default="scope">
               <span class="description-text" :title="scope.row.description">{{ shortDesc(scope.row.description) }}</span>
             </template>
           </el-table-column>
@@ -35,7 +35,7 @@
             width="160"
             prop="create_time"
             :label="$t('m.CreateTime')">
-            <template slot-scope="scope">
+            <template #default="scope">
               {{ scope.row.create_time | localtime }}
             </template>
           </el-table-column>
@@ -48,7 +48,7 @@
             width="100"
             prop="visible"
             :label="$t('m.Visibility')">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-switch v-model="scope.row.visible"
                          active-text=""
                          inactive-text=""
@@ -61,8 +61,8 @@
             :label="$t('m.Option')"
             width="200">
             <div slot-scope="scope">
-              <icon-btn :name="$t('m.Edit')" icon="edit" @click.native="openLessonPlanDialog(scope.row.id)"></icon-btn>
-              <icon-btn :name="$t('m.Delete')" icon="trash" @click.native="deleteLessonPlan(scope.row.id)"></icon-btn>
+              <icon-btn :name="$t('m.Edit')" icon="ios-create" @click.native="openLessonPlanDialog(scope.row.id)"></icon-btn>
+              <icon-btn :name="$t('m.Delete')" icon="ios-trash" @click.native="deleteLessonPlan(scope.row.id)"></icon-btn>
             </div>
           </el-table-column>
         </el-table>
@@ -112,10 +112,10 @@
         </div>
         <div class="batch-preview-hint">{{ $t('m.Auto_Fill_From_MD') }}</div>
       </div>
-      <span slot="footer" class="dialog-footer">
+      <template #footer><span class="dialog-footer">
         <el-button @click="showBatchImport = false; resetBatchImport()">{{ $t('m.Cancel') }}</el-button>
         <el-button type="primary" @click="submitBatchImport" :disabled="batchPreview.length === 0">{{ $t('m.Import_All_Files') }}</el-button>
-      </span>
+      </span></template>
     </el-dialog>
 
     <!-- 教案编辑对话框 -->
@@ -157,7 +157,7 @@
                 <el-button size="small" type="primary" icon="el-icon-upload">{{ $t('m.Upload_MD_File') }}</el-button>
               </el-upload>
               <div v-if="mdFileName" class="md-file-info">
-                <i class="el-icon-document"></i>
+                <el-icon-document/>
                 <span>{{ mdFileName }}</span>
                 <el-button type="text" size="mini" @click="clearMdFile" icon="el-icon-delete">{{ $t('m.Remove') }}</el-button>
               </div>
@@ -198,7 +198,7 @@
               </el-upload>
               <div v-if="lessonPlan.pdf_file" class="pdf-file-info">
                 <div class="pdf-file-row">
-                  <i class="el-icon-document"></i>
+                  <el-icon-document/>
                   <span class="pdf-file-name">{{ pdfFileName }}</span>
                   <el-button type="text" size="mini" @click="previewPdf" icon="el-icon-view">{{ $t('m.Preview') }}</el-button>
                   <el-button type="text" size="mini" @click="lessonPlan.pdf_file = ''" icon="el-icon-delete">{{ $t('m.Remove') }}</el-button>
@@ -219,7 +219,7 @@
               :placeholder="$t('m.Search_Problems')"
               @input="searchProblems"
               clearable>
-              <el-button slot="append" icon="el-icon-search" @click="searchProblems"></el-button>
+              <template #append><el-button icon="el-icon-search" @click="searchProblems"></el-button></template>
             </el-input>
             <div class="selected-problems-actions" v-if="searchResults.length > 0">
               <el-button type="text" size="mini" @click="selectAllProblems">{{ $t('m.Select_All_Problems') }}</el-button>
@@ -257,10 +257,10 @@
           </el-switch>
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <template #footer><span class="dialog-footer">
         <el-button @click="showEditDialog = false">{{ $t('m.Cancel') }}</el-button>
         <el-button type="primary" @click="submitLessonPlan">{{ $t('m.Save') }}</el-button>
-      </span>
+      </span></template>
     </el-dialog>
   </div>
 </template>
@@ -679,7 +679,7 @@ export default {
       max-width: 100%;
     }
 
-    /deep/ .el-table {
+    :deep(.el-table){
       th, td {
         word-break: normal !important;
       }
@@ -707,15 +707,15 @@ export default {
       flex-shrink: 0;
     }
 
-    /deep/ .el-pagination {
+    :deep(.el-pagination){
       flex-shrink: 0;
       white-space: nowrap;
       margin-left: 16px;
     }
 
-    /deep/ .el-pager li,
-    /deep/ .btn-prev,
-    /deep/ .btn-next {
+    :deep(.el-pager li),
+    :deep(.btn-prev),
+    :deep(.btn-next){
       pointer-events: auto !important;
       cursor: pointer !important;
     }

@@ -22,7 +22,7 @@
               <div class="sample-input">
                 <p class="title">{{$t('m.Sample_Input')}} {{index + 1}}
                   <a class="copy" v-clipboard:copy="sample.input" v-clipboard:success="onCopy" v-clipboard:error="onCopyError">
-                    <Icon type="clipboard"></Icon>
+                    <Icon type="ios-clipboard"></Icon>
                   </a>
                 </p>
                 <pre>{{sample.input}}</pre>
@@ -108,7 +108,7 @@
           
           <Button 
             type="primary" 
-            icon="edit" 
+            icon="ios-create" 
             :loading="submitting" 
             @click="submitCode"
             :disabled="submitting"
@@ -447,16 +447,16 @@ export default {
     overflow-wrap: break-word;
     min-width: 0;
 
-    /deep/ pre {
+    :deep(pre){
       overflow-x: auto;
     }
 
-    /deep/ img {
+    :deep(img){
       max-width: 100%;
       height: auto;
     }
 
-    /deep/ table {
+    :deep(table){
       display: block;
       overflow-x: auto;
       max-width: 100%;

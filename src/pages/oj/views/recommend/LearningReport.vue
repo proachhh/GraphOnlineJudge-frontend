@@ -77,7 +77,7 @@
                 </span>
               </div>
               <div v-else class="dim-empty">
-                <Icon type="ios-information-outline" size="14" />
+                <Icon type="ios-information-circle-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </div>
@@ -95,7 +95,7 @@
                 </span>
               </div>
               <div v-else class="dim-empty">
-                <Icon type="ios-information-outline" size="14" />
+                <Icon type="ios-information-circle-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </div>
@@ -116,7 +116,7 @@
                 <span>整体掌握度</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-outline" size="14" />
+                <Icon type="ios-information-circle-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
@@ -125,7 +125,7 @@
             <!-- 文字卡片：编码风格 -->
             <div class="text-card" v-if="profileData.coding_style || profileData.preferred_style">
               <div class="tc-head">
-                <Icon type="code-working" color="#19be6b" size="16" />
+                <Icon type="ios-code-working" color="#19be6b" size="16" />
                 <span>编码风格</span>
                 <span class="tc-score">{{ profileScores.coding_style || 3 }} / 5</span>
               </div>
@@ -133,11 +133,11 @@
             </div>
             <div v-else class="text-card text-card-empty">
               <div class="tc-head">
-                <Icon type="code-working" color="#c5c8ce" size="16" />
+                <Icon type="ios-code-working" color="#c5c8ce" size="16" />
                 <span>编码风格</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-outline" size="14" />
+                <Icon type="ios-information-circle-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
@@ -158,7 +158,7 @@
                 <span>学习节奏</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-outline" size="14" />
+                <Icon type="ios-information-circle-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
@@ -167,7 +167,7 @@
             <!-- 文字卡片：建议重点提升方向 -->
             <div class="text-card" v-if="profileData.recommended_focus">
               <div class="tc-head">
-                <Icon type="compass" color="#9c27b0" size="16" />
+                <Icon type="ios-compass" color="#9c27b0" size="16" />
                 <span>建议重点方向</span>
                 <span class="tc-score">{{ profileScores.recommended_focus || 4 }} / 5</span>
               </div>
@@ -175,11 +175,11 @@
             </div>
             <div v-else class="text-card text-card-empty">
               <div class="tc-head">
-                <Icon type="compass" color="#c5c8ce" size="16" />
+                <Icon type="ios-compass" color="#c5c8ce" size="16" />
                 <span>建议重点方向</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-outline" size="14" />
+                <Icon type="ios-information-circle-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
@@ -199,7 +199,7 @@
                 <span>学习目标</span>
               </div>
               <p class="dim-empty">
-                <Icon type="ios-information-outline" size="14" />
+                <Icon type="ios-information-circle-outline" size="14" />
                 <span>暂未收集，</span>
                 <a @click="gotoGuideChat">点击完善画像</a>
               </p>
@@ -265,6 +265,7 @@
 </template>
 
 <script>
+import { Progress } from 'view-ui-plus'
 import api from '@oj/api'
 import { mapGetters } from 'vuex'
 import axios from 'axios'
@@ -328,7 +329,7 @@ export default {
           title: this.$t('m.Accuracy'),
           key: 'accuracy',
           width: 180,
-          render: (h, params) => h('Progress', { props: { percent: params.row.accuracy, status: params.row.accuracy < 30 ? 'wrong' : params.row.accuracy < 70 ? 'normal' : 'success' } })
+          render: (h, params) => h(Progress, { percent: params.row.accuracy, status: params.row.accuracy < 30 ? 'wrong' : params.row.accuracy < 70 ? 'normal' : 'success' })
         }
       ]
     }
@@ -346,7 +347,7 @@ export default {
       }, 500)
     })
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.stopProfilePolling()
   },
   methods: {
@@ -751,7 +752,7 @@ export default {
 .mastery-section {
   .mastery-table {
     border-radius: 8px; overflow: hidden;
-    /deep/ .ivu-table { font-size: 15px; th { font-size: 15px; padding: 12px 8px; } td { padding: 10px 8px; line-height: 1.5; } }
+    :deep(.ivu-table){ font-size: 15px; th { font-size: 15px; padding: 12px 8px; } td { padding: 10px 8px; line-height: 1.5; } }
   }
 }
 </style>
