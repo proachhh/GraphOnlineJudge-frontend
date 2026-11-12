@@ -29,6 +29,10 @@
             <el-icon-search/>
             <span>代码查重</span>
           </div>
+          <div class="nav-item" :class="{ active: activeSection === 'class' }" @click="switchSection('class')">
+            <el-icon-setting/>
+            <span>班级与考试</span>
+          </div>
         </nav>
       </aside>
 
@@ -303,6 +307,23 @@
           </el-table>
         </template>
 
+        <!-- ===== 班级与考试（列表 → 班级主页 → 建考试/成绩单，全部保留左侧菜单栏）===== -->
+        <template v-else-if="section === 'class'">
+          <ClassHome v-if="classNav && classNav.view === 'home'" :key="'home-' + classNav.classId"
+                     embedded :class-id="String(classNav.classId)"
+                     @back="classNav = null"
+                     @create-exam="classNav = { view: 'exam-create', classId: classNav.classId }"
+                     @open-score="classNav = { view: 'exam-score', examId: $event, fromClassId: classNav.classId }" />
+          <ExamCreate v-else-if="classNav && classNav.view === 'exam-create'" :key="'create-' + classNav.classId"
+                      embedded :class-id="String(classNav.classId)"
+                      @back="classNav = { view: 'home', classId: classNav.classId }"
+                      @done="classNav = { view: 'home', classId: classNav.classId }" />
+          <ExamScore v-else-if="classNav && classNav.view === 'exam-score'" :key="'score-' + classNav.examId"
+                     embedded :exam-id="String(classNav.examId)"
+                     @back="classNav = { view: 'home', classId: classNav.fromClassId }" />
+          <ClassList v-else embedded @open-class="classNav = { view: 'home', classId: $event }" />
+        </template>
+
         <!-- ===== 代码查重 ===== -->
         <template v-else-if="section === 'check'">
           <div class="content-toolbar">
@@ -458,9 +479,19 @@
 <script>
 import api from '@oj/api'
 import * as echarts from 'echarts'
+import ClassList from '../school/ClassList.vue'
+import ClassHome from '../school/ClassHome.vue'
+import ExamCreate from '../school/ExamCreate.vue'
+import ExamScore from '../school/ExamScore.vue'
 
 export default {
   name: 'TeacherDashboard',
+  components: {
+    ClassList,
+    ClassHome,
+    ExamCreate,
+    ExamScore
+  },
   data () {
     return {
       activeSection: 'stats',
@@ -502,7 +533,15 @@ export default {
       checkChecked: 0,
       codePairVisible: false,
       currentPair: {},
-      codePairTitle: '代码对比'
+      codePairTitle: '代码对比',
+      // 班级模块内部导航：null=列表，{view:'home'|'exam-create'|'exam-score', ...}=子页
+      classNav: null
+    }
+  },
+  watch: {
+    // 导航栏"班级"按钮带 query 跳转过来时自动切到班级板块
+    '$route.query.section' (v) {
+      if (v === 'class') this.switchSection('class')
     }
   },
   mounted () {
@@ -510,6 +549,7 @@ export default {
     this.loadSets()
     this.loadStats()
     window.addEventListener('resize', this.handleResize)
+    if (this.$route.query.section === 'class') this.switchSection('class')
   },
   beforeUnmount () {
     window.removeEventListener('resize', this.handleResize)
@@ -641,6 +681,7 @@ export default {
     switchSection (s) {
       this.section = s
       this.activeSection = s
+      if (s !== 'class') this.classNav = null
       if (s === 'students' && !this.students.length) this.loadStudents()
       if (s === 'sets' && !this.sets.length) this.loadSets()
       if (s === 'stats') {

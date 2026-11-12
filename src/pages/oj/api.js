@@ -473,6 +473,71 @@ export default {
   },
   getMuteStatus () {
     return ajax('forum/mute_status/', 'get')
+  },
+  // ==================== 班级 ====================
+  getMyClasses () {
+    return ajax('school/class/', 'get')
+  },
+  createClass (data) {
+    return ajax('school/class/', 'post', { data })
+  },
+  getClassDetail (id) {
+    return ajax('school/class/detail/', 'get', { params: { id } })
+  },
+  editClass (data) {
+    return ajax('school/class/detail/', 'put', { data })
+  },
+  archiveClass (id) {
+    return ajax('school/class/detail/', 'delete', { params: { id } })
+  },
+  getClassMembers (classId, status) {
+    return ajax('school/class/member/', 'get', { params: { class_id: classId, status } })
+  },
+  joinClass (data) {
+    return ajax('school/class/member/', 'post', { data })
+  },
+  classMemberAction (data) {
+    return ajax('school/class/member/', 'put', { data })
+  },
+  quitClass (classId) {
+    return ajax('school/class/member/', 'delete', { params: { class_id: classId } })
+  },
+  getClassDashboard (classId) {
+    return ajax('school/class/dashboard/', 'get', { params: { class_id: classId } })
+  },
+  // ==================== 考试 ====================
+  getExams (classId) {
+    return ajax('school/exam/', 'get', { params: { class_id: classId } })
+  },
+  createExam (data) {
+    return ajax('school/exam/', 'post', { data })
+  },
+  editExam (data) {
+    return ajax('school/exam/', 'put', { data })
+  },
+  deleteExam (id) {
+    return ajax('school/exam/', 'delete', { params: { id } })
+  },
+  enterExam (examId) {
+    return ajax('school/exam/enter/', 'get', { params: { exam_id: examId } })
+  },
+  getExamProblem (examId, problemId) {
+    return ajax('school/exam/problem/', 'get', { params: { exam_id: examId, problem_id: problemId } })
+  },
+  submitExamCode (data) {
+    return ajax('school/exam/submit/', 'post', { data })
+  },
+  getExamMySubmissions (examId, problemId) {
+    return ajax('school/exam/submit/', 'get', { params: { exam_id: examId, problem_id: problemId } })
+  },
+  getExamScore (examId) {
+    return ajax('school/exam/score/', 'get', { params: { exam_id: examId } })
+  },
+  getExamMonitor (examId) {
+    return ajax('school/exam/monitor/', 'get', { params: { exam_id: examId } })
+  },
+  reportExamEvent (data) {
+    return ajax('school/exam/monitor/', 'post', { data })
   }
 }
 

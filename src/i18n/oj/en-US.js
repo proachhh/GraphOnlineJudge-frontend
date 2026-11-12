@@ -661,6 +661,7 @@ export const m = {
    Discard_Changes: 'Are you sure to discard the changes?',
    Set_New_Avatar_Success: 'Successfully set new avatar',
    Real_Name: 'Real Name',
+   Student_ID: 'Student ID',
    School: 'School',
    Major: 'Major',
    Mood: 'Mood',

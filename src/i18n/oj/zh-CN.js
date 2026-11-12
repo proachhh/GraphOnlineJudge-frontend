@@ -650,6 +650,7 @@ export const m = {
   Discard_Changes: '确定放弃更改吗？',
   Set_New_Avatar_Success: '头像设置成功',
   Real_Name: '真实姓名',
+  Student_ID: '学号',
   School: '学校',
   Major: '专业',
   Mood: '心情',

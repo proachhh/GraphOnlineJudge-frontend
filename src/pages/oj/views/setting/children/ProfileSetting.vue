@@ -69,6 +69,9 @@
           <FormItem :label="$t('m.Real_Name')">
             <Input v-model="formProfile.real_name"/>
           </FormItem>
+          <FormItem :label="$t('m.Student_ID')">
+            <Input v-model="formProfile.student_id"/>
+          </FormItem>
           <Form-item :label="$t('m.School')">
             <Input v-model="formProfile.school"/>
           </Form-item>
@@ -127,6 +130,7 @@
         languages: languages,
         formProfile: {
           real_name: '',
+          student_id: '',
           mood: '',
           major: '',
           blog: '',

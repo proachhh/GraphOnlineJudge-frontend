@@ -656,6 +656,7 @@ export const m = {
   Discard_Changes: '確定放棄變更嗎？',
   Set_New_Avatar_Success: '大頭貼設定成功',
   Real_Name: '真實姓名',
+  Student_ID: '學號',
   School: '學校',
   Major: '專業',
   Mood: '心情',

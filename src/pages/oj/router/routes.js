@@ -19,6 +19,7 @@ import {
 
 import * as Contest from '@oj/views/contest'
 import * as Setting from '@oj/views/setting'
+import * as School from '@oj/views/school'
 
 export default [
   {
@@ -32,6 +33,36 @@ export default [
     path: '/login',
     meta: {title: 'Login'},
     component: () => import('@oj/views/user/AuthPage.vue')
+  },
+  {
+    name: 'class-list',
+    path: '/class',
+    meta: {title: 'Class', requiresAuth: true},
+    component: School.ClassList
+  },
+  {
+    name: 'class-home',
+    path: '/class/:classId',
+    meta: {title: 'Class', requiresAuth: true},
+    component: School.ClassHome
+  },
+  {
+    name: 'exam-create',
+    path: '/class/:classId/exam/create',
+    meta: {title: 'CreateExam', requiresAuth: true},
+    component: School.ExamCreate
+  },
+  {
+    name: 'exam-page',
+    path: '/exam/:examId',
+    meta: {title: 'Exam', requiresAuth: true},
+    component: School.ExamPage
+  },
+  {
+    name: 'exam-score',
+    path: '/exam/:examId/score',
+    meta: {title: 'ExamScore', requiresAuth: true},
+    component: School.ExamScore
   },
   {
     name: 'register',

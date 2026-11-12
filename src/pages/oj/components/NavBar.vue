@@ -18,6 +18,10 @@
           <Icon type="ios-trophy"></Icon>
           {{$t('m.Contests')}}
         </Menu-item>
+        <Menu-item name="/class">
+          <Icon type="ios-school"></Icon>
+          班级
+        </Menu-item>
         <Menu-item name="/knowledge-universe">
           <Icon type="ios-analytics"></Icon>
           图谱
@@ -125,6 +129,23 @@
       ...mapActions(['getProfile']),
       handleRoute (route) {
         if (!route) return
+        // 教师/管理员点"班级"：提示身份并跳转到教师工作台的班级管理
+        if (route === '/class' && (this.isTeacher || this.isAdminRole)) {
+          this.$Message.info({
+            content: '检测到教师身份，已为你打开教师工作台的班级管理',
+            duration: 3
+          })
+          this.$router.push('/teacher?section=class')
+          return
+        }
+        // 学生点"班级"：默认进入上次浏览的班级（可从班级主页返回列表换班）
+        if (route === '/class') {
+          const last = localStorage.getItem('last_class_id')
+          if (last) {
+            this.$router.push({ name: 'class-home', params: { classId: last } })
+            return
+          }
+        }
         if (route.indexOf('admin') >= 0) {
           window.open('/admin/')
         } else if (route === '/teacher') {
