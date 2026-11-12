@@ -469,7 +469,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  padding-top: 64px;
+  padding-top: 56px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

@@ -1,5 +1,8 @@
 <template>
   <div class="user-home-elegant">
+    <div class="page-back-row">
+      <el-button icon="el-icon-arrow-left" size="small" plain @click="$router.back()">返回</el-button>
+    </div>
     <Row :gutter="20" class="main-row">
 
       <!-- 左侧：用户名片 -->
@@ -447,6 +450,11 @@
   padding: 20px;
   min-height: calc(100vh - 80px);
   background: linear-gradient(180deg, #f0f4f8 0%, #f8fafc 100%);
+}
+
+/* 返回按钮行 */
+.page-back-row {
+  margin-bottom: 16px;
 }
 
 .main-row {

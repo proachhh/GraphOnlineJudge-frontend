@@ -178,12 +178,12 @@
     position: fixed;
     top: 0;
     left: 0;
-    height: 64px;
+    height: 56px;
     width: 100%;
     z-index: 1000;
     transition: all 0.3s ease;
     border: none !important;
-    padding-top: 6px;
+    padding-top: 0;
     
     &.header-transparent {
       background-color: transparent;
@@ -267,10 +267,19 @@
     }
     
     &.header-scrolled {
-      background-color: #fff;
-      box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.08);
+      /* 亚克力材质：半透明 + 背景模糊 + 饱和度增强 */
+      background-color: rgba(255, 255, 255, 0.58);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: 0 2px 12px 0 rgba(30, 58, 138, 0.08);
       padding-top: 0;
       border: none !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.4) !important;
+
+      /* 不支持 backdrop-filter 的浏览器回退为近不透明白底 */
+      @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+        background-color: rgba(255, 255, 255, 0.95);
+      }
       
       &::before, &::after {
         display: none !important;
@@ -290,9 +299,11 @@
 
     .logo {
       flex-shrink: 0;
-      
+      display: flex;
+      align-items: center;
+
       .logo-img {
-        height: 38px;
+        height: 30px;
         object-fit: contain;
         vertical-align: middle;
         transition: transform 0.2s ease;
@@ -309,7 +320,13 @@
       max-width: 800px;
       border-bottom: none !important;
       box-shadow: none !important;
-      margin-top: 4px;
+      margin-top: 0;
+      /* 容器与按钮等高（32px，同右侧登录/注册），flex 居中 */
+      height: 32px;
+      line-height: normal;
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
       
       &::after {
         display: none !important;
@@ -318,33 +335,37 @@
       .ivu-menu-item, .ivu-menu-submenu-title {
         margin: 0 4px;
         padding: 0 14px;
-        height: 34px;
-        line-height: 34px;
-        border-radius: 20px;
+        height: 32px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        border-radius: 999px;
         border: 2px solid #1e3a8a;
         color: #1e3a8a !important;
+        font-size: 14px;
         font-weight: 600;
         transition: all 0.3s ease;
-        
+
         &:hover {
           background: rgba(30, 58, 138, 0.1) !important;
           box-shadow: 0 0 12px rgba(30, 58, 138, 0.2);
         }
-        
+
         &.ivu-menu-item-active {
           background: #1e3a8a !important;
           color: #fff !important;
           border-color: #1e3a8a;
           box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
-          
+
           .ivu-icon {
             color: #fff !important;
           }
         }
-        
+
         .ivu-icon {
           color: #1e3a8a;
           margin-right: 6px;
+          line-height: 1;
         }
       }
       
@@ -409,7 +430,7 @@
         border: 2px solid #1e3a8a;
         color: #1e3a8a;
         border-radius: 20px;
-        padding: 8px 20px;
+        padding: 5px 18px;
         font-weight: 600;
         transition: all 0.3s ease;
         
@@ -485,8 +506,9 @@
       max-width: 600px;
 
       .ivu-menu-item, .ivu-menu-submenu-title {
-        padding: 0 12px;
-        font-size: 14px;
+        padding: 0 10px;
+        font-size: 12px;
+        margin: 0 3px;
       }
     }
   }

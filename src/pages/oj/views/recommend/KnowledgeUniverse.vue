@@ -296,7 +296,7 @@ export default {
 
 /* 路径规划卡片 */
 .ku-path-card {
-  position: absolute; top: 64px; left: 20px; z-index: 10;
+  position: absolute; top: 56px; left: 20px; z-index: 10;
   width: 290px; padding: 18px;
   background: rgba(20,35,60,0.95);
   border: 1px solid rgba(74,122,158,0.3);
@@ -317,7 +317,7 @@ export default {
 
 /* 详情卡片 */
 .ku-detail-card {
-  position: absolute; top: 64px; right: 20px; z-index: 10;
+  position: absolute; top: 56px; right: 20px; z-index: 10;
   width: 300px; padding: 18px;
   background: rgba(20,35,60,0.95);
   border: 1px solid rgba(74,122,158,0.3);
@@ -338,15 +338,17 @@ export default {
 
 .ku-chart { width: 100%; height: 100%; }
 
-/* el-input 深色风格 */
-.ku-path-card :deep(.el-input__inner){
-  background: rgba(10,10,26,0.6);
-  border-color: rgba(74,122,158,0.3);
-  color: #fff;
+/* Element Plus 的输入背景和边框由 el-input__wrapper 承载。 */
+.ku-path-card :deep(.el-input) {
+  --el-input-bg-color: rgba(10,10,26,0.6);
+  --el-input-text-color: #fff;
+  --el-input-border-color: rgba(74,122,158,0.3);
+  --el-input-hover-border-color: #4A9EE6;
+  --el-input-focus-border-color: #4A9EE6;
+  --el-input-placeholder-color: rgba(255,255,255,0.6);
 }
-.ku-path-card :deep(.el-input.active .el-input__inner){
-  border-color: #4A9EE6;
-  box-shadow: 0 0 0 2px rgba(74,158,230,0.2);
+.ku-path-card :deep(.el-autocomplete.active .el-input__wrapper) {
+  box-shadow: 0 0 0 1px #4A9EE6 inset, 0 0 0 2px rgba(74,158,230,0.2);
 }
 
 </style>
@@ -354,6 +356,10 @@ export default {
 <style>
 /* autocomplete 下拉建议深色样式（popper 挂在 body 上，非 scoped 块） */
 .dark-popper {
+  --el-bg-color-overlay: rgba(20,35,60,0.95);
+  --el-border-color-light: rgba(74,122,158,0.3);
+  --el-text-color-regular: #E8F1F8;
+  --el-fill-color-light: rgba(74,122,158,0.2);
   background: rgba(20,35,60,0.95) !important;
   border: 1px solid rgba(74,122,158,0.3) !important;
 }
@@ -361,6 +367,7 @@ export default {
   color: #E8F1F8 !important;
 }
 .dark-popper .el-autocomplete-suggestion__wrap li.hover,
+.dark-popper .el-autocomplete-suggestion__wrap li.highlighted,
 .dark-popper .el-autocomplete-suggestion__wrap li:hover {
   background: rgba(74,122,158,0.2) !important;
 }

@@ -105,7 +105,7 @@
 
   .content-app {
   min-height: 100vh;
-  margin-top: 64px;
+  margin-top: 56px;
   padding: 0 2%;
 }
 
@@ -161,9 +161,14 @@
     left: 0;
     right: 0;
     z-index: 30;
-    padding: 8px 2% 8px;
+    /* 与题目页布局预留的底部 30px 完全等高，避免露出的间隙透出 body 灰底 */
+    height: 30px;
+    padding: 0 2%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: #f5f7fa;
-    border-top: 1px solid #e8eaec;
+    border-top: none;
   }
 }
 

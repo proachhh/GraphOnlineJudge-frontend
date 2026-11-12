@@ -1,6 +1,10 @@
 <template>
   <div class="submission-details-elegant">
 
+    <div class="page-back-row">
+      <el-button icon="el-icon-arrow-left" size="small" plain @click="$router.back()">返回</el-button>
+    </div>
+
     <div class="details-panel">
       <!-- 状态信息 -->
       <div class="status-section">
@@ -301,6 +305,11 @@ import { Tag } from 'view-ui-plus'
   padding: 40px 20px;
   min-height: calc(100vh - 60px);
   background: linear-gradient(180deg, #f0f4f8 0%, #f8fafc 100%);
+}
+
+/* 返回按钮行 */
+.page-back-row {
+  margin-bottom: 16px;
 }
 
 /* 页面标题 */

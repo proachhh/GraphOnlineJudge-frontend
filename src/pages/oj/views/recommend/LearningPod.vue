@@ -40,7 +40,7 @@
             <div class="quiz-counter">第 {{ diagIndex + 1 }} / {{ diagQuestions.length }} 题</div>
             <div class="quiz-question">{{ currentQuiz.question }}</div>
             <div class="quiz-feedback" :class="quizIsCorrect ? 'correct' : 'wrong'">
-              <component :is="quizIsCorrect ? 'el-icon-success' : 'el-icon-error'"/>
+              <component :is="quizIsCorrect ? 'el-icon-circle-check' : 'el-icon-circle-close'"/>
               {{ quizIsCorrect ? '回答正确' : '回答错误' }}
               <span v-if="!quizIsCorrect">正确答案：{{ String.fromCharCode(65 + currentQuiz.answer) }}</span>
             </div>
@@ -61,7 +61,7 @@
             </div>
             <div class="report-questions">
               <div v-for="(q, i) in diagQuestions" :key="i" class="report-q-item">
-                <component :is="q.userCorrect ? 'el-icon-success' : 'el-icon-error'" :style="{color: q.userCorrect ? '#67C23A' : '#F56C6C'}"/>
+                <component :is="q.userCorrect ? 'el-icon-circle-check' : 'el-icon-circle-close'" :style="{color: q.userCorrect ? '#67C23A' : '#F56C6C'}"/>
                 <span>第 {{ i + 1 }} 题</span>
                 <span class="rq-status" :class="q.userCorrect ? 'ok' : 'fail'">{{ q.userCorrect ? '正确' : '错误' }}</span>
               </div>

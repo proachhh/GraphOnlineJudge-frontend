@@ -172,26 +172,37 @@
         formRegister: { username: '', password: '', passwordAgain: '', email: '', captcha: '' },
         ruleLogin: {
           username: [
-            { required: true, trigger: 'blur' },
+            { required: true, message: '请输入用户名', trigger: 'blur' },
             { validator: CheckRequiredTFA, trigger: 'blur' }
           ],
-          password: [{ required: true, trigger: 'change', min: 6, max: 20 }]
+          password: [
+            { required: true, message: '请输入密码', trigger: 'change' },
+            { min: 6, max: 20, message: '密码长度为 6-20 位', trigger: 'change' }
+          ]
         },
         ruleRegister: {
           username: [
-            { required: true, trigger: 'blur' },
+            { required: true, message: '请输入用户名', trigger: 'blur' },
             { validator: CheckUsernameNotExist, trigger: 'blur' }
           ],
           email: [
-            { required: true, type: 'email', trigger: 'blur' },
+            { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+            { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
             { validator: CheckEmailNotExist, trigger: 'blur' }
           ],
           password: [
-            { required: true, trigger: 'blur', min: 6, max: 20 },
+            { required: true, message: '请输入密码', trigger: 'blur' },
+            { min: 6, max: 20, message: '密码长度为 6-20 位', trigger: 'blur' },
             { validator: CheckPassword, trigger: 'blur' }
           ],
-          passwordAgain: [{ required: true, validator: CheckAgainPassword, trigger: 'change' }],
-          captcha: [{ required: true, trigger: 'blur', min: 1, max: 10 }]
+          passwordAgain: [
+            { required: true, message: '请再次输入密码', trigger: 'change' },
+            { validator: CheckAgainPassword, trigger: 'change' }
+          ],
+          captcha: [
+            { required: true, message: '请输入验证码', trigger: 'blur' },
+            { min: 1, max: 10, message: '验证码长度为 1-10 位', trigger: 'blur' }
+          ]
         }
       }
     },
@@ -350,8 +361,6 @@
     width: 480px;
     flex-shrink: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
     background: #fff;
     overflow-y: auto;
   }
@@ -359,6 +368,9 @@
     width: 100%;
     max-width: 360px;
     padding: 40px 24px;
+    /* 用 margin:auto 居中：内容超出容器时贴顶对齐且可完整滚动，
+       修复旧的 align-items:center 导致注册表单超高时顶部与验证码被裁切、滚不到的问题 */
+    margin: auto;
   }
   .form-header { margin-bottom: 28px; }
   .form-title {
@@ -395,6 +407,11 @@
   }
   .auth-form :deep(.ivu-form-item){ margin-bottom: 18px; }
   .auth-form :deep(.ivu-form-item-error .ivu-input){ border-color: #ed4014; }
+  /* 校验错误提示由绝对定位改为占位流式显示，避免被下方输入框遮挡 */
+  .auth-form :deep(.ivu-form-item-error-tip) {
+    position: static;
+    padding-top: 4px;
+  }
 
   .oj-captcha {
     display: flex;

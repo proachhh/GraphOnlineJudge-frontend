@@ -433,7 +433,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.forum-page { min-height: calc(100vh - 64px); background: #f5f7fa; padding: 24px 0; margin-top: 64px; }
+.forum-page { min-height: calc(100vh - 56px); background: #f5f7fa; padding: 24px 0; margin-top: 56px; }
 .forum-container { max-width: 1080px; margin: 0 auto; padding: 0 20px; display: flex; gap: 20px; align-items: flex-start; }
 .forum-sidebar {
   width: 200px; flex-shrink: 0; background: #fff; border-radius: 12px; padding: 10px;

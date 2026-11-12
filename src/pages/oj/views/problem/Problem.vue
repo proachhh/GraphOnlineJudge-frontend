@@ -1,6 +1,6 @@
 <template>
   <div class="problem-page-root">
-    <div v-if="contestID" class="contest-problem-sidebar" :class="{ 'full-width-mode': layoutMode === 'horizontal' }">
+    <div v-if="contestID" class="contest-problem-sidebar full-width-mode">
     <div class="sidebar-header">
       <Icon type="ios-photos" size="16" />
       <span>题目列表</span>
@@ -25,27 +25,19 @@
       </router-link>
     </div>
   </div>
-  <div class="flex-container" :class="{ 'full-width-layout': layoutMode === 'horizontal', 'contest-mode': contestID }">
+  <div class="flex-container full-width-layout" :class="{ 'contest-mode': contestID }">
     <div id="problem-main">
-      <!-- 布局切换 -->
+      <!-- 顶部工具行 -->
       <div class="layout-toggle-row">
         <div class="toggle-left">
           <el-button icon="el-icon-arrow-left" size="small" plain @click="$router.back()">返回</el-button>
         </div>
-        <RadioGroup v-model="layoutMode" type="button" size="small">
-          <Radio label="vertical">
-            <span style="font-size: 12px">上下</span>
-          </Radio>
-          <Radio label="horizontal">
-            <span style="font-size: 12px">左右</span>
-          </Radio>
-        </RadioGroup>
       </div>
 
-      <!-- 题目描述 + 代码编辑器容器 -->
-      <div class="problem-layout-wrapper" :class="layoutMode" ref="layoutWrapper">
-        <div class="layout-left" :style="layoutLeftStyle" ref="layoutLeft">
-          <Panel :padding="40" shadow>
+      <!-- 2×2 四卡片网格：左上题目描述 / 右上信息+编辑器 / 左下智能提示 / 右下自测 -->
+      <div class="quad-grid" ref="quadGrid" :style="gridStyle">
+        <div class="q-col q-col-left">
+          <Panel class="q-card q-tl" :padding="40" shadow :style="{height: leftTopHeight + '%'}">
             <template #title><div class="problem-title-header">
               <span class="problem-title-id">#{{problem._id}}.</span>
               <span class="problem-title-text">{{problem.title}}</span>
@@ -94,31 +86,13 @@
                 <p class="content">{{problem.source}}</p>
               </div>
 
-              <div v-if="layoutMode === 'horizontal'" class="problem-info-inline">
-                <Divider />
-                <div class="info-inline-grid">
-                  <span class="info-inline-item"><b>ID</b> {{ problem._id || '—' }}</span>
-                <span class="info-inline-item"><b>{{$t('m.Time_Limit')}}</b> {{ problem.time_limit || '—' }}MS</span>
-                <span class="info-inline-item"><b>{{$t('m.Memory_Limit')}}</b> {{ problem.memory_limit || '—' }}MB</span>
-                  <span class="info-inline-item"><b>{{$t('m.IOMode')}}</b> {{ problem.io_mode && problem.io_mode.io_mode || '—' }}</span>
-                <span class="info-inline-item"><b>{{$t('m.Created')}}</b> {{ problem.created_by && problem.created_by.username || '—' }}</span>
-                  <span v-if="problem.difficulty" class="info-inline-item"><b>{{$t('m.Level')}}</b> {{$t('m.' + problem.difficulty)}}</span>
-                  <span v-if="problem.total_score" class="info-inline-item"><b>{{$t('m.Score')}}</b> {{problem.total_score}}</span>
-                  <span class="info-inline-item"><b>{{$t('m.Tags')}}</b>
-                    <Tag v-for="tag in problem.tags" :key="tag" size="small">{{ tagDisplayName(tag) }}</Tag>
-                  </span>
-                </div>
-              </div>
             </div>
           </Panel>
-        </div>
 
-        <div v-if="layoutMode === 'horizontal'" class="resize-handle" @mousedown="startResize"></div>
-        <div v-show="isResizing" class="resize-overlay" @mouseup="stopResize" @mousemove="handleResize"></div>
-
-        <div class="layout-right" :style="layoutRightStyle" ref="layoutRight">
+          <div class="q-splitter q-splitter-h" @mousedown="startRowResize('left', $event)"></div>
 
           <AICard
+            class="q-card q-bl"
             title="智能解题提示"
             icon="ios-bulb"
             iconColor="#ff9900"
@@ -127,8 +101,25 @@
             :fetchFn="fetchHint"
             :streamFn="fetchHintStream"
           />
+        </div>
 
-          <Card :padding="20" id="submit-code" dis-hover ref="submitCodeCard">
+        <div class="q-splitter q-splitter-v" @mousedown="startColResize($event)"></div>
+
+        <div class="q-col q-col-right">
+          <Card class="q-card q-tr" :padding="20" id="submit-code" dis-hover :style="{height: rightTopHeight + '%'}">
+            <!-- 题目元信息 -->
+            <div class="q-meta-grid">
+              <span class="q-meta-item"><b>ID</b>{{ problem._id || '—' }}</span>
+              <span class="q-meta-item"><b>{{$t('m.Time_Limit')}}</b>{{ problem.time_limit || '—' }}MS</span>
+              <span class="q-meta-item"><b>{{$t('m.Memory_Limit')}}</b>{{ problem.memory_limit || '—' }}MB</span>
+              <span class="q-meta-item"><b>{{$t('m.IOMode')}}</b>{{ (problem.io_mode && problem.io_mode.io_mode) || '—' }}</span>
+              <span class="q-meta-item"><b>{{$t('m.Created')}}</b>{{ problem.created_by && problem.created_by.username || '—' }}</span>
+              <span v-if="problem.difficulty" class="q-meta-item"><b>{{$t('m.Level')}}</b>{{$t('m.' + problem.difficulty)}}</span>
+              <span v-if="problem.total_score" class="q-meta-item"><b>{{$t('m.Score')}}</b>{{problem.total_score}}</span>
+              <span class="q-meta-item q-meta-tags"><b>{{$t('m.Tags')}}</b>
+                <Tag v-for="tag in problem.tags" :key="tag" size="small">{{ tagDisplayName(tag) }}</Tag>
+              </span>
+            </div>
         <CodeMirror ref="codeMirror" :value.sync="code"
                     :languages="problem.languages"
                     :language="language"
@@ -137,40 +128,12 @@
                     @changeTheme="onChangeTheme"
                     @changeLang="onChangeLang"></CodeMirror>
 
-        <div class="self-test-section">
-          <p class="self-test-label">{{$t('m.Self_Test')}}</p>
-          <div class="self-test-row">
-            <div class="self-test-left">
-              <p class="self-test-col-title">{{$t('m.Self_Test_Input')}}</p>
-              <textarea v-model="selfTestInput" rows="5"
-                        :placeholder="$t('m.Self_Test_Placeholder')"
-                        class="self-test-textarea"></textarea>
-            </div>
-            <div class="self-test-right">
-              <p class="self-test-col-title">
-                {{$t('m.Self_Test_Output')}}
-                <span v-if="selfTestResult" class="self-test-meta" :class="{ success: selfTestResult.success }">
-                  <span v-if="selfTestResult.success" class="self-test-tag self-test-tag-success">{{$t('m.Self_Test_Run')}} {{$t('m.Success')}}</span>
-                  <span v-else class="self-test-tag self-test-tag-error">{{$t('m.Error')}}</span>
-                  <span v-if="selfTestResult.success" class="meta-text">{{$t('m.Time')}}: {{ selfTestResult.time_cost }}ms</span>
-                  <span v-if="selfTestResult.success" class="meta-text">{{$t('m.Memory')}}: {{ (selfTestResult.memory_cost / 1024 / 1024).toFixed(2) }}MB</span>
-                </span>
-              </p>
-              <pre v-if="selfTestResult" class="self-test-pre">{{ selfTestResult.output || selfTestResult.error }}</pre>
-              <pre v-else class="self-test-pre self-test-pre-empty">{{ $t('m.Self_Test_Output_Hint') }}</pre>
-            </div>
-          </div>
-        </div>
-
         <div class="submit-row">
           <div class="submit-row-left">
             <Button type="primary" icon="ios-create" :loading="submitting" @click="submitCode"
                     :disabled="problemSubmitDisabled || submitted">
               <span v-if="submitting">{{$t('m.Submitting')}}</span>
               <span v-else>{{$t('m.Submit')}}</span>
-            </Button>
-            <Button type="primary" :loading="selfTesting" @click="runSelfTest">
-              {{$t('m.Self_Test')}}
             </Button>
             <Button type="info" @click="goVisualizer" title="逐步可视化代码执行过程">
               <Icon type="ios-code-working"></Icon>
@@ -219,99 +182,43 @@
           </Alert>
         </div>
       </Card>
+
+          <div class="q-splitter q-splitter-h" @mousedown="startRowResize('right', $event)"></div>
+
+          <Card class="q-card q-br" dis-hover :padding="20">
+            <div class="self-test-section">
+              <div class="self-test-head">
+                <p class="self-test-label">{{$t('m.Self_Test')}}</p>
+                <Button type="primary" :loading="selfTesting" @click="runSelfTest">
+                  {{$t('m.Self_Test')}}
+                </Button>
+              </div>
+              <div class="self-test-row">
+                <div class="self-test-left">
+                  <p class="self-test-col-title">{{$t('m.Self_Test_Input')}}</p>
+                  <textarea v-model="selfTestInput" rows="5"
+                            :placeholder="$t('m.Self_Test_Placeholder')"
+                            class="self-test-textarea"></textarea>
+                </div>
+                <div class="self-test-right">
+                  <p class="self-test-col-title">
+                    {{$t('m.Self_Test_Output')}}
+                    <span v-if="selfTestResult" class="self-test-meta" :class="{ success: selfTestResult.success }">
+                      <span v-if="selfTestResult.success" class="self-test-tag self-test-tag-success">{{$t('m.Self_Test_Run')}} {{$t('m.Success')}}</span>
+                      <span v-else class="self-test-tag self-test-tag-error">{{$t('m.Error')}}</span>
+                      <span v-if="selfTestResult.success" class="meta-text">{{$t('m.Time')}}: {{ selfTestResult.time_cost }}ms</span>
+                      <span v-if="selfTestResult.success" class="meta-text">{{$t('m.Memory')}}: {{ (selfTestResult.memory_cost / 1024 / 1024).toFixed(2) }}MB</span>
+                    </span>
+                  </p>
+                  <pre v-if="selfTestResult" class="self-test-pre">{{ selfTestResult.output || selfTestResult.error }}</pre>
+                  <pre v-else class="self-test-pre self-test-pre-empty">{{ $t('m.Self_Test_Output_Hint') }}</pre>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>
-
-    <div id="right-column" v-show="layoutMode === 'vertical'">
-      <VerticalMenu @on-click="handleRoute">
-        <template v-if="this.contestID">
-          <VerticalMenu-item :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
-            <Icon type="ios-photos"></Icon>
-            {{$t('m.Problems')}}
-          </VerticalMenu-item>
-
-          <VerticalMenu-item :route="{name: 'contest-announcement-list', params: {contestID: contestID}}">
-            <Icon type="ios-chatbubbles"></Icon>
-            {{$t('m.Announcements')}}
-          </VerticalMenu-item>
-        </template>
-
-        <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission" :route="submissionRoute">
-          <Icon type="ios-menu"></Icon>
-           {{$t('m.Submissions')}}
-        </VerticalMenu-item>
-
-        <template v-if="this.contestID">
-          <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission"
-                             :route="{name: 'contest-rank', params: {contestID: contestID}}">
-            <Icon type="ios-stats"></Icon>
-            {{$t('m.Rankings')}}
-          </VerticalMenu-item>
-          <VerticalMenu-item :route="{name: 'contest-details', params: {contestID: contestID}}">
-            <Icon type="ios-home"></Icon>
-            {{$t('m.View_Contest')}}
-          </VerticalMenu-item>
-        </template>
-      </VerticalMenu>
-
-      <Card id="info">
-        <template #title><div class="header">
-          <Icon type="ios-information-circle"></Icon>
-          <span class="card-title">{{$t('m.Information')}}</span>
-        </div></template>
-        <ul>
-          <li><p>ID</p>
-            <p>{{problem._id || '—'}}</p></li>
-          <li>
-            <p>{{$t('m.Time_Limit')}}</p>
-            <p>{{ problem.time_limit || '—' }}MS</p></li>
-          <li>
-            <p>{{$t('m.Memory_Limit')}}</p>
-            <p>{{ problem.memory_limit || '—' }}MB</p></li>
-          <li>
-            <p>{{$t('m.IOMode')}}</p>
-            <p>{{ (problem.io_mode && problem.io_mode.io_mode) || '—' }}</p></li>
-          <li>
-            <p>{{$t('m.Created')}}</p>
-            <p>{{ problem.created_by && problem.created_by.username || '—' }}</p></li>
-          <li v-if="problem.difficulty">
-            <p>{{$t('m.Level')}}</p>
-            <p>{{$t('m.' + problem.difficulty)}}</p></li>
-          <li v-if="problem.total_score">
-            <p>{{$t('m.Score')}}</p>
-            <p>{{problem.total_score}}</p>
-          </li>
-          <li>
-            <p>{{$t('m.Tags')}}</p>
-            <p>
-              <Poptip trigger="hover" placement="top" transfer word-wrap width="260">
-                <a>{{$t('m.Show')}}</a>
-                <template #content><div style="display: flex; flex-wrap: wrap; gap: 4px">
-                  <Tag v-for="tag in problem.tags" :key="tag">{{ tagDisplayName(tag) }}</Tag>
-                </div></template>
-              </Poptip>
-            </p>
-          </li>
-        </ul>
-      </Card>
-
-      <Card id="pieChart" ref="pieChart" :padding="0">
-        <template #title><div>
-          <Icon type="ios-analytics"></Icon>
-          <span class="card-title">{{$t('m.Statistic')}}</span>
-          <Button type="ghost" size="small" id="detail" @click="graphVisible = !graphVisible">Details</Button>
-        </div></template>
-        <div class="echarts" ref="pieChartDom"></div>
-      </Card>
-    </div>
-
-    <Modal v-model="graphVisible">
-      <div id="pieChart-detail" ref="pieChartDetail"></div>
-      <template #footer><div>
-        <Button type="ghost" @click="graphVisible=false">{{$t('m.Close')}}</Button>
-      </div></template>
-    </Modal>
 
   </div>
   <div v-if="resultVisible" class="result-overlay" @click.self="resultVisible = false">
@@ -390,8 +297,7 @@
 </template>
 
 <script>
-import { markRaw } from 'vue'
-  import {mapGetters, mapActions} from 'vuex'
+import {mapGetters, mapActions} from 'vuex'
   import {types} from '../../../../store'
   import CodeMirror from '@oj/components/CodeMirror.vue'
   import AICard from '@oj/components/AICard.vue'
@@ -400,13 +306,8 @@ import { markRaw } from 'vue'
   import {FormMixin} from '@oj/components/mixins'
   import {JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey} from '@/utils/constants'
   import api from '@oj/api'
-  import {pie, largePie} from './chartData'
-  import * as echarts from 'echarts'
   import { tagDisplayName } from '@/i18n'
   import katex from 'katex'
-
-  // 只显示这些状态的图形占用
-  const filtedStatus = ['-1', '-2', '0', '1', '2', '3', '4', '8']
 
   export default {
     name: 'Problem',
@@ -420,12 +321,11 @@ import { markRaw } from 'vue'
       return {
         statusVisible: false,
         captchaRequired: false,
-        graphVisible: false,
         submissionExists: false,
-        layoutMode: 'horizontal',
         leftWidth: 50,
+        leftTopHeight: 83,
+        rightTopHeight: 74,
         vizModalVisible: false,
-        isResizing: false,
         captchaCode: '',
         captchaSrc: '',
         contestID: '',
@@ -467,10 +367,6 @@ import { markRaw } from 'vue'
           statistic_info: {},
           io_mode: {'io_mode': 'Standard IO'}
         },
-        pie: pie,
-        largePie: largePie,
-        pieChart: null,
-        largePieChart: null,
         contestProblems: []
       }
     },
@@ -487,9 +383,6 @@ import { markRaw } from 'vue'
       }
     },
     mounted () {
-      if (window.innerWidth <= 768) {
-        this.layoutMode = 'vertical'
-      }
       this.$store.commit(types.CHANGE_CONTEST_ITEM_VISIBLE, {menu: false})
       this.init()
       this._resizeHandler = () => { this.fixLayoutHeights() }
@@ -624,7 +517,6 @@ import { markRaw } from 'vue'
           if (problem.languages) {
             problem.languages = problem.languages.sort()
           }
-          this.changePie(problem)
 
           if (problem.samples && problem.samples.length > 0) {
             this.selfTestInput = problem.samples[0].input
@@ -665,75 +557,6 @@ import { markRaw } from 'vue'
             problemID: problem._id
           }
         })
-      },
-      changePie (problemData) {
-        if (!problemData.statistic_info) {
-          problemData.statistic_info = {}
-        }
-        for (let k in problemData.statistic_info) {
-          if (filtedStatus.indexOf(k) === -1) {
-            delete problemData.statistic_info[k]
-          }
-        }
-        let acNum = problemData.accepted_number || 0
-        let subNum = problemData.submission_number || 0
-        let data = [
-          {name: 'WA', value: Math.max(0, subNum - acNum)},
-          {name: 'AC', value: acNum}
-        ]
-        this.pie.series[0].data = data
-
-        let data2 = JSON.parse(JSON.stringify(data))
-        data2[1].selected = true
-        this.largePie.series[1].data = data2
-
-        let legend = Object.keys(problemData.statistic_info).map(ele => JUDGE_STATUS[ele].short)
-        if (legend.length === 0) {
-          legend.push('AC', 'WA')
-        }
-        this.largePie.legend.data = legend
-
-        let acCount = problemData.statistic_info['0'] || 0
-        delete problemData.statistic_info['0']
-
-        let largePieData = []
-        Object.keys(problemData.statistic_info).forEach(ele => {
-          largePieData.push({name: JUDGE_STATUS[ele].short, value: problemData.statistic_info[ele]})
-        })
-        largePieData.push({name: 'AC', value: acCount})
-        this.largePie.series[0].data = largePieData
-
-        this.$nextTick(() => {
-          this.initPieChart()
-        })
-      },
-      initPieChart () {
-        const dom = this.$refs.pieChartDom
-        if (!dom) return
-        if (this.pieChart) {
-          this.pieChart.dispose()
-        }
-        this.pieChart = markRaw(echarts.init(dom))
-        this.pieChart.setOption(this.pie)
-      },
-      initLargePieChart () {
-        const dom = this.$refs.pieChartDetail
-        if (!dom) return
-        if (this.largePieChart) {
-          this.largePieChart.dispose()
-        }
-        this.largePieChart = markRaw(echarts.init(dom))
-        this.largePieChart.setOption(this.largePie)
-      },
-      disposeCharts () {
-        if (this.pieChart) {
-          this.pieChart.dispose()
-          this.pieChart = null
-        }
-        if (this.largePieChart) {
-          this.largePieChart.dispose()
-          this.largePieChart = null
-        }
       },
       handleRoute (route) {
         this.$router.push(route)
@@ -909,28 +732,72 @@ import { markRaw } from 'vue'
           this.$error('Self test failed')
         })
       },
-      startResize (e) {
-        this.isResizing = true
-        window.addEventListener('mousemove', this.handleResize)
-        window.addEventListener('mouseup', this.stopResize)
-        document.body.style.cursor = 'col-resize'
+      startColResize (e) {
+        this.beginGridResize('col', e)
+      },
+      startRowResize (side, e) {
+        this.beginGridResize(side === 'left' ? 'rowLeft' : 'rowRight', e)
+      },
+      beginGridResize (dir, e) {
+        const splitter = e.target
+        const container = dir === 'col' ? this.$refs.quadGrid : splitter.parentElement
+        if (!container) return
+        this._resizeDir = dir
+        this._resizeRect = container.getBoundingClientRect()
+        // 拖拽过程中直接操作 DOM，绕过 Vue 重渲染（大模板每帧重 patch 是卡顿主因）
+        this._resizeCardEl = dir === 'col' ? null : splitter.previousElementSibling
+        this._dragVal = null
+        window.addEventListener('mousemove', this.onGridResize)
+        window.addEventListener('mouseup', this.endGridResize)
+        document.body.style.cursor = dir === 'col' ? 'col-resize' : 'row-resize'
         document.body.style.userSelect = 'none'
         e.preventDefault()
       },
-      handleResize (e) {
-        if (!this.isResizing) return
-        const main = this.$el.querySelector('#problem-main')
-        if (!main) return
-        const rect = main.getBoundingClientRect()
-        const w = ((e.clientX - rect.left) / rect.width) * 100
-        this.leftWidth = Math.min(Math.max(w, 30), 70)
+      onGridResize (e) {
+        // rAF 合并高频 mousemove
+        this._moveEvent = e
+        if (this._resizeRAF) return
+        this._resizeRAF = requestAnimationFrame(() => {
+          this._resizeRAF = null
+          const ev = this._moveEvent
+          if (!ev || !this._resizeDir || !this._resizeRect) return
+          const rect = this._resizeRect
+          if (this._resizeDir === 'col') {
+            // 减去分割条宽度一半，让边界精准跟随鼠标、无跳变
+            const w = Math.min(Math.max(((ev.clientX - rect.left - 5) / rect.width) * 100, 30), 70)
+            this._dragVal = w
+            if (this.$refs.quadGrid) this.$refs.quadGrid.style.gridTemplateColumns = `${w}% 10px 1fr`
+          } else {
+            const h = Math.min(Math.max(((ev.clientY - rect.top - 5) / rect.height) * 100, 15), 85)
+            this._dragVal = h
+            if (this._resizeCardEl) this._resizeCardEl.style.height = h + '%'
+          }
+        })
       },
-      stopResize () {
-        this.isResizing = false
-        window.removeEventListener('mousemove', this.handleResize)
-        window.removeEventListener('mouseup', this.stopResize)
+      endGridResize () {
+        // 拖拽结束才把结果写回响应式数据（与 DOM 当前值一致，无跳变、仅一次渲染）
+        if (this._dragVal != null) {
+          if (this._resizeDir === 'col') {
+            this.leftWidth = this._dragVal
+          } else if (this._resizeDir === 'rowLeft') {
+            this.leftTopHeight = this._dragVal
+          } else if (this._resizeDir === 'rowRight') {
+            this.rightTopHeight = this._dragVal
+          }
+        }
+        this._resizeDir = null
+        this._dragVal = null
+        this._resizeCardEl = null
+        if (this._resizeRAF) {
+          cancelAnimationFrame(this._resizeRAF)
+          this._resizeRAF = null
+        }
+        window.removeEventListener('mousemove', this.onGridResize)
+        window.removeEventListener('mouseup', this.endGridResize)
         document.body.style.cursor = ''
         document.body.style.userSelect = ''
+        // 拖拽结束后再刷新一次编辑器尺寸
+        this.fixLayoutHeights()
       },
       fixLayoutHeights () {
         if (this.$refs.codeMirror && this.$refs.codeMirror.editor) {
@@ -983,14 +850,10 @@ import { markRaw } from 'vue'
           return {name: 'submission-list', query: {problemID: this.problemID}}
         }
       },
-      layoutRightStyle () {
-        if (this.layoutMode !== 'horizontal') return {}
-        return { flex: '1', minWidth: '0' }
-      },
-      layoutLeftStyle () {
-        if (this.layoutMode !== 'horizontal') return {}
-        // 使用内联 flex 简写覆盖 CSS 中的 flex:1，否则 flex-basis:0 会使 width 失效导致拖动无效
-        return { width: this.leftWidth + '%', flex: `0 0 ${this.leftWidth}%` }
+      gridStyle () {
+        return {
+          gridTemplateColumns: `${this.leftWidth}% 10px 1fr`
+        }
       },
       resultHeaderClass () {
         const r = this.submissionDetail.result
@@ -1056,32 +919,23 @@ import { markRaw } from 'vue'
       next()
     },
     beforeUnmount () {
-      window.removeEventListener('mousemove', this.handleResize)
-      window.removeEventListener('mouseup', this.stopResize)
+      window.removeEventListener('mousemove', this.onGridResize)
+      window.removeEventListener('mouseup', this.endGridResize)
       window.removeEventListener('resize', this._resizeHandler)
-      this.disposeCharts()
+      if (this._resizeRAF) {
+        cancelAnimationFrame(this._resizeRAF)
+        this._resizeRAF = null
+      }
     },
     watch: {
       '$route' () {
         this.init()
-      },
-      graphVisible (val) {
-        if (val) {
-          this.$nextTick(() => {
-            this.initLargePieChart()
-          })
-        }
-      },
-      layoutMode () {
-        if (this.layoutMode === 'horizontal') {
-          this.$nextTick(() => { this.fixLayoutHeights() })
-        }
       }
     },
     updated () {
-      if (this.layoutMode === 'horizontal') {
-        this.fixLayoutHeights()
-      }
+      // 拖拽分割条期间跳过，避免每次 mousemove 都触发编辑器 refresh 造成卡顿
+      if (this._resizeDir) return
+      this.fixLayoutHeights()
     }
   }
 </script>
@@ -1094,16 +948,7 @@ import { markRaw } from 'vue'
   .flex-container {
     display: flex;
     width: 100%;
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-    background: linear-gradient(180deg, #f0f4f8 0%, #f8fafc 100%);
-    min-height: calc(100vh - 60px);
-
-    &.contest-mode:not(.full-width-layout) {
-      max-width: 100%;
-      padding: 24px 20px;
-    }
+    background: #f5f7fa;
 
     &.full-width-layout {
       max-width: none;
@@ -1112,257 +957,45 @@ import { markRaw } from 'vue'
       background: #f5f7fa;
       margin: 0;
       position: fixed;
-      top: 80px;
+      top: 56px;
       left: 0;
       right: 0;
-      bottom: 50px;
+      bottom: 30px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       z-index: 20;
 
       #problem-main {
-          margin-right: 0;
-          flex: 1 1 0%;
-          min-width: 0;
-          min-height: 0;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          padding: 0 0 0 8px;
+        margin-right: 0;
+        flex: 1 1 0%;
+        min-width: 0;
+        min-height: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        /* 卡片与屏幕左右、底部边缘等宽小间隙 */
+        padding: 0 10px 10px;
 
         .layout-toggle-row {
           flex-shrink: 0;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 8px 8px 8px 0;
+          padding: 8px 0;
         }
 
-        .problem-layout-wrapper {
+        .quad-grid {
           flex: 1 1 0%;
           min-height: 0;
           width: 100%;
-        }
-
-        .problem-layout-wrapper.horizontal {
-          display: flex;
-          width: 100%;
-
-          .layout-left {
-            flex: 1;
-            min-width: 0;
-            overflow-y: auto;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-          }
-
-          :deep(.layout-left > .ivu-card){
-            flex: 1 1 auto;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-          }
-
-          :deep(.layout-left .ivu-card-body){
-            flex: 1 1 0%;
-            min-height: 0;
-          }
-
-          .layout-right {
-            flex: 1;
-            min-width: 0;
-            overflow-y: auto;
-          }
         }
       }
     }
 
     &.contest-mode {
       #problem-main {
-        flex: 1;
-        min-width: 0;
-      }
-    }
-
-    &.full-width-layout.contest-mode {
-      #problem-main {
-        padding-left: 200px;
-      }
-    }
-
-    #problem-main {
-      flex: 1;
-      min-width: 0;
-      margin-right: 24px;
-
-      .layout-toggle-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-
-      .problem-layout-wrapper {
-         &.horizontal {
-           display: flex;
-           gap: 0;
-         }
-
-         &.vertical {
-           .layout-left {
-             width: 100%;
-           }
-           .layout-right {
-             width: 100%;
-           }
-         }
-       }
-
-      .resize-handle {
-        width: 4px;
-        background: #e2e8f0;
-        cursor: col-resize;
-        flex-shrink: 0;
-        z-index: 10;
-        transition: background 0.2s;
-
-        &:hover {
-          background: #1e3a8a;
-        }
-      }
-
-      .resize-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 9999;
-        cursor: col-resize;
-      }
-
-      .problem-panel {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-        overflow: hidden;
-        margin-bottom: 24px;
-      }
-
-      .code-panel {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-        overflow: hidden;
-        padding: 24px;
-      }
-    }
-
-    #right-column {
-      flex: none;
-      width: 340px;
-
-      .chart-card,
-      #pieChart,
-      #info {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-        overflow: hidden;
-        margin-bottom: 20px;
-
-        :deep(.ivu-card-body){
-          padding: 0;
-        }
-
-        .header {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #1e3a8a;
-          padding: 16px 20px;
-          border-bottom: 2px solid #f1f5f9;
-
-          .ivu-icon {
-            font-size: 20px;
-          }
-        }
-
-        ul {
-          list-style-type: none;
-          padding: 16px 20px;
-          margin: 0;
-
-          li {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 14px 0;
-            border-bottom: 1px solid #f1f5f9;
-
-            &:last-child {
-              border-bottom: none;
-            }
-
-            p {
-              margin: 0;
-              font-size: 13px;
-
-              &:first-child {
-                color: #64748b;
-                font-weight: 500;
-                flex-shrink: 0;
-                margin-right: 12px;
-              }
-
-              &:last-child {
-                color: #1e3a8a;
-                font-weight: 600;
-                text-align: right;
-                word-break: break-all;
-                line-height: 1.5;
-              }
-            }
-          }
-        }
-      }
-
-      /* 饼图卡片单独样式 */
-      #pieChart {
-        display: flex;
-        flex-direction: column;
-
-        :deep(.ivu-card-body){
-          padding: 0;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .header {
-          position: relative;
-
-          #detail {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-          }
-        }
-
-        .echarts {
-          height: 300px;
-          min-height: 300px;
-          width: 300px;
-          max-width: 100%;
-          padding: 0;
-          margin: 0 auto;
-          overflow: hidden;
-        }
+        padding-left: 210px;
       }
     }
   }
@@ -1509,44 +1142,13 @@ import { markRaw } from 'vue'
       }
     }
   }
-
-  #pieChart-detail {
-    margin-top: 20px;
-    width: 100%;
-    height: 480px;
-  }
-
-  .problem-info-inline {
-    margin-top: 8px;
-
-    .info-inline-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 16px;
-
-      .info-inline-item {
-        font-size: 13px;
-        color: #475569;
-        padding: 2px 0;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        flex-wrap: wrap;
-
-        b {
-          color: #1e3a8a;
-          font-weight: 600;
-        }
-      }
-    }
-  }
 </style>
 
 <style lang="less">
   .contest-problem-sidebar {
     position: fixed;
     left: 0;
-    top: 80px;
+    top: 56px;
     bottom: 0;
     width: 200px;
     z-index: 99;
@@ -1653,62 +1255,201 @@ import { markRaw } from 'vue'
     }
   }
 
-  .full-width-layout {
-    #problem-main {
-      .problem-layout-wrapper.horizontal {
+  /* ============ 2×2 四卡片网格（左右两列，横分割条各列独立） ============ */
+  .quad-grid {
+    display: grid;
+
+    /* 左右两列，列内为纵向 flex：上卡片（高度%由内联样式控制）+ 横条 + 下卡片 */
+    .q-col {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    /* 分割条：默认与背景同色，悬停高亮，可拖拽调比例 */
+    .q-splitter {
+      background: transparent;
+      border-radius: 4px;
+      transition: background 0.15s;
+      z-index: 5;
+
+      &:hover {
+        background: rgba(30, 58, 138, 0.18);
+      }
+    }
+
+    .q-splitter-v { cursor: col-resize; }
+    .q-splitter-h {
+      cursor: row-resize;
+      height: 10px;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    /* 卡片通用：小圆角矩形 */
+    .q-card {
+      min-width: 0;
+      min-height: 0;
+      /* ivu-card 全局有 transition: all .2s ease-in-out，会让拖拽调高度呈缓动动画（慢启动再加速），必须关掉 */
+      transition: none !important;
+    }
+
+    .q-card.ivu-card {
+      border-radius: 8px !important;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.07);
+    }
+
+    /* 左上：题目描述卡片（高度由列内联样式 % 控制） */
+    .q-tl.ivu-card {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+
+      > .ivu-card-body {
+        flex: 1 1 0;
+        min-height: 0;
+        overflow-y: auto;
+      }
+    }
+
+    /* 右上：元信息 + 编辑器卡片（高度由列内联样式 % 控制） */
+    .q-tr.ivu-card {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+
+      > .ivu-card-body {
+        flex: 1 1 0;
+        min-height: 0;
         display: flex;
+        flex-direction: column;
         overflow: hidden;
+      }
 
-        .layout-left {
-          flex: 1 1 0%;
-          min-width: 0;
-          overflow-y: auto;
-          overflow-x: hidden;
-          padding-bottom: 54px;
+      .q-meta-grid {
+        flex-shrink: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 22px;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #e8edf3;
+
+        .q-meta-item {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 14px;
+          color: #475569;
+          flex-wrap: wrap;
+
+          b {
+            color: #1e3a8a;
+            font-weight: 600;
+          }
+        }
+      }
+
+      /* 编辑器撑满剩余高度 */
+      .cm-outer {
+        flex: 1 1 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        margin: 0 0 12px 0;
+      }
+
+      .cm-outer .codemirror-editor {
+        flex: 1 1 0;
+        min-height: 0;
+      }
+
+      .cm-outer .CodeMirror {
+        height: 100% !important;
+      }
+
+      .cm-outer .CodeMirror-scroll {
+        min-height: 0 !important;
+        max-height: none !important;
+      }
+
+      .submit-row,
+      .status,
+      .alert-row {
+        flex-shrink: 0;
+      }
+    }
+
+    /* 左下：智能解题提示卡片（撑满列剩余高度） */
+    .ai-response-card {
+      margin: 0 !important;
+      border-radius: 8px !important;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.07);
+
+      > .ivu-card-body {
+        flex: 1 1 0;
+        min-height: 0;
+        overflow-y: auto;
+      }
+    }
+
+    /* 右下：自测卡片（撑满列剩余高度） */
+    .q-br.ivu-card {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+
+      > .ivu-card-body {
+        flex: 1 1 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      .self-test-section {
+        flex: 1 1 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+
+        .self-test-head {
           display: flex;
-          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+
+          .self-test-label {
+            margin-bottom: 0;
+          }
         }
 
-        .layout-left > .ivu-card {
-          flex: 1 1 auto;
+        .self-test-row {
+          flex: 1 1 0;
           min-height: 0;
-          min-width: 0;
-          margin-bottom: 0;
-          border-radius: 16px;
-          display: flex;
-          flex-direction: column;
         }
 
-        .layout-left .ivu-card-body {
-          flex: 1 1 0%;
+        .self-test-left,
+        .self-test-right {
+          flex: 1 1 0;
           min-height: 0;
-          overflow-y: auto;
         }
 
-        .layout-right {
-          flex: 1 1 0%;
-          min-width: 0;
-          overflow-y: auto;
-          width: 100%;
-          padding-bottom: 54px;
-        }
-
-        .layout-right > .ivu-card {
-          width: 100%;
-        }
-
-        .layout-right .ai-response-card {
-          margin-top: 0 !important;
-          margin-bottom: 0 !important;
-        }
-
-        .layout-right #submit-code > .ivu-card-body > div:first-child .CodeMirror {
-          height: auto !important;
-        }
-
-        .layout-right #submit-code > .ivu-card-body > div:first-child .CodeMirror-scroll {
-          max-height: none !important;
-          max-width: none !important;
+        .self-test-textarea,
+        .self-test-pre {
+          flex: 1 1 0;
+          min-height: 0;
+          height: auto;
+          max-height: none;
+          resize: none;
         }
       }
     }
@@ -1864,23 +1605,13 @@ import { markRaw } from 'vue'
     margin-top: 8px;
   }
 
-  #submit-code .ivu-card,
-  #pieChart .ivu-card,
-  #info .ivu-card {
-    border-radius: 20px !important;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  }
-
-  .full-width-layout .ai-response-card.ivu-card {
-    border-radius: 20px !important;
+  #submit-code.ivu-card {
+    border-radius: 8px !important;
     overflow: hidden;
   }
 
-  #submit-code .ivu-card-body,
-  #pieChart .ivu-card-body,
-  #info .ivu-card-body {
-    border-radius: 20px !important;
+  #submit-code .ivu-card-body {
+    border-radius: 8px !important;
   }
 
   .fl-right {
@@ -2074,17 +1805,33 @@ import { markRaw } from 'vue'
   z-index: 30 !important;
 }
 
-/* 隐藏所有滚动条但保留滚动功能 */
-.problem-page-root,
-.problem-page-root * {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+/* 卡片内显示细滚动条 */
+.problem-page-root ::-webkit-scrollbar,
+.problem-page-root *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.problem-page-root *::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+.problem-page-root ::-webkit-scrollbar-thumb,
+.problem-page-root *::-webkit-scrollbar-thumb {
+  background: #c4ccd8;
+  border-radius: 4px;
+}
+
+.problem-page-root ::-webkit-scrollbar-thumb:hover,
+.problem-page-root *::-webkit-scrollbar-thumb:hover {
+  background: #a9b4c6;
+}
+
+.problem-page-root ::-webkit-scrollbar-track,
+.problem-page-root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 题目页内容为全屏固定布局，禁用无用的页面级滚动条 */
+html:has(.problem-page-root),
+body:has(.problem-page-root) {
+  overflow: hidden;
 }
 </style>
 

@@ -12,6 +12,6 @@ export default { components: { AgreementContent } }
 </script>
 
 <style scoped>
-.agreement-page { min-height: calc(100vh - 64px); background: #f5f7fa; padding: 40px 0; margin-top: 64px; }
+.agreement-page { min-height: calc(100vh - 56px); background: #f5f7fa; padding: 40px 0; margin-top: 56px; }
 .agreement-container { max-width: 800px; margin: 0 auto; padding: 30px; background: #fff; border-radius: 12px; }
 </style>

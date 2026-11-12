@@ -1,5 +1,7 @@
 <template>
-  <textarea ref="editor"></textarea>
+  <div class="codemirror-editor">
+    <textarea ref="editor" :value="currentValue"></textarea>
+  </div>
 </template>
 <script>
 // 自研 CodeMirror 封装（替代仅支持 Vue 2 的 vue-codemirror-lite）
@@ -8,9 +10,12 @@
 //   <codemirror :value="code" :options="opts" @change="fn" ref="myEditor"></codemirror>
 //   组件实例暴露 this.editor（CodeMirror 实例），与 vue-codemirror-lite 一致
 import CodeMirror from 'codemirror'
+import { markRaw } from 'vue'
+import 'codemirror/lib/codemirror.css'
 
 export default {
   name: 'Codemirror',
+  compatConfig: { MODE: 3 },
   props: {
     modelValue: {
       type: String,
@@ -57,13 +62,24 @@ export default {
     }
   },
   mounted () {
-    const opts = Object.assign({}, this.options, {value: this.currentValue || ''})
-    this.editor = CodeMirror.fromTextArea(this.$refs.editor, opts)
+    // fromTextArea reads its initial content from the textarea, not options.value.
+    const opts = Object.assign({}, this.options)
+    // CodeMirror relies on instance/document identity during input handling.
+    this.editor = markRaw(CodeMirror.fromTextArea(this.$refs.editor, opts))
     this.editor.on('change', () => {
       const val = this.editor.getValue()
       this.$emit('update:modelValue', val)
       this.$emit('change', val)
     })
+  },
+  beforeUnmount () {
+    if (this.editor) {
+      if (typeof this.editor.closeHint === 'function') {
+        this.editor.closeHint()
+      }
+      this.editor.toTextArea()
+      this.editor = null
+    }
   }
 }
 </script>

@@ -48,6 +48,20 @@ forceVue3Compat(ViewUIPlusNS)
 forceVue3Compat(ViewUIPlus)
 forceVue3Compat(ElementPlusNS)
 
+// Table 的内部行组件没有从库入口导出，仍会继承 MODE 2。
+// 保留 Vue 3 的监听器透传，才能把 TableBody 的点击处理绑定到 <tr>。
+const tableRow = ViewUIPlusNS.Table?.components?.tableBody?.components?.TableTr
+if (tableRow) {
+  tableRow.compatConfig = Object.assign({}, tableRow.compatConfig, { INSTANCE_LISTENERS: false })
+}
+
+// element-plus 内部未导出的函数式组件（如 el-tabs 的 ChildrenSorter/IsolatedRenderer）
+// 拿不到上面的 MODE 3 注入，会退回全局 MODE 2，被 @vue/compat 误判为
+// Vue2 异步组件工厂去调用，抛 "props.render is not a function" 导致整页白屏。
+// 本项目没有使用 Vue2 风格异步组件，全局关闭该转换是安全的。
+import { configureCompat } from 'vue'
+configureCompat({ COMPONENT_ASYNC: false })
+
 const app = createApp(App)
 
 app.use(store)

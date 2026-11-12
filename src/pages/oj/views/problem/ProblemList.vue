@@ -84,18 +84,22 @@
                    :columns="problemTableColumns"
                    :data="problemList"
                    :loading="loadings.table"
+                   @on-row-click="goProblem"
                    class="problem-table"
                    disabled-hover></Table>
           </div>
 
           <div v-else class="card-container">
-            <Card
+            <router-link
               v-for="problem in problemList"
               :key="problem.id"
+              :to="problemLocation(problem)"
+              class="problem-card-link"
+            >
+            <Card
               :padding="18"
               shadow
               class="problem-card-item"
-              @click.native="$router.push({ name: 'problem-details', params: { problemID: problem._id } })"
             >
               <div class="card-header-row">
                 <span class="card-problem-id">{{ problem._id }}</span>
@@ -137,6 +141,7 @@
                 </span>
               </div>
             </Card>
+            </router-link>
           </div>
 
           <div class="pagination-wrapper">
@@ -202,6 +207,7 @@
 
 <script>
 import { Poptip, Tag } from 'view-ui-plus'
+import { RouterLink } from 'vue-router'
 import { mapGetters } from 'vuex'
 import api from '@oj/api'
 import utils from '@/utils/utils'
@@ -230,24 +236,22 @@ export default {
           width: 100,
           align: 'center',
           render: (h, params) => {
-            return h('div', {
+            return h(RouterLink, {
+              to: this.problemLocation(params.row),
               style: { 'white-space': 'nowrap', 'font-weight': '600', 'color': '#1e3a8a', 'cursor': 'pointer' },
-              onClick: () => {
-                this.$router.push({ name: 'problem-details', params: { problemID: params.row._id } })
-              }
-            }, params.row._id)
+              onClick: event => event.stopPropagation()
+            }, { default: () => String(params.row._id) })
           }
         },
         {
           title: this.$i18n.t('m.Title'),
           width: 280,
           render: (h, params) => {
-            const titleEl = h('div', {
+            const titleEl = h(RouterLink, {
+              to: this.problemLocation(params.row),
               class: 'problem-title',
-              onClick: () => {
-                this.$router.push({ name: 'problem-details', params: { problemID: params.row._id } })
-              }
-            }, this.cleanTitle(params.row.title))
+              onClick: event => event.stopPropagation()
+            }, { default: () => this.cleanTitle(params.row.title) })
             return h(Poptip, {
               trigger: 'hover',
               placement: 'top',
@@ -334,6 +338,12 @@ export default {
   },
   methods: {
     tagDisplayName,
+    problemLocation (problem) {
+      return { name: 'problem-details', params: { problemID: problem._id } }
+    },
+    goProblem (problem) {
+      this.$router.push(this.problemLocation(problem))
+    },
     cleanTitle (title) {
       if (!title) return title
       return title.replace(/^「[^」]*」\s*/, '')
@@ -448,6 +458,7 @@ export default {
               }, '...'))
             }
             const inner = h('div', {
+              onClick: event => event.stopPropagation(),
               style: {
                 display: 'flex',
                 alignItems: 'center',
@@ -770,6 +781,7 @@ export default {
 
       td {
         padding: 14px 12px;
+        cursor: pointer;
         border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
         line-height: 1.6;
@@ -782,6 +794,7 @@ export default {
   }
 
   .problem-title {
+    display: block;
     font-size: 16px;
     color: #334155;
     cursor: pointer;
@@ -902,7 +915,13 @@ export default {
     padding: 20px 24px;
   }
 
+  .problem-card-link {
+    display: block;
+    color: inherit;
+  }
+
   .problem-card-item {
+    height: 100%;
     cursor: pointer;
     border-radius: 10px;
     transition: all 0.2s ease;

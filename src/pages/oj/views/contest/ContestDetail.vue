@@ -7,6 +7,9 @@
     <!--children end-->
 
     <div v-if="route_name === 'contest-details'">
+      <div class="page-back-row">
+        <el-button icon="el-icon-arrow-left" size="small" plain @click="$router.back()">返回</el-button>
+      </div>
       <!-- 比赛概览卡片 -->
       <div class="overview-panel">
         <div class="panel-header">
@@ -303,6 +306,11 @@ export default {
   margin: 0 auto;
   padding: 24px 20px;
   min-height: calc(100vh - 60px);
+}
+
+/* 返回按钮行 */
+.page-back-row {
+  margin-bottom: 16px;
 }
 
 .overview-panel {

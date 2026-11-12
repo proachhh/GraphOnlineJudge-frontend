@@ -3,6 +3,7 @@
     <!-- 页头 -->
     <div class="viz-header">
       <div class="header-left">
+        <el-button icon="el-icon-arrow-left" size="small" plain @click="$router.back()">返回</el-button>
         <h2 class="header-title">代码执行可视化</h2>
         <span class="header-badge" v-if="totalSteps > 0">{{ currentStep + 1 }} / {{ totalSteps }}</span>
       </div>
